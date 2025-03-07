@@ -20,6 +20,10 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 
+// Configure default toast settings
+const TOAST_DURATION = 5000; // 5 seconds
+const TOAST_POSITION = "top-center";
+
 interface LocationState {
   message?: string;
 }
@@ -69,8 +73,20 @@ const LoginPage: React.FC = () => {
       const success = await login(values.email, values.password);
 
       if (success) {
-        toast.success("התחברת בהצלחה!");
+        // Show success toast and navigate
+        toast.success("התחברת בהצלחה!", {
+          position: TOAST_POSITION,
+          autoClose: TOAST_DURATION,
+          hideProgressBar: false,
+        });
         navigate("/dashboard");
+      } else {
+        // Show detailed error toast
+        toast.error(error || "ההתחברות נכשלה, אנא נסה שנית", {
+          position: TOAST_POSITION,
+          autoClose: TOAST_DURATION,
+          hideProgressBar: false,
+        });
       }
     },
   });

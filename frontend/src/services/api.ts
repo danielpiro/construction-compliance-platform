@@ -36,10 +36,14 @@ api.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    if (error.response && error.response.status === 401) {
-      // Token expired or invalid, remove it and redirect to login
-      removeToken();
-      window.location.href = "/login";
+    if (error.response?.status === 401) {
+      // Don't redirect if it's a login attempt failure
+      const isLoginEndpoint = error.config?.url?.includes("/auth/login");
+      if (!isLoginEndpoint) {
+        // Only remove token and redirect for non-login 401 errors
+        removeToken();
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

@@ -88,7 +88,7 @@ export const verifyEmail = async (
     await user.save();
 
     const FRONTEND_LOGIN_URL =
-      process.env.FRONTEND_URL || "http://localhost:3000/login";
+      process.env.FRONTEND_URL || "http://localhost:5173/login";
 
     return res.redirect(`${FRONTEND_LOGIN_URL}`);
   } catch (error) {
