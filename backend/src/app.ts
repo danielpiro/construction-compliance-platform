@@ -23,7 +23,7 @@ const app: Application = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors()); // TODO - restrict to specific origins in production
 
 // Body parser middleware for most routes
 app.use(express.json({ limit: "10mb" }));
