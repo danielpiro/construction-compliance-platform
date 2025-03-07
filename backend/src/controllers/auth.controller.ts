@@ -87,10 +87,10 @@ export const verifyEmail = async (
     user.verificationToken = undefined;
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Email verified successfully. You can now login.",
-    });
+    const FRONTEND_LOGIN_URL =
+      process.env.FRONTEND_URL || "http://localhost:3000/login";
+
+    return res.redirect(`${FRONTEND_LOGIN_URL}`);
   } catch (error) {
     console.error(error);
     res.status(500).json({
