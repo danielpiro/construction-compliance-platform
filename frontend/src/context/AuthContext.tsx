@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-import { toast } from "react-toastify";
 import authService from "../services/authService";
 import { saveToken, removeToken, hasToken } from "../utils/tokenStorage";
 
@@ -137,9 +136,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.register(userData);
 
       if (response.success) {
-        toast.success(
-          "Registration successful! Please check your email for verification."
-        );
         return true;
       } else {
         setError(response.message || "Registration failed. Please try again.");
