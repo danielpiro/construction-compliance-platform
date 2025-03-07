@@ -25,6 +25,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import { useAuth } from "./hooks/useAuth";
 import DashboardPage from "./pages/projects/DashboardPage";
 import ProfilePage from "./pages/projects/ProfilePage";
+import SettingsPage from "./pages/settings/SettingsPage";
 
 // Protected Route Component
 interface ProtectedRouteProps {
@@ -70,6 +71,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />
