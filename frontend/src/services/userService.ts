@@ -13,7 +13,7 @@ interface ProfileData {
  */
 export const getProfile = async (): Promise<ProfileData> => {
   const response = await api.get("/user/profile");
-  return response.data;
+  return response.data.data;
 };
 
 /**
@@ -23,7 +23,7 @@ export const updateProfile = async (
   data: Partial<ProfileData>
 ): Promise<ProfileData> => {
   const response = await api.put("/user/profile", data);
-  return response.data;
+  return response.data.data;
 };
 
 // Email change functionality removed for now

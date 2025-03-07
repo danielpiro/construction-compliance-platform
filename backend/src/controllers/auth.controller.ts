@@ -280,10 +280,10 @@ export const resetPassword = async (
   }
 };
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
+// @desc    Get user profile
+// @route   GET /api/user/profile
 // @access  Private
-export const getMe = async (
+export const getProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -305,8 +305,8 @@ export const getMe = async (
   }
 };
 
-// @desc    Update user details
-// @route   PUT /api/auth/update-details
+// @desc    Update user profile
+// @route   PUT /api/user/profile
 // @access  Private
 export const updateDetails = async (
   req: Request,
@@ -314,12 +314,13 @@ export const updateDetails = async (
   next: NextFunction
 ) => {
   try {
-    const { name, companyName, companyAddress } = req.body;
+    const { name, phone, company, role } = req.body;
 
     const fieldsToUpdate = {
       name,
-      companyName,
-      companyAddress,
+      phone,
+      companyName: company, // Map company to companyName
+      role,
     };
 
     const user = await User.findByIdAndUpdate(

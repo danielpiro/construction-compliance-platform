@@ -70,7 +70,7 @@ const authService = {
   // Get current user
   getCurrentUser: async (): Promise<AuthResponse> => {
     try {
-      const response = await api.get("/auth/me");
+      const response = await api.get("/user/profile");
       return {
         success: true,
         data: response.data,
@@ -140,7 +140,7 @@ const authService = {
   // Update profile
   updateProfile: async (data: UpdateProfileData): Promise<AuthResponse> => {
     try {
-      const response = await api.put("/auth/update-profile", data);
+      const response = await api.put("/user/profile", data);
       return response.data;
     } catch (error: any) {
       if (error.response) {

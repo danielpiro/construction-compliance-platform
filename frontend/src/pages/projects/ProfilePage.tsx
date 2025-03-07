@@ -13,11 +13,12 @@ import {
   Alert,
   Snackbar,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
 import * as userService from "../../services/userService";
+import { useAuth } from "../../hooks/useAuth";
+import i18n from "../../utils/i18n";
 
 const ProfilePage: React.FC = () => {
-  const { t } = useTranslation();
+  const { updateUserData } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState<{
@@ -54,7 +55,7 @@ const ProfilePage: React.FC = () => {
         console.error("Failed to fetch profile data:", error);
         setSnackbar({
           open: true,
-          message: t("profile.fetchError", "Failed to fetch profile data"),
+          message: i18n.t("profile.fetchError"),
           severity: "error",
         });
       } finally {
@@ -63,7 +64,7 @@ const ProfilePage: React.FC = () => {
     };
 
     fetchProfile();
-  }, [t]);
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -91,21 +92,18 @@ const ProfilePage: React.FC = () => {
       await userService.updateProfile(updatedData);
 
       // Update auth context with new user data
-      // updateUserData({
-      //   ...user,
-      //   ...updatedData,
-      // });
+      updateUserData(updatedData);
 
       setSnackbar({
         open: true,
-        message: t("profile.updateSuccess", "Profile updated successfully"),
+        message: i18n.t("profile.updateSuccess"),
         severity: "success",
       });
     } catch (error) {
       console.error("Failed to update profile:", error);
       setSnackbar({
         open: true,
-        message: t("profile.updateError", "Failed to update profile"),
+        message: i18n.t("profile.updateError"),
         severity: "error",
       });
     } finally {
@@ -150,13 +148,10 @@ const ProfilePage: React.FC = () => {
           </Avatar>
           <Box>
             <Typography variant="h4" component="h1" gutterBottom>
-              {t("profile.title", "Profile")}
+              {i18n.t("profile.title")}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              {t(
-                "profile.subtitle",
-                "Manage your personal information and account settings"
-              )}
+              {i18n.t("profile.subtitle")}
             </Typography>
           </Box>
         </Box>
@@ -165,14 +160,14 @@ const ProfilePage: React.FC = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                {t("profile.personalInfo", "Personal Information")}
+                {i18n.t("profile.personalInfo")}
               </Typography>
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={t("profile.name", "Full Name")}
+                label={i18n.t("profile.name")}
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
@@ -183,7 +178,7 @@ const ProfilePage: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={t("profile.phone", "Phone Number")}
+                label={i18n.t("profile.phone")}
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
@@ -193,7 +188,7 @@ const ProfilePage: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={t("profile.company", "Company")}
+                label={i18n.t("profile.company")}
                 name="company"
                 value={formData.company}
                 onChange={handleInputChange}
@@ -203,7 +198,7 @@ const ProfilePage: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={t("profile.role", "Role")}
+                label={i18n.t("profile.role")}
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
@@ -213,7 +208,7 @@ const ProfilePage: React.FC = () => {
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Typography variant="h6" sx={{ mb: 2 }}>
-                {t("profile.accountSettings", "Account Settings")}
+                {i18n.t("profile.accountSettings")}
               </Typography>
             </Grid>
 
@@ -221,7 +216,7 @@ const ProfilePage: React.FC = () => {
               <TextField
                 fullWidth
                 disabled
-                label={t("profile.email", "Email")}
+                label={i18n.t("profile.email")}
                 value={formData.email}
               />
               <Typography
@@ -229,10 +224,7 @@ const ProfilePage: React.FC = () => {
                 color="text.secondary"
                 sx={{ mt: 1, display: "block" }}
               >
-                {t(
-                  "profile.emailNote",
-                  "Email address is used for login and notifications"
-                )}
+                {i18n.t("profile.emailNote")}
               </Typography>
             </Grid>
 
@@ -248,7 +240,7 @@ const ProfilePage: React.FC = () => {
                   {saving ? (
                     <CircularProgress size={24} color="inherit" />
                   ) : (
-                    t("common.save", "Save")
+                    i18n.t("common.save")
                   )}
                 </Button>
               </Box>

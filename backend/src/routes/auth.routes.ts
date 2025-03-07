@@ -6,7 +6,6 @@ import {
   verifyEmail,
   forgotPassword,
   resetPassword,
-  getMe,
   updateDetails,
   updatePassword,
   updateEmail,
@@ -24,7 +23,6 @@ router.post("/forgot-password", forgotPassword);
 router.put("/reset-password/:token", resetPassword);
 
 // Protected routes
-router.get("/me", protect, getMe);
 router.put("/update-details", protect, updateDetails);
 router.put("/update-password", protect, updatePassword);
 router.put("/update-email", protect, updateEmail);
