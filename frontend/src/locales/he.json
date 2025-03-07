@@ -1,0 +1,171 @@
+{
+  "common": {
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "cancel": "ביטול",
+    "save": "שמור",
+    "edit": "ערוך",
+    "delete": "מחק",
+    "back": "חזרה",
+    "confirm": "אישור",
+    "add": "הוסף",
+    "create": "צור",
+    "update": "עדכן",
+    "required": "שדה חובה"
+  },
+  "auth": {
+    "login": "התחברות",
+    "register": "הרשמה",
+    "logout": "התנתק",
+    "email": "דואר אלקטרוני",
+    "password": "סיסמה",
+    "confirmPassword": "אימות סיסמה",
+    "name": "שם",
+    "company": "שם חברה",
+    "address": "כתובת",
+    "forgotPassword": "שכחת סיסמה?",
+    "noAccount": "אין לך חשבון? הירשם",
+    "hasAccount": "כבר יש לך חשבון? התחבר",
+    "resetPassword": "איפוס סיסמה",
+    "loginSuccess": "התחברת בהצלחה",
+    "registerSuccess": "נרשמת בהצלחה! אנא בדוק את המייל שלך לאימות החשבון.",
+    "passwordResetSuccess": "הסיסמה אופסה בהצלחה!",
+    "errors": {
+      "invalidEmail": "כתובת דואר אלקטרוני לא תקינה",
+      "requiredEmail": "דואר אלקטרוני הוא שדה חובה",
+      "requiredPassword": "סיסמה היא שדה חובה",
+      "passwordMismatch": "הסיסמאות אינן תואמות",
+      "loginFailed": "ההתחברות נכשלה. אנא בדוק את הפרטים שלך ונסה שוב.",
+      "registerFailed": "ההרשמה נכשלה. אנא נסה שוב מאוחר יותר."
+    }
+  },
+  "nav": {
+    "home": "דף הבית",
+    "dashboard": "לוח בקרה",
+    "projects": "פרויקטים",
+    "profile": "פרופיל",
+    "settings": "הגדרות",
+    "features": "תכונות",
+    "contact": "צור קשר"
+  },
+  "home": {
+    "title": "פלטפורמת אימות התאמה לבנייה",
+    "subtitle": "אמת התאמה של בניינים לתקנות מדינה באמצעות אלגוריתמים מתקדמים",
+    "getStarted": "התחל כאן",
+    "features": {
+      "title": "תכונות מרכזיות",
+      "validation": {
+        "title": "אימות אלגוריתמי",
+        "description": "אמת באופן אוטומטי את ההתאמה לתקנות בנייה ותקנים באמצעות האלגוריתמים המתוחכמים שלנו."
+      },
+      "workflow": {
+        "title": "תהליך עבודה מובנה",
+        "description": "נהל פרויקטים, סוגים, חללים ואלמנטים במקום אחד עם המבנה ההיררכי האינטואיטיבי שלנו."
+      },
+      "collaboration": {
+        "title": "שיתוף פעולה מאובטח",
+        "description": "שתף פרויקטים עם חברי צוות ולקוחות עם רמות גישה והרשאות מבוקרות."
+      }
+    },
+    "cta": {
+      "title": "מוכן להבטיח שהפרויקטים שלך עומדים בכל דרישות ההתאמה?",
+      "description": "הצטרף לאלפי אנשי מקצוע שסומכים על הפלטפורמה שלנו לאימות התאמה רגולטורית.",
+      "button": "הירשם עכשיו"
+    }
+  },
+  "projects": {
+    "title": "הפרויקטים שלי",
+    "newProject": "פרויקט חדש",
+    "createProject": "צור פרויקט חדש",
+    "editProject": "ערוך פרויקט",
+    "noProjects": "אין לך עדיין פרויקטים",
+    "createFirst": "צור את הפרויקט הראשון שלך",
+    "details": {
+      "address": "כתובת",
+      "location": "מיקום",
+      "area": "אזור",
+      "permissionDate": "תאריך אישור",
+      "isBefore": "לפני 2020",
+      "created": "נוצר",
+      "types": "סוגי פרויקט",
+      "addType": "הוסף סוג",
+      "noTypes": "אין עדיין סוגי פרויקט. הוסף סוג כדי להתחיל."
+    },
+    "form": {
+      "name": "שם פרויקט",
+      "address": "כתובת",
+      "location": "מיקום (עיר)",
+      "area": "אזור",
+      "permissionDate": "תאריך אישור",
+      "isBefore": "תאריך האישור הוא לפני 01/01/2020",
+      "uploadImage": "העלה תמונת פרויקט",
+      "create": "צור פרויקט",
+      "update": "עדכן פרויקט"
+    },
+    "delete": {
+      "title": "מחק פרויקט",
+      "confirm": "האם אתה בטוח שברצונך למחוק את \"{name}\"? פעולה זו אינה ניתנת לביטול.",
+      "button": "מחק"
+    }
+  },
+  "types": {
+    "residential": "מגורים",
+    "schools": "בתי ספר",
+    "offices": "משרדים",
+    "hotels": "מלונות",
+    "commercials": "מסחרי",
+    "publicGathering": "התקהלות ציבורית"
+  },
+  "spaces": {
+    "title": "חללים",
+    "addSpace": "הוסף חלל",
+    "noSpaces": "אין עדיין חללים. הוסף חלל כדי להתחיל.",
+    "types": {
+      "bedroom": "חדר שינה",
+      "protectSpace": "מרחב מוגן",
+      "wetRoom": "חדר רטוב",
+      "balcony": "מרפסת"
+    }
+  },
+  "elements": {
+    "title": "אלמנטים עבור {spaceName}",
+    "addElement": "הוסף אלמנט",
+    "noElements": "אין עדיין אלמנטים. הוסף אלמנט כדי להתחיל.",
+    "types": {
+      "wall": "קיר",
+      "ceiling": "תקרה",
+      "floor": "רצפה",
+      "thermalBridge": "גשר תרמי"
+    },
+    "subtypes": {
+      "outsideWall": "קיר חיצוני",
+      "isolationWall": "קיר בידוד",
+      "upperOpenSpace": "חלל פתוח עליון",
+      "upperCloseRoom": "חדר סגור עליון",
+      "upperRoof": "גג עליון",
+      "underRoof": "תחת גג"
+    }
+  },
+  "profile": {
+    "title": "הפרופיל שלי",
+    "updateSuccess": "הפרופיל עודכן בהצלחה!",
+    "form": {
+      "fullName": "שם מלא",
+      "email": "דואר אלקטרוני",
+      "company": "שם חברה",
+      "address": "כתובת חברה",
+      "update": "עדכן פרופיל",
+      "changePassword": "שנה סיסמה",
+      "deleteAccount": "מחק חשבון"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "message": "הדף שאתה מחפש אינו קיים או הועבר.",
+      "button": "חזור לדף הבית"
+    },
+    "generic": "אירעה שגיאה. אנא נסה שוב מאוחר יותר."
+  }
+}
