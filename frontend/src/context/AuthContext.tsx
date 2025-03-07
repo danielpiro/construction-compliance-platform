@@ -1,17 +1,42 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-import axios from "axios";
+import { toast } from "react-toastify";
+import authService from "../services/authService";
+import { saveToken, removeToken, hasToken } from "../utils/tokenStorage";
 
-// Import the token storage utility
-import {
-  getToken,
-  saveToken,
-  removeToken,
-  hasToken,
-} from "../utils/tokenStorage";
-import { AuthContextType, User } from "../styles/auth";
+// User interface
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role?: string;
+  companyName?: string;
+  companyAddress?: string;
+}
 
-// Create context with a default value
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// AuthContext interface
+export interface AuthContextType {
+  isLoggedIn: boolean;
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    company?: string,
+    address?: string
+  ) => Promise<boolean>;
+  logout: () => void;
+  clearError: () => void;
+  setError: (error: string) => void;
+  updateUserData: (newUserData: Partial<User>) => void;
+}
+
+// Create context with default undefined value
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 // Context provider component
 interface AuthProviderProps {
@@ -30,17 +55,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         if (hasToken()) {
           // Verify token and get user data
-          const response = await axios.get("/api/users/me", {
-            headers: {
-              Authorization: `Bearer ${getToken()}`,
-            },
-          });
+          const response = await authService.getCurrentUser();
 
-          setUser(response.data);
-          setIsLoggedIn(true);
+          if (response.success && response.data) {
+            setUser(response.data);
+            setIsLoggedIn(true);
+          } else {
+            // If getting user data fails, remove token
+            removeToken();
+            setIsLoggedIn(false);
+            setUser(null);
+          }
         }
       } catch (error) {
-        // If token is invalid, remove it
         console.error("Authentication check failed:", error);
         removeToken();
         setIsLoggedIn(false);
@@ -59,25 +86,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.post("/api/auth/login", { email, password });
+      const response = await authService.login(email, password);
 
-      // Save token and set auth state
-      saveToken(response.data.token);
-      setUser(response.data.user);
-      setIsLoggedIn(true);
+      if (response.success && response.token) {
+        // Save token and set auth state
+        saveToken(response.token);
 
-      // Navigation will be handled by the component using this hook
-      return true; // Return success status
+        // Get user data after successful login
+        const userResponse = await authService.getCurrentUser();
+        if (userResponse.success && userResponse.data) {
+          setUser(userResponse.data);
+          setIsLoggedIn(true);
+          return true;
+        }
+      }
+
+      // If we reach here, login failed
+      setError(response.message || "Login failed. Please try again.");
+      return false;
     } catch (err) {
       // Handle login error
-      if (axios.isAxiosError(err) && err.response) {
-        setError(
-          err.response.data.message || "Login failed. Please try again."
-        );
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-      return false; // Return failure status
+      console.error("Login error:", err);
+      setError("An unexpected error occurred. Please try again.");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -95,25 +126,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      await axios.post("/api/auth/register", {
+      const userData = {
         name,
         email,
         password,
-        company,
-        address,
-      });
+        companyName: company,
+        companyAddress: address,
+      };
 
-      // Return success status - navigation will be handled by the component
-      return true;
-    } catch (err) {
-      // Handle registration error
-      if (axios.isAxiosError(err) && err.response) {
-        setError(
-          err.response.data.message || "Registration failed. Please try again."
+      const response = await authService.register(userData);
+
+      if (response.success) {
+        toast.success(
+          "Registration successful! Please check your email for verification."
         );
+        return true;
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        setError(response.message || "Registration failed. Please try again.");
+        return false;
       }
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError("An unexpected error occurred. Please try again.");
       return false;
     } finally {
       setLoading(false);
@@ -122,10 +156,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Logout function
   const logout = () => {
+    authService.logout();
     removeToken();
     setIsLoggedIn(false);
     setUser(null);
-    // Navigation will be handled by the component using this hook
   };
 
   // Clear error
@@ -133,23 +167,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
   };
 
+  // Update user data
+  const updateUserData = (newUserData: Partial<User>) => {
+    if (user) {
+      setUser({ ...user, ...newUserData });
+    }
+  };
+
+  // AuthContext value
+  const contextValue: AuthContextType = {
+    isLoggedIn,
+    user,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    clearError,
+    setError,
+    updateUserData,
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        isLoggedIn,
-        user,
-        loading,
-        error,
-        login,
-        register,
-        logout,
-        clearError,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };
-
-// Export AuthContext for hook usage
-export { AuthContext };

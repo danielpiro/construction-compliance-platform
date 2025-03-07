@@ -4,7 +4,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "./hooks/useAuth"; // Change from "./context/AuthContext"
+import { AuthProvider } from "./context/AuthContext"; // Import from context directly
 import App from "./App";
 import theme, { cacheRtl } from "./styles/theme";
 import "./index.css";

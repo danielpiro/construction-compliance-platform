@@ -26,7 +26,6 @@ interface LocationState {
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [loginAttempted, setLoginAttempted] = useState(false);
   const { login, error, loading, clearError } = useAuth();
   const navigate = useNavigate();
 
@@ -67,27 +66,17 @@ const LoginPage: React.FC = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log("Form submitted with values:", values);
-      setLoginAttempted(true);
       const success = await login(values.email, values.password);
 
       if (success) {
         toast.success("התחברת בהצלחה!");
-        setTimeout(() => {
-          navigate("/projects");
-        }, 500); // Short delay to show success message
-      } else {
-        // Error handling is done in the login function of useAuth
-        console.log("Login failed");
+        navigate("/dashboard");
       }
     },
   });
 
-  // Explicit submission handler with logging
-  const handleLoginClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default button behavior
-    console.log("Login button clicked");
-    formik.handleSubmit(); // Manually trigger form submission
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -119,11 +108,7 @@ const LoginPage: React.FC = () => {
 
           <Box
             component="form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              console.log("Form submit event triggered");
-              formik.handleSubmit();
-            }}
+            onSubmit={formik.handleSubmit}
             noValidate
             sx={{ mt: 1 }}
           >
@@ -166,7 +151,7 @@ const LoginPage: React.FC = () => {
                   <InputAdornment position="end">
                     <IconButton
                       aria-label="toggle password visibility"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={handleShowPassword}
                       edge="end"
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -183,7 +168,6 @@ const LoginPage: React.FC = () => {
               color="primary"
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
-              onClick={handleLoginClick}
             >
               {loading ? <CircularProgress size={24} /> : "התחבר"}
             </Button>
@@ -207,19 +191,6 @@ const LoginPage: React.FC = () => {
           </Box>
         </Paper>
       </Box>
-
-      {/* Additional debug info - can be removed in production */}
-      {import.meta.env.DEV && loginAttempted && (
-        <Paper elevation={1} sx={{ mt: 2, p: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary">
-            Debug Info:
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            API URL:{" "}
-            {import.meta.env.VITE_API_URL || "http://localhost:5000/api"}
-          </Typography>
-        </Paper>
-      )}
     </Container>
   );
 };

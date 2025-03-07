@@ -1,6 +1,5 @@
-// src/pages/auth/RegisterPage.tsx
 import React, { useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -16,16 +15,15 @@ import {
   Divider,
   Container,
   Paper,
+  Link,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import authService from "../../services/authService";
+import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 
 const RegisterPage: React.FC = () => {
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { register, error, loading, clearError } = useAuth();
   const [success, setSuccess] = useState(false);
 
   // Validation schema
@@ -55,43 +53,27 @@ const RegisterPage: React.FC = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
-      setLoading(true);
-      setError(null);
+      clearError();
 
-      try {
-        const response = await authService.register({
-          name: values.name,
-          email: values.email,
-          password: values.password,
-          companyName: values.companyName,
-          companyAddress: values.companyAddress,
-        });
+      const success = await register(
+        values.name,
+        values.email,
+        values.password,
+        values.companyName,
+        values.companyAddress
+      );
 
-        if (response.success) {
-          setSuccess(true);
-          toast.success(
-            'נרשמת בהצלחה! אנא בדוק את הדוא"ל שלך להשלמת תהליך האימות'
-          );
-        } else {
-          setError(response.message || "שגיאה בהרשמה");
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        setError(
-          err.response?.data?.message || "שגיאה בהרשמה. אנא נסה שוב מאוחר יותר."
+      if (success) {
+        setSuccess(true);
+        toast.success(
+          'נרשמת בהצלחה! אנא בדוק את הדוא"ל שלך להשלמת תהליך האימות'
         );
-      } finally {
-        setLoading(false);
       }
     },
   });
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
-  };
-
-  const handleLoginClick = () => {
-    navigate("/login");
   };
 
   if (success) {
@@ -294,22 +276,9 @@ const RegisterPage: React.FC = () => {
 
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Button
-                  onClick={handleLoginClick}
-                  variant="text"
-                  sx={{
-                    textTransform: "none",
-                    fontWeight: "normal",
-                    fontSize: "0.875rem",
-                    color: "text.secondary",
-                    "&:hover": {
-                      backgroundColor: "transparent",
-                      color: "primary.main",
-                    },
-                  }}
-                >
+                <Link component={RouterLink} to="/login" variant="body2">
                   כבר יש לך חשבון? התחבר
-                </Button>
+                </Link>
               </Grid>
             </Grid>
           </Box>

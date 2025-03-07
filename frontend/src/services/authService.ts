@@ -1,17 +1,12 @@
-import axios from "axios";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import api from "./api";
 
-// Define the API base URL
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
-// Response types
+// Define interfaces for auth responses
 interface AuthResponse {
   success: boolean;
   message?: string;
   token?: string;
-}
-
-interface PasswordResetRequest {
-  password: string;
+  data?: any;
 }
 
 interface RegisterData {
@@ -22,10 +17,16 @@ interface RegisterData {
   companyAddress?: string;
 }
 
+interface PasswordResetRequest {
+  password: string;
+}
+
 interface UpdateProfileData {
-  name: string;
+  name?: string;
   companyName?: string;
   companyAddress?: string;
+  phone?: string;
+  role?: string;
 }
 
 interface UpdatePasswordData {
@@ -33,81 +34,87 @@ interface UpdatePasswordData {
   newPassword: string;
 }
 
-interface UpdateEmailData {
-  newEmail: string;
-  password: string;
-}
-
-// Create axios instance with proper configuration
-const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-// Auth service methods
 const authService = {
   // Register user
   register: async (userData: RegisterData): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.post("/auth/register", userData);
+      const response = await api.post("/auth/register", userData);
       return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
+    } catch (error: any) {
+      if (error.response) {
         return error.response.data as AuthResponse;
       }
-      throw error;
+      return {
+        success: false,
+        message: "Connection error. Please try again later.",
+      };
     }
   },
 
   // Login user
   login: async (email: string, password: string): Promise<AuthResponse> => {
     try {
-      console.log(
-        `Attempting to login with email: ${email} to ${API_URL}/auth/login`
-      );
-      const response = await apiClient.post("/auth/login", { email, password });
-      console.log("Login response:", response.data);
-
-      if (response.data.success && response.data.token) {
-        // Store token in localStorage
-        localStorage.setItem("token", response.data.token);
-      }
-
+      const response = await api.post("/auth/login", { email, password });
       return response.data;
-    } catch (error) {
-      console.error("Login error:", error);
-      if (axios.isAxiosError(error) && error.response) {
+    } catch (error: any) {
+      if (error.response) {
         return error.response.data as AuthResponse;
       }
-      throw error;
+      return {
+        success: false,
+        message: "Connection error. Please try again later.",
+      };
+    }
+  },
+
+  // Get current user
+  getCurrentUser: async (): Promise<AuthResponse> => {
+    try {
+      const response = await api.get("/auth/me");
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error: any) {
+      if (error.response) {
+        return error.response.data as AuthResponse;
+      }
+      return {
+        success: false,
+        message: "Failed to fetch user data.",
+      };
     }
   },
 
   // Verify email
   verifyEmail: async (token: string): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.get(`/auth/verify-email/${token}`);
+      const response = await api.get(`/auth/verify-email/${token}`);
       return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
+    } catch (error: any) {
+      if (error.response) {
         return error.response.data as AuthResponse;
       }
-      throw error;
+      return {
+        success: false,
+        message: "Email verification failed.",
+      };
     }
   },
 
   // Forgot password
   forgotPassword: async (data: { email: string }): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.post("/auth/forgot-password", data);
+      const response = await api.post("/auth/forgot-password", data);
       return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
+    } catch (error: any) {
+      if (error.response) {
         return error.response.data as AuthResponse;
       }
-      throw error;
+      return {
+        success: false,
+        message: "Failed to process password reset request.",
+      };
     }
   },
 
@@ -117,62 +124,55 @@ const authService = {
     data: PasswordResetRequest
   ): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.put(
-        `/auth/reset-password/${token}`,
-        data
-      );
+      const response = await api.put(`/auth/reset-password/${token}`, data);
       return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
+    } catch (error: any) {
+      if (error.response) {
         return error.response.data as AuthResponse;
       }
-      throw error;
+      return {
+        success: false,
+        message: "Failed to reset password.",
+      };
+    }
+  },
+
+  // Update profile
+  updateProfile: async (data: UpdateProfileData): Promise<AuthResponse> => {
+    try {
+      const response = await api.put("/auth/update-profile", data);
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        return error.response.data as AuthResponse;
+      }
+      return {
+        success: false,
+        message: "Failed to update profile.",
+      };
+    }
+  },
+
+  // Update password
+  updatePassword: async (data: UpdatePasswordData): Promise<AuthResponse> => {
+    try {
+      const response = await api.put("/auth/update-password", data);
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        return error.response.data as AuthResponse;
+      }
+      return {
+        success: false,
+        message: "Failed to update password.",
+      };
     }
   },
 
   // Logout user
   logout: (): void => {
-    localStorage.removeItem("token");
-  },
-
-  // Get token
-  getToken: (): string | null => {
-    return localStorage.getItem("token");
-  },
-
-  // Check if user is authenticated
-  isAuthenticated: (): boolean => {
-    return !!localStorage.getItem("token");
-  },
-
-  // Get current user profile
-  getCurrentUser: async () => {
-    const response = await apiClient.get("/auth/me");
-    return response.data;
-  },
-
-  // Update user profile
-  updateProfile: async (data: UpdateProfileData) => {
-    const response = await apiClient.put("/auth/update-details", data);
-    return response.data;
-  },
-
-  // Update password
-  updatePassword: async (data: UpdatePasswordData) => {
-    const response = await apiClient.put("/auth/update-password", data);
-    return response.data;
-  },
-
-  // Update email
-  updateEmail: async (data: UpdateEmailData) => {
-    const response = await apiClient.put("/auth/update-email", data);
-    return response.data;
-  },
-
-  // Delete account
-  deleteAccount: async () => {
-    const response = await apiClient.delete("/auth/delete-account");
-    return response.data;
+    // Just client-side logout, no server call needed
+    // The token will be removed in the auth context
   },
 };
 
