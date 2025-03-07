@@ -15,6 +15,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format } from "date-fns";
 import { he as heLocale } from "date-fns/locale";
+import { areaToHebrew, hebrewToArea } from "../../utils/areaMapping";
 
 // Define the types for Project data
 interface ProjectFormData {
@@ -46,15 +47,32 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   onSubmit,
   isEditing = false,
 }) => {
-  // Cities data (would normally be loaded from countries.json)
-  // This is a placeholder - replace with actual data from your API or imported file
-  const cities: City[] = [
-    { city: "ירושלים", area: "א" },
-    { city: "תל אביב", area: "ב" },
-    { city: "חיפה", area: "ג" },
-    { city: "באר שבע", area: "ד" },
-    // Add more cities as needed
-  ];
+  // Load cities from countries.json
+  const [cities, setCities] = useState<City[]>([]);
+
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const response = await fetch("/data/countries.json");
+        const data: Record<string, string>[] = await response.json();
+        // Transform data to match City interface
+        const citiesData = data
+          .filter((item) => Object.keys(item)[0] !== "city") // Skip header row
+          .map((item) => {
+            const [cityName, area] = Object.entries(item)[0];
+            return {
+              city: cityName,
+              area: areaToHebrew[area] || area, // Convert area code to Hebrew
+            };
+          });
+        setCities(citiesData);
+      } catch (error) {
+        console.error("Error loading cities:", error);
+      }
+    };
+
+    loadCities();
+  }, []);
 
   // Form state
   const [formData, setFormData] = useState<ProjectFormData>({
@@ -191,7 +209,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     submitData.append("address", formData.address);
     submitData.append("location", formData.location);
     if (formData.area) {
-      submitData.append("area", formData.area);
+      // Convert Hebrew area back to English before sending to server
+      const area = hebrewToArea[formData.area] || formData.area;
+      submitData.append("area", area);
     }
     if (formData.permissionDate) {
       submitData.append(

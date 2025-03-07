@@ -12,19 +12,10 @@ import {
   DialogTitle,
   CircularProgress,
   Alert,
-  Card,
-  CardContent,
-  CardActionArea,
 } from "@mui/material";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import HomeIcon from "@mui/icons-material/Home";
-import SchoolIcon from "@mui/icons-material/School";
-import BusinessIcon from "@mui/icons-material/Business";
-import ApartmentIcon from "@mui/icons-material/Apartment";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import GroupsIcon from "@mui/icons-material/Groups";
 import AddIcon from "@mui/icons-material/Add";
 import api from "../../services/api";
 
@@ -41,19 +32,11 @@ interface Project {
   imageUrl?: string;
 }
 
-// Project Type interface
-interface ProjectType {
-  _id: string;
-  name: string;
-  projectId: string;
-}
-
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
   const [project, setProject] = useState<Project | null>(null);
-  const [types, setTypes] = useState<ProjectType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -62,15 +45,14 @@ const ProjectDetailPage: React.FC = () => {
     const fetchProjectData = async () => {
       try {
         setLoading(true);
-
-        // Fetch project details
         const projectResponse = await api.get(`/projects/${projectId}`);
-        setProject(projectResponse.data);
-
-        // Fetch project types
-        const typesResponse = await api.get(`/projects/${projectId}/types`);
-        setTypes(typesResponse.data);
-
+        if (projectResponse.data.success) {
+          setProject(projectResponse.data.data);
+        } else {
+          throw new Error(
+            projectResponse.data.message || "Failed to load project"
+          );
+        }
         setError(null);
       } catch (err) {
         console.error("Error fetching project data:", err);
@@ -91,25 +73,6 @@ const ProjectDetailPage: React.FC = () => {
       console.error("Error deleting project:", error);
       setError("נכשל במחיקת הפרויקט. אנא נסה שוב.");
       setDeleteDialogOpen(false);
-    }
-  };
-
-  const getTypeIcon = (typeName: string) => {
-    switch (typeName.toLowerCase()) {
-      case "residential":
-        return <HomeIcon fontSize="large" />;
-      case "schools":
-        return <SchoolIcon fontSize="large" />;
-      case "offices":
-        return <BusinessIcon fontSize="large" />;
-      case "hotels":
-        return <ApartmentIcon fontSize="large" />;
-      case "commercials":
-        return <StorefrontIcon fontSize="large" />;
-      case "public gathering":
-        return <GroupsIcon fontSize="large" />;
-      default:
-        return <HomeIcon fontSize="large" />;
     }
   };
 
@@ -141,11 +104,6 @@ const ProjectDetailPage: React.FC = () => {
       </Box>
     );
   }
-
-  const handleAddType = () => {
-    // This would normally open a dialog or navigate to a form
-    console.log("Add type clicked");
-  };
 
   return (
     <Box p={3}>
@@ -226,59 +184,14 @@ const ProjectDetailPage: React.FC = () => {
         <Typography variant="h5" component="h2">
           סוגי המבנה
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleAddType}
-        >
+        <Button variant="contained" color="primary" startIcon={<AddIcon />}>
           הוסף סוג
         </Button>
       </Box>
 
-      <Grid container spacing={3}>
-        {types.length === 0 ? (
-          <Grid item xs={12}>
-            <Alert severity="info">
-              אין סוגי מבנה עדיין. הוסף סוג כדי להתחיל.
-            </Alert>
-          </Grid>
-        ) : (
-          types.map((type) => (
-            <Grid item key={type._id} xs={12} sm={6} md={4} lg={3}>
-              <Card
-                component={Link}
-                to={`/projects/${projectId}/types/${type._id}`}
-                sx={{
-                  textDecoration: "none",
-                  height: "100%",
-                  transition: "transform 0.2s",
-                  "&:hover": {
-                    transform: "scale(1.02)",
-                  },
-                }}
-              >
-                <CardActionArea sx={{ height: "100%" }}>
-                  <CardContent
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      textAlign: "center",
-                      height: "100%",
-                    }}
-                  >
-                    {getTypeIcon(type.name)}
-                    <Typography variant="h6" component="h3" sx={{ mt: 2 }}>
-                      {type.name}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-          ))
-        )}
-      </Grid>
+      <Alert severity="info" sx={{ mt: 3 }}>
+        תכונה זו תהיה זמינה בקרוב
+      </Alert>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
