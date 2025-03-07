@@ -36,11 +36,10 @@ export const register = async (
       companyAddress,
       verificationToken,
     });
-
+    const BASE_URL =
+      process.env.BACKEND_URL || `${req.protocol}://${req.get("host")}`;
     // Send verification email
-    const verifyUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/auth/verify-email/${verificationToken}`;
+    const verifyUrl = `${BASE_URL}/api/auth/verify-email/${verificationToken}`;
     const message = `Please click on the following link to verify your email: \n\n ${verifyUrl}`;
 
     await sendEmail({
@@ -196,10 +195,11 @@ export const forgotPassword = async (
 
     await user.save();
 
+    const BASE_URL =
+      process.env.BACKEND_URL || `${req.protocol}://${req.get("host")}`;
+
     // Create reset url
-    const resetUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/auth/reset-password/${resetToken}`;
+    const resetUrl = `${BASE_URL}/api/auth/reset-password/${resetToken}`;
     const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
     await sendEmail({
@@ -437,10 +437,11 @@ export const updateEmail = async (
     user.verificationToken = verificationToken;
     await user.save();
 
+    const BASE_URL =
+      process.env.BACKEND_URL || `${req.protocol}://${req.get("host")}`;
+
     // Send verification email
-    const verifyUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/auth/verify-email/${verificationToken}`;
+    const verifyUrl = `${BASE_URL}/api/auth/verify-email/${verificationToken}`;
     const message = `Please click on the following link to verify your new email: \n\n ${verifyUrl}`;
 
     await sendEmail({
