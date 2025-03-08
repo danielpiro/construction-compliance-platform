@@ -125,7 +125,7 @@ const ProfilePage: React.FC = () => {
           height: "50vh",
         }}
       >
-        <CircularProgress />
+        <CircularProgress aria-label={i18n.t("common.loading")} />
       </Box>
     );
   }
@@ -143,6 +143,7 @@ const ProfilePage: React.FC = () => {
               fontWeight: "bold",
               mr: 2,
             }}
+            aria-label={i18n.t("profile.userAvatar")}
           >
             {formData.name?.charAt(0).toUpperCase()}
           </Avatar>
@@ -172,6 +173,7 @@ const ProfilePage: React.FC = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 required
+                placeholder={i18n.t("profile.namePlaceholder")}
               />
             </Grid>
 
@@ -182,6 +184,7 @@ const ProfilePage: React.FC = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
+                placeholder={i18n.t("profile.phonePlaceholder")}
               />
             </Grid>
 
@@ -192,6 +195,7 @@ const ProfilePage: React.FC = () => {
                 name="company"
                 value={formData.company}
                 onChange={handleInputChange}
+                placeholder={i18n.t("profile.companyPlaceholder")}
               />
             </Grid>
 
@@ -202,6 +206,7 @@ const ProfilePage: React.FC = () => {
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
+                placeholder={i18n.t("profile.rolePlaceholder")}
               />
             </Grid>
 
@@ -218,6 +223,7 @@ const ProfilePage: React.FC = () => {
                 disabled
                 label={i18n.t("profile.email")}
                 value={formData.email}
+                aria-readonly="true"
               />
               <Typography
                 variant="caption"
@@ -236,9 +242,14 @@ const ProfilePage: React.FC = () => {
                   type="submit"
                   disabled={saving}
                   sx={{ minWidth: 120 }}
+                  aria-busy={saving}
                 >
                   {saving ? (
-                    <CircularProgress size={24} color="inherit" />
+                    <CircularProgress
+                      size={24}
+                      color="inherit"
+                      aria-label={i18n.t("common.processing")}
+                    />
                   ) : (
                     i18n.t("common.save")
                   )}

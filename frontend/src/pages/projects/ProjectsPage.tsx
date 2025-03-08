@@ -1,61 +1,87 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Grid, Button, Pagination } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Grid,
+  Button,
+  Pagination,
+  CircularProgress,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 
-// Define Project interface
+import projectService from "../../services/projectService";
+
 interface Project {
   _id: string;
   name: string;
-  creationDate: string;
+  creationDate: Date;
   address: string;
   location: string;
-  area: string;
+  area: "A" | "B" | "C" | "D";
   isBefore: boolean;
-  imageUrl?: string;
+  image?: string;
+  permissionDate: Date;
+}
+
+interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  count: number;
+  pagination: {
+    total: number;
+    pages: number;
+    page: number;
+    limit: number;
+  };
 }
 
 const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const projectsPerPage = 12;
 
-  // Fetch projects (mock data for now)
+  const fetchProjects = React.useCallback(async () => {
+    if (isLoading) return;
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = (await projectService.getProjects({
+        page,
+        limit: projectsPerPage,
+      })) as PaginatedResponse<Project>;
+
+      if (response.success && Array.isArray(response.data)) {
+        setProjects(response.data);
+        if (response.pagination && response.pagination.pages !== totalPages) {
+          setTotalPages(response.pagination.pages);
+        }
+      } else {
+        setError("Invalid response format from server");
+      }
+    } catch (err) {
+      setError("Failed to load projects. Please try again later.");
+      console.error("Error fetching projects:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, isLoading, totalPages, projectsPerPage]);
+
   useEffect(() => {
-    // This would be replaced with an actual API call
-    const mockProjects: Project[] = Array.from({ length: 20 }, (_, i) => ({
-      _id: `proj-${i + 1}`,
-      name: `פרויקט ${i + 1}`,
-      creationDate: new Date().toLocaleDateString("he-IL"),
-      address: `כתובת ${i + 1}, ישראל`,
-      location:
-        i % 4 === 0
-          ? "ירושלים"
-          : i % 4 === 1
-          ? "תל אביב"
-          : i % 4 === 2
-          ? "חיפה"
-          : "באר שבע",
-      area: i % 4 === 0 ? "א" : i % 4 === 1 ? "ב" : i % 4 === 2 ? "ג" : "ד",
-      isBefore: i % 2 === 0,
-    }));
+    fetchProjects();
+  }, [fetchProjects]);
 
-    setProjects(mockProjects);
-    setTotalPages(Math.ceil(mockProjects.length / projectsPerPage));
-  }, []);
-
-  const handlePageChange = (
-    _event: React.ChangeEvent<unknown>,
-    value: number
-  ) => {
-    setPage(value);
-  };
-
-  // Get current page projects
-  const currentProjects = projects.slice(
-    (page - 1) * projectsPerPage,
-    page * projectsPerPage
+  const handlePageChange = React.useCallback(
+    (_event: React.ChangeEvent<unknown>, value: number) => {
+      if (value !== page) {
+        setPage(value);
+      }
+    },
+    [page]
   );
 
   return (
@@ -80,7 +106,25 @@ const ProjectsPage: React.FC = () => {
         </Button>
       </Box>
 
-      {projects.length === 0 ? (
+      {isLoading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" py={5}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Box textAlign="center" py={5}>
+          <Typography color="error" gutterBottom>
+            {error}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => window.location.reload()}
+            sx={{ mt: 2 }}
+          >
+            נסה שוב
+          </Button>
+        </Box>
+      ) : projects.length === 0 ? (
         <Box textAlign="center" py={5}>
           <Typography variant="h6" gutterBottom>
             אין לך פרויקטים עדיין
@@ -99,7 +143,7 @@ const ProjectsPage: React.FC = () => {
       ) : (
         <>
           <Grid container spacing={3}>
-            {currentProjects.map((project) => (
+            {projects.map((project) => (
               <Grid item key={project._id} xs={12} sm={6} md={4} lg={3}>
                 <Box
                   component={Link}
@@ -126,7 +170,8 @@ const ProjectsPage: React.FC = () => {
                     color="text.secondary"
                     gutterBottom
                   >
-                    נוצר: {project.creationDate}
+                    נוצר:{" "}
+                    {new Date(project.creationDate).toLocaleDateString("he-IL")}
                   </Typography>
                   <Box
                     display="flex"

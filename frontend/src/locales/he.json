@@ -12,7 +12,8 @@
     "add": "הוסף",
     "create": "צור",
     "update": "עדכן",
-    "required": "שדה חובה"
+    "required": "שדה חובה",
+    "processing": "מעבד..."
   },
   "auth": {
     "login": "התחברות",
@@ -149,7 +150,23 @@
   },
   "profile": {
     "title": "הפרופיל שלי",
+    "subtitle": "צפייה ועריכת פרטי המשתמש שלך",
+    "userAvatar": "תמונת משתמש",
     "updateSuccess": "הפרופיל עודכן בהצלחה!",
+    "updateError": "אירעה שגיאה בעדכון הפרופיל",
+    "fetchError": "אירעה שגיאה בטעינת נתוני הפרופיל",
+    "personalInfo": "פרטים אישיים",
+    "accountSettings": "הגדרות חשבון",
+    "name": "שם מלא",
+    "namePlaceholder": "הכנס את שמך המלא",
+    "phone": "מספר טלפון",
+    "phonePlaceholder": "הכנס את מספר הטלפון שלך",
+    "company": "חברה",
+    "companyPlaceholder": "הכנס את שם החברה שלך",
+    "role": "תפקיד",
+    "rolePlaceholder": "הכנס את התפקיד שלך",
+    "email": "דואר אלקטרוני",
+    "emailNote": "לא ניתן לשנות את כתובת הדואר האלקטרוני המשויכת לחשבון זה",
     "form": {
       "fullName": "שם מלא",
       "email": "דואר אלקטרוני",
