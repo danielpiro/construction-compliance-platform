@@ -78,6 +78,8 @@
   "projects": {
     "title": "הפרויקטים שלי",
     "newProject": "פרויקט חדש",
+    "buildingTypes": "סוגי בניינים",
+    "projectType": "סוג פרויקט",
     "createProject": "צור פרויקט חדש",
     "editProject": "ערוך פרויקט",
     "noProjects": "אין לך עדיין פרויקטים",
@@ -121,6 +123,15 @@
   "spaces": {
     "title": "חללים",
     "addSpace": "הוסף חלל",
+    "editSpace": "ערוך חלל",
+    "paths": {
+      "edit": "ערוך חלל",
+      "projects": "פרויקטים",
+      "types": "סוגים",
+      "spaces": "חללים"
+    },
+    "space": "חלל {{number}}",
+    "addAnotherSpace": "הוסף חלל נוסף",
     "noSpaces": "אין עדיין חללים. הוסף חלל כדי להתחיל.",
     "types": {
       "bedroom": "חדר שינה",
@@ -130,8 +141,10 @@
     }
   },
   "elements": {
-    "title": "אלמנטים עבור {spaceName}",
+    "title": "אלמנטים",
     "addElement": "הוסף אלמנט",
+    "element": "אלמנט {{number}}",
+    "viewElements": "צפה באלמנטים",
     "noElements": "אין עדיין אלמנטים. הוסף אלמנט כדי להתחיל.",
     "types": {
       "wall": "קיר",

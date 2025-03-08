@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Box, Typography, Grid, Button, Paper, Chip } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -7,12 +8,13 @@ import AddIcon from "@mui/icons-material/Add";
 interface Element {
   _id: string;
   name: string;
-  type: "קיר" | "תקרה" | "רצפה" | "גשר תרמי";
+  type: "wall" | "ceiling" | "floor" | "thermalBridge";
   subType?: string;
   spaceId: string;
 }
 
 const ElementsPage: React.FC = () => {
+  const { t } = useTranslation();
   const { projectId, typeId, spaceId } = useParams<{
     projectId: string;
     typeId: string;
@@ -31,35 +33,35 @@ const ElementsPage: React.FC = () => {
       {
         _id: "elem1",
         name: "קיר צפוני",
-        type: "קיר",
-        subType: "קיר חיצוני",
+        type: "wall",
+        subType: "outsideWall",
         spaceId: spaceId || "",
       },
       {
         _id: "elem2",
         name: "קיר מזרחי",
-        type: "קיר",
-        subType: "קיר בידוד",
+        type: "wall",
+        subType: "isolationWall",
         spaceId: spaceId || "",
       },
       {
         _id: "elem3",
         name: "רצפה ראשית",
-        type: "רצפה",
-        subType: "מרחב עליון פתוח",
+        type: "floor",
+        subType: "upperOpenSpace",
         spaceId: spaceId || "",
       },
       {
         _id: "elem4",
         name: "תקרה",
-        type: "תקרה",
-        subType: "גג עליון",
+        type: "ceiling",
+        subType: "upperRoof",
         spaceId: spaceId || "",
       },
       {
         _id: "elem5",
         name: "מסגרת חלון",
-        type: "גשר תרמי",
+        type: "thermalBridge",
         spaceId: spaceId || "",
       },
     ];
@@ -72,13 +74,13 @@ const ElementsPage: React.FC = () => {
 
   const getChipColor = (type: string) => {
     switch (type) {
-      case "קיר":
+      case "wall":
         return "primary";
-      case "תקרה":
+      case "ceiling":
         return "secondary";
-      case "רצפה":
+      case "floor":
         return "success";
-      case "גשר תרמי":
+      case "thermalBridge":
         return "warning";
       default:
         return "default";
@@ -90,7 +92,7 @@ const ElementsPage: React.FC = () => {
       <Box sx={{ mb: 3 }}>
         <Typography variant="caption" component="div">
           <Link to="/projects" style={{ textDecoration: "none" }}>
-            פרויקטים
+            {t("nav.projects")}
           </Link>{" "}
           &gt;
           <Link
@@ -114,7 +116,7 @@ const ElementsPage: React.FC = () => {
             style={{ textDecoration: "none" }}
           >
             {" "}
-            חללים
+            {t("spaces.title")}
           </Link>{" "}
           &gt;
           {spaceName}
@@ -128,10 +130,10 @@ const ElementsPage: React.FC = () => {
         mb={3}
       >
         <Typography variant="h4" component="h1">
-          אלמנטים עבור {spaceName}
+          {t("elements.title")} - {spaceName}
         </Typography>
         <Button variant="contained" color="primary" startIcon={<AddIcon />}>
-          הוסף אלמנט
+          {t("elements.addElement")}
         </Button>
       </Box>
 
@@ -152,25 +154,31 @@ const ElementsPage: React.FC = () => {
                   {element.name}
                 </Typography>
                 <Chip
-                  label={element.type}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  color={getChipColor(element.type) as any}
+                  label={t(`elements.types.${element.type}`)}
+                  color={
+                    getChipColor(element.type) as
+                      | "primary"
+                      | "secondary"
+                      | "success"
+                      | "warning"
+                      | "default"
+                  }
                   size="small"
                   sx={{ mb: 1 }}
                 />
                 {element.subType && (
                   <Typography variant="body2" color="text.secondary">
-                    {element.subType}
+                    {t(`elements.subtypes.${element.subType}`)}
                   </Typography>
                 )}
               </Box>
 
               <Box display="flex" justifyContent="flex-end" mt={2}>
                 <Button size="small" color="primary">
-                  ערוך
+                  {t("common.edit")}
                 </Button>
                 <Button size="small" color="error" sx={{ mr: 1 }}>
-                  מחק
+                  {t("common.delete")}
                 </Button>
               </Box>
             </Paper>

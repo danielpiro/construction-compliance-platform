@@ -13,10 +13,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { he as heLocale } from "date-fns/locale";
 import { areaToHebrew, hebrewToArea } from "../../utils/areaMapping";
-import {
-  SpaceElementSection,
-  SpaceWithElements,
-} from "../../components/spaces/SpaceElementSection";
+import { SpaceWithElements } from "../../components/spaces/SpaceElementSection";
 
 // Helper functions for building version
 const getBuildingVersion = (date: Date): string => {
@@ -408,19 +405,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 />
               </Box>
             )}
-          </Grid>
-
-          {/* Spaces and Elements Section */}
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-              חללים ואלמנטים
-            </Typography>
-            <SpaceElementSection
-              spaces={formData.spaces}
-              onSpacesChange={(spaces) =>
-                setFormData((prev) => ({ ...prev, spaces }))
-              }
-            />
           </Grid>
 
           {/* Submit Button */}

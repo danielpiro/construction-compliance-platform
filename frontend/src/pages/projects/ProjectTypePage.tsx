@@ -1,5 +1,5 @@
-// src/pages/projects/ProjectTypePage.tsx
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Link as RouterLink,
   useParams,
@@ -28,14 +28,11 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
   ArrowBack as ArrowBackIcon,
-  Chair as ChairIcon,
-  Shield as ShieldIcon,
-  Bathtub as BathtubIcon,
-  Balcony as BalconyIcon,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import buildingTypeService from "../../services/buildingTypeService";
 import spaceService from "../../services/spaceService";
+import projectService from "../../services/projectService";
 
 // Types
 interface BuildingType {
@@ -72,13 +69,6 @@ const buildingTypeLabels: Record<string, string> = {
   "Public Gathering": "התקהלות ציבורית",
 };
 
-const spaceTypeIcons: Record<string, React.ReactNode> = {
-  Bedroom: <ChairIcon />,
-  "Protect Space": <ShieldIcon />,
-  "Wet Room": <BathtubIcon />,
-  Balcony: <BalconyIcon />,
-};
-
 const spaceTypeLabels: Record<string, string> = {
   Bedroom: "חדר שינה / אירוח",
   "Protect Space": "מרחב מוגן",
@@ -87,6 +77,7 @@ const spaceTypeLabels: Record<string, string> = {
 };
 
 const ProjectTypePage: React.FC = () => {
+  const { t } = useTranslation();
   const { typeId } = useParams<{ typeId: string }>();
   const location = useLocation();
   const projectId = location.state?.projectId;
@@ -105,21 +96,21 @@ const ProjectTypePage: React.FC = () => {
     setError(null);
 
     try {
-      if (!projectId) {
-        setError("פרטי הפרויקט חסרים");
-        return;
-      }
-
-      // Fetch building type details
+      // Fetch building type details first to get project info
       const typeResponse = await buildingTypeService.getBuildingType(typeId);
       if (typeResponse.success) {
         setBuildingType(typeResponse.data);
+        const projectResponse = await projectService.getProject(
+          typeResponse.data.project
+        );
 
         // Set project info
-        setProject({
-          _id: typeResponse.data.project,
-          name: typeResponse.data.projectName || "פרויקט",
-        });
+        if (projectResponse.success) {
+          setProject({
+            _id: projectResponse.data._id,
+            name: projectResponse.data.name,
+          });
+        }
 
         // Fetch spaces
         const spacesResponse = await spaceService.getSpaces(typeId);
@@ -162,7 +153,7 @@ const ProjectTypePage: React.FC = () => {
   };
 
   const handleCreateSpace = () => {
-    navigate(`/building-types/${typeId}/spaces/create`);
+    navigate(`/projects/${projectId}/types/${typeId}/spaces/create`);
   };
 
   if (loading) {
@@ -208,7 +199,7 @@ const ProjectTypePage: React.FC = () => {
         mb={3}
       >
         <Typography variant="h4" component="h1">
-          {buildingType.name}
+          {buildingType.name} - {t("projects.projectType")}
         </Typography>
         <Box>
           <Button
@@ -224,7 +215,9 @@ const ProjectTypePage: React.FC = () => {
             variant="outlined"
             color="primary"
             startIcon={<EditIcon />}
-            onClick={() => navigate(`/building-types/${typeId}/edit`)}
+            onClick={() =>
+              navigate(`/projects/${projectId}/types/${typeId}/edit`)
+            }
             sx={{ mr: 1 }}
           >
             ערוך
@@ -297,48 +290,30 @@ const ProjectTypePage: React.FC = () => {
             <Grid container spacing={3}>
               {spaces.map((space) => (
                 <Grid item xs={12} sm={6} md={4} key={space._id}>
-                  <Paper
-                    component={RouterLink}
-                    to={`/spaces/${space._id}`}
-                    sx={{
-                      p: 3,
-                      textDecoration: "none",
-                      color: "inherit",
-                      transition: "transform 0.2s, box-shadow 0.2s",
-                      "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: 3,
-                      },
-                      display: "block",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        mb: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          mr: 2,
-                          color: "primary.main",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          p: 1,
-                          borderRadius: "50%",
-                          bgcolor: "primary.light",
-                          opacity: 0.8,
-                        }}
-                      >
-                        {spaceTypeIcons[space.type]}
-                      </Box>
-                      <Typography variant="h6">{space.name}</Typography>
-                    </Box>
+                  <Paper sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      {space.name}
+                    </Typography>
                     <Typography variant="body2" color="text.secondary">
                       סוג: {spaceTypeLabels[space.type]}
                     </Typography>
+                    <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                      <Button
+                        component={RouterLink}
+                        to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/elements`}
+                        variant="outlined"
+                        fullWidth
+                      >
+                        צפה באלמנטים
+                      </Button>
+                      <Button
+                        component={RouterLink}
+                        to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/edit`}
+                        variant="outlined"
+                      >
+                        עריכה
+                      </Button>
+                    </Box>
                   </Paper>
                 </Grid>
               ))}
@@ -361,16 +336,14 @@ const ProjectTypePage: React.FC = () => {
         </Paper>
       </Box>
 
-      {/* Add Space FAB */}
-      {spaces.length > 0 && (
-        <Fab
-          color="primary"
-          sx={{ position: "fixed", bottom: 24, right: 24 }}
-          onClick={handleCreateSpace}
-        >
-          <AddIcon />
-        </Fab>
-      )}
+      {/* Add Space FAB - Always show */}
+      <Fab
+        color="primary"
+        sx={{ position: "fixed", bottom: 24, right: 24 }}
+        onClick={handleCreateSpace}
+      >
+        <AddIcon />
+      </Fab>
 
       {/* Delete Confirmation Dialog */}
       <Dialog

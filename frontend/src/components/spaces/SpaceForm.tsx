@@ -150,23 +150,21 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
     <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
       <Container maxWidth="md">
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 3,
-            }}
-          >
-            <Typography variant="h5">{t("spaces.addSpace")}</Typography>
-            <Button
-              startIcon={<AddIcon />}
-              onClick={handleAddSpace}
-              variant="contained"
-              color="primary"
-            >
-              {t("spaces.addAnotherSpace")}
-            </Button>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h5">
+              {initialData ? t("spaces.editSpace") : t("spaces.addSpace")}
+            </Typography>
+            {!initialData && (
+              <Button
+                startIcon={<AddIcon />}
+                onClick={handleAddSpace}
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+              >
+                {t("spaces.addAnotherSpace")}
+              </Button>
+            )}
           </Box>
 
           {spaces.map((space, spaceIndex) => (
@@ -181,7 +179,7 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
                   }}
                 >
                   <Typography variant="h6">
-                    {t("spaces.space")} #{spaceIndex + 1}
+                    {t("spaces.space", { number: spaceIndex + 1 })}
                   </Typography>
                   {spaces.length > 1 && (
                     <IconButton
@@ -271,7 +269,9 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
                                 }}
                               >
                                 <Typography variant="subtitle1">
-                                  {t("elements.addElement")} #{elementIndex + 1}
+                                  {t("elements.element", {
+                                    number: elementIndex + 1,
+                                  })}
                                 </Typography>
                                 <IconButton
                                   onClick={() =>
@@ -389,7 +389,7 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
             size="large"
             fullWidth
           >
-            {t("common.create")}
+            {initialData ? t("common.save") : t("common.create")}
           </Button>
         </Box>
       </Container>

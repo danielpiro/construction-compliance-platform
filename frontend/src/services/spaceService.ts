@@ -44,7 +44,12 @@ const spaceService = {
   // Get single space by ID
   getSpace: async (spaceId: string) => {
     const response = await apiClient.get(`/spaces/${spaceId}`);
-    return response.data;
+    return {
+      success: true,
+      data: response.data.data,
+      elements: response.data.data.elements || [],
+      message: response.data.message,
+    };
   },
 
   // Create new space
@@ -62,7 +67,11 @@ const spaceService = {
   // Update space
   updateSpace: async (spaceId: string, spaceData: Partial<SpaceData>) => {
     const response = await apiClient.put(`/spaces/${spaceId}`, spaceData);
-    return response.data;
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message,
+    };
   },
 
   // Delete space

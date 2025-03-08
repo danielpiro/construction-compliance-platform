@@ -99,9 +99,8 @@ export const getSpace = async (
     const userId = (req as any).user.id;
     const spaceId = req.params.id;
 
-    // Find space
+    // Find space and its elements
     const space = await Space.findById(spaceId);
-
     if (!space) {
       return res.status(404).json({
         success: false,
@@ -121,9 +120,15 @@ export const getSpace = async (
       });
     }
 
+    // Get elements for this space
+    const elements = await Element.find({ space: spaceId });
+
     res.status(200).json({
       success: true,
-      data: space,
+      data: {
+        ...space.toObject(),
+        elements,
+      },
     });
   } catch (error) {
     console.error(error);

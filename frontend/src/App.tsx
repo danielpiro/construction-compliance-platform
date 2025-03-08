@@ -36,11 +36,12 @@ import { useAuth } from "./hooks/useAuth";
 import ProfilePage from "./pages/projects/ProfilePage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import { SpaceForm, SpaceFormData } from "./components/spaces/SpaceForm";
+import EditSpaceForm from "./components/spaces/EditSpaceForm";
 import spaceService from "./services/spaceService";
 
 // Create Space Form Component
 const CreateSpaceForm: React.FC = () => {
-  const { typeId } = useParams();
+  const { typeId, projectId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
@@ -50,17 +51,19 @@ const CreateSpaceForm: React.FC = () => {
       if (!typeId) throw new Error(t("errors.generic"));
       setError(null);
 
-      // Create each space with its elements
-      for (const space of spaces) {
-        await spaceService.createSpace(typeId, {
+      // Create all spaces at once
+      const creationPromises = spaces.map((space) =>
+        spaceService.createSpace(typeId, {
           name: space.name,
           type: space.type,
           elements: space.elements,
-        });
-      }
+        })
+      );
+
+      await Promise.all(creationPromises);
 
       // Navigate back to project type page
-      navigate(`/building-types/${typeId}`);
+      navigate(`/projects/${projectId}/types/${typeId}/spaces`);
     } catch (error) {
       console.error("Failed to create space:", error);
       setError(error instanceof Error ? error.message : t("errors.generic"));
@@ -201,7 +204,7 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/building-types/:typeId/spaces/create"
+          path="/projects/:projectId/types/:typeId/spaces/create"
           element={
             <ProtectedRoute>
               <CreateSpaceForm />
@@ -213,6 +216,15 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ElementsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/projects/:projectId/types/:typeId/spaces/:spaceId/edit"
+          element={
+            <ProtectedRoute>
+              <EditSpaceForm />
             </ProtectedRoute>
           }
         />

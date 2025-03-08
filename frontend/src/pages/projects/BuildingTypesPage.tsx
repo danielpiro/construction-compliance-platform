@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
@@ -38,6 +39,7 @@ const buildingTypeLabels: Record<string, string> = {
 };
 
 const BuildingTypesPage: React.FC = () => {
+  const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
   const [buildingTypes, setBuildingTypes] = useState<BuildingType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +125,7 @@ const BuildingTypesPage: React.FC = () => {
         }}
       >
         <Typography variant="h4" component="h1">
-          סוגי מבנים
+          {t("projects.buildingTypes")}
         </Typography>
       </Box>
 
@@ -133,7 +135,7 @@ const BuildingTypesPage: React.FC = () => {
             <Grid item xs={12} sm={6} md={4} key={type._id}>
               <Paper
                 component={RouterLink}
-                to={`/building-types/${type._id}`}
+                to={`/projects/${projectId}/types/${type._id}`}
                 sx={{
                   p: 3,
                   textDecoration: "none",

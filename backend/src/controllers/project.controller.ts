@@ -286,11 +286,104 @@ export const createProject = async (
 
 // Other methods remain the same...
 export const updateProject = async (
-  req: Request,
+  req: RequestWithFile,
   res: Response,
   next: NextFunction
 ) => {
-  // Implementation remains the same...
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const projectId = req.params.id;
+    const userId = normalizeId((req as any).user.id);
+
+    // Find the project and check authorization
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      });
+    }
+
+    // Check if user is authorized to update the project
+    const ownerId = normalizeId(project.owner);
+    if (ownerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this project",
+      });
+    }
+
+    // Update project fields
+    if (req.body.name) project.name = req.body.name;
+    if (req.body.address) project.address = req.body.address;
+    if (req.body.location) project.location = req.body.location;
+    if (req.body.area) project.area = req.body.area;
+    if (req.body.permissionDate) {
+      const permissionDate = new Date(req.body.permissionDate);
+      if (isNaN(permissionDate.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid permission date format. Expected yyyy-MM-dd",
+        });
+      }
+      project.permissionDate = permissionDate;
+    }
+
+    // Handle image update if new file is provided
+    if (req.file) {
+      // Delete old image if it exists
+      if (project.image) {
+        const oldImagePath = path.join(__dirname, "..", "..", project.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      project.image = `uploads/${req.file.filename}`;
+    }
+
+    // Save the updated project
+    await project.save({ session });
+
+    await session.commitTransaction();
+
+    // Return updated project with populated data
+    const updatedProject = await Project.findById(projectId)
+      .populate({
+        path: "spaces",
+        populate: { path: "elements" },
+      })
+      .populate("owner", "name email")
+      .populate("sharedWith.user", "name email");
+
+    res.status(200).json({
+      success: true,
+      data: updatedProject,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    console.error("Project update error:", error);
+
+    if (error instanceof Error && error.name === "ValidationError") {
+      const validationError = error as any;
+      const errorMessages = Object.values(validationError.errors).map(
+        (err: any) => err.message
+      );
+      return res.status(400).json({
+        success: false,
+        message: "Invalid project data",
+        errors: errorMessages,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  } finally {
+    session.endSession();
+  }
 };
 
 export const deleteProject = async (
@@ -298,7 +391,66 @@ export const deleteProject = async (
   res: Response,
   next: NextFunction
 ) => {
-  // Implementation remains the same...
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const projectId = req.params.id;
+    const userId = normalizeId((req as any).user.id);
+
+    // Find the project and check authorization
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      });
+    }
+
+    // Check if user is authorized to delete the project
+    const ownerId = normalizeId(project.owner);
+    if (ownerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this project",
+      });
+    }
+
+    // Delete associated spaces and elements
+    const spaces = await Space.find({ buildingType: projectId });
+    for (const space of spaces) {
+      await Element.deleteMany({ space: space._id }, { session });
+    }
+    await Space.deleteMany({ buildingType: projectId }, { session });
+
+    // Delete project image if it exists
+    if (project.image) {
+      const imagePath = path.join(__dirname, "..", "..", project.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    // Delete the project
+    await Project.findByIdAndDelete(projectId, { session });
+
+    await session.commitTransaction();
+
+    res.status(200).json({
+      success: true,
+      data: {},
+      message: "Project deleted successfully",
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    console.error("Project deletion error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  } finally {
+    session.endSession();
+  }
 };
 
 export const shareProject = async (
