@@ -28,7 +28,10 @@ const router = Router();
 router.use(protect);
 
 // Project routes
-router.route("/").get(getProjects).post(createProject);
+router
+  .route("/")
+  .get(getProjects)
+  .post(uploadImage, handleUploadError, createProject);
 
 router.route("/:id").get(getProject).put(updateProject).delete(deleteProject);
 

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { AxiosError } from "axios";
+import { ApiError, ApiResponse } from "../../types/api";
 import { Container, Typography, Box, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import projectService from "../../services/projectService";
@@ -8,20 +10,30 @@ const CreateProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: FormData) => {
     try {
-      const response = await projectService.createProject(formData);
+      const response: ApiResponse = await projectService.createProject(
+        formData
+      );
 
       if (response.success) {
         // Redirect to projects page after successful creation
         navigate("/projects");
       } else {
-        setError("Unable to create project. Please try again.");
+        const errorMessage =
+          response.errors?.[0] ||
+          response.message ||
+          "Unable to create project. Please try again.";
+        setError(errorMessage);
       }
     } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
       console.error("Error creating project:", error);
-      setError("Unable to create project. Please try again.");
+      const errorMessage =
+        axiosError.response?.data?.message ||
+        axiosError.message ||
+        "Unable to create project. Please try again.";
+      setError(errorMessage);
     }
   };
 

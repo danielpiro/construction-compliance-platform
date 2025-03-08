@@ -35,21 +35,19 @@ const projectService = {
   },
 
   // Create new project
-  createProject: async (projectData: ProjectData) => {
-    // First create the project without the image
-    const { image, ...data } = projectData;
-    const response = await apiClient.post("/projects", data);
-
-    // If there's an image, upload it in a separate request
-    if (image && response.data.success) {
-      const projectId = response.data.data._id;
-      await projectService.uploadProjectImage(projectId, image);
-
-      // Refresh project data after image upload
-      return projectService.getProject(projectId);
+  createProject: async (formData: FormData) => {
+    try {
+      // Send the entire FormData including image in a single request
+      const response = await apiClient.post("/projects", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to create project:", error);
+      throw error;
     }
-
-    return response.data;
   },
 
   // Update project

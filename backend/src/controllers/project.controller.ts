@@ -123,7 +123,7 @@ export const getProject = async (
 // @route   POST /api/projects
 // @access  Private
 export const createProject = async (
-  req: Request,
+  req: RequestWithFile,
   res: Response,
   next: NextFunction
 ) => {
@@ -139,18 +139,48 @@ export const createProject = async (
       });
     }
 
-    // Create project
-    const project = await Project.create({
-      ...req.body,
+    // Parse and validate permissionDate
+    const [day, month, year] = (req.body.permissionDate as string).split("/");
+    const permissionDate = new Date(`${year}-${month}-${day}`);
+    if (isNaN(permissionDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid permission date format. Expected dd/MM/yyyy",
+      });
+    }
+
+    // Prepare project data
+    const projectData: Partial<IProject> = {
+      name: req.body.name,
+      address: req.body.address,
+      location: req.body.location,
+      area: req.body.area,
+      permissionDate,
       owner: userId,
-    });
+      ...(req.file && { image: `/uploads/${req.file.filename}` }),
+    };
+
+    // Create project
+    const project = await Project.create(projectData);
 
     res.status(201).json({
       success: true,
       data: project,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Project creation error:", error);
+    // Check for validation errors
+    if (error instanceof Error && error.name === "ValidationError") {
+      const validationError = error as any;
+      const errorMessages = Object.values(validationError.errors).map(
+        (err: any) => err.message
+      );
+      return res.status(400).json({
+        success: false,
+        message: "Invalid project data",
+        errors: errorMessages,
+      });
+    }
     res.status(500).json({
       success: false,
       message: "Server Error",

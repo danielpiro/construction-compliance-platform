@@ -16,13 +16,19 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Add request interceptor to attach token to requests
+// Add request interceptor to attach token and handle FormData
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // If sending FormData, let the browser set the correct Content-Type
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     return config;
   },
   (error: AxiosError) => {
