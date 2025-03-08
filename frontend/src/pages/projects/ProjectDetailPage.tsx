@@ -358,14 +358,16 @@ const ProjectDetailPage: React.FC = () => {
             <Typography variant="h5" component="h2">
               סוגי המבנה
             </Typography>
-            <Button variant="contained" color="primary" startIcon={<AddIcon />}>
-              הוסף סוג
+            <Button
+              component={Link}
+              to={`/projects/${projectId}/building-types`}
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+            >
+              נהל סוגי מבנה
             </Button>
           </Box>
-
-          <Alert severity="info" sx={{ mt: 3 }}>
-            תכונה זו תהיה זמינה בקרוב
-          </Alert>
 
           {/* Delete Confirmation Dialog */}
           <Dialog

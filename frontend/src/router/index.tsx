@@ -16,6 +16,7 @@ import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
 import ProjectDetailPage from "../pages/projects/ProjectDetailPage";
 import ProjectTypePage from "../pages/projects/ProjectTypePage";
+import BuildingTypesPage from "../pages/projects/BuildingTypesPage";
 import ElementsPage from "../pages/elements/ElementsPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import DashboardPage from "../pages/projects/DashboardPage";
@@ -96,6 +97,14 @@ const Router = () => {
           element: (
             <ProtectedRoute>
               <ProjectDetailPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "projects/:projectId/building-types",
+          element: (
+            <ProtectedRoute>
+              <BuildingTypesPage />
             </ProtectedRoute>
           ),
         },
