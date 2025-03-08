@@ -35,7 +35,7 @@ interface Project {
   location: string;
   area: string;
   permissionDate: string;
-  isBefore: boolean;
+  buildingVersion: string;
   image?: string;
   owner: string;
   sharedWith?: Array<{ user: string; role: string }>;
@@ -60,6 +60,22 @@ const buildingTypeLabels: Record<string, string> = {
   Hotels: "מלונות",
   Commercials: "מסחר",
   "Public Gathering": "התקהלות ציבורית",
+};
+
+// Helper function to get display version
+const getDisplayVersion = (version: string): string => {
+  switch (version) {
+    case "version2011":
+      return "גרסה 2011 (לפני 01/01/2020)";
+    case "version2019":
+      return "גרסה 2019 (01/01/2020 - 01/06/2021)";
+    case "fixSheet1":
+      return "תיקון 1 (01/06/2021 - 01/12/2022)";
+    case "fixSheet2":
+      return "תיקון 2 (אחרי 01/12/2022)";
+    default:
+      return version;
+  }
 };
 
 // Format date to local string
@@ -367,7 +383,8 @@ const ProjectDetailPage: React.FC = () => {
                   {formatDate(project.permissionDate)}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>לפני 2020:</strong> {project.isBefore ? "כן" : "לא"}
+                  <strong>גרסת בנייה:</strong>{" "}
+                  {getDisplayVersion(project.buildingVersion)}
                 </Typography>
                 <Typography variant="body1">
                   <strong>נוצר:</strong> {formatDate(project.creationDate)}

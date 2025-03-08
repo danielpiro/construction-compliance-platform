@@ -293,8 +293,20 @@ export const updateProject = async (
       updateData.permissionDate = permissionDate;
     }
 
-    if (req.body.isBefore) {
-      updateData.isBefore = req.body.isBefore === "true";
+    if (req.body.buildingVersion) {
+      const validVersions = [
+        "version2011",
+        "version2019",
+        "fixSheet1",
+        "fixSheet2",
+      ];
+      if (!validVersions.includes(req.body.buildingVersion)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid building version",
+        });
+      }
+      updateData.buildingVersion = req.body.buildingVersion;
     }
 
     // Handle image if it exists in the request

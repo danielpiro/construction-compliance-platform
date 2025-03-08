@@ -10,6 +10,23 @@ import { useParams, useNavigate } from "react-router-dom";
 import projectService from "../../services/projectService";
 import ProjectForm from "./ProjectForm";
 
+// Helper function to determine building version based on date
+const getBuildingVersion = (date: Date): string => {
+  const date2020 = new Date("2020-01-01");
+  const date2021June = new Date("2021-06-01");
+  const date2022Dec = new Date("2022-12-01");
+
+  if (date < date2020) {
+    return "version2011";
+  } else if (date >= date2020 && date < date2021June) {
+    return "version2019";
+  } else if (date >= date2021June && date < date2022Dec) {
+    return "fixSheet1";
+  } else {
+    return "fixSheet2";
+  }
+};
+
 // Project interface
 interface Project {
   _id: string;
@@ -18,7 +35,7 @@ interface Project {
   location: string;
   area: string;
   permissionDate: string;
-  isBefore: boolean;
+  buildingVersion: string;
   imageUrl?: string;
 }
 
@@ -102,13 +119,15 @@ const EditProjectPage: React.FC = () => {
     return new Date(dateString);
   };
 
+  const parsedDate = parseDate(project.permissionDate);
+
   const initialData = {
     name: project.name,
     address: project.address,
     location: project.location,
     area: project.area,
-    permissionDate: parseDate(project.permissionDate),
-    isBefore: project.isBefore,
+    permissionDate: parsedDate,
+    buildingVersion: project.buildingVersion || getBuildingVersion(parsedDate),
     imageUrl: project.imageUrl,
     image: null, // Initialize image as null
   };

@@ -7,14 +7,44 @@ import {
   Typography,
   Autocomplete,
   Paper,
-  Checkbox,
-  FormControlLabel,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { he as heLocale } from "date-fns/locale";
 import { areaToHebrew, hebrewToArea } from "../../utils/areaMapping";
+
+// Helper functions for building version
+const getBuildingVersion = (date: Date): string => {
+  const date2020 = new Date("2020-01-01");
+  const date2021June = new Date("2021-06-01");
+  const date2022Dec = new Date("2022-12-01");
+
+  if (date < date2020) {
+    return "version2011";
+  } else if (date >= date2020 && date < date2021June) {
+    return "version2019";
+  } else if (date >= date2021June && date < date2022Dec) {
+    return "fixSheet1";
+  } else {
+    return "fixSheet2";
+  }
+};
+
+const getDisplayVersion = (version: string): string => {
+  switch (version) {
+    case "version2011":
+      return "גרסה 2011 (לפני 01/01/2020)";
+    case "version2019":
+      return "גרסה 2019 (01/01/2020 - 01/06/2021)";
+    case "fixSheet1":
+      return "תיקון 1 (01/06/2021 - 01/12/2022)";
+    case "fixSheet2":
+      return "תיקון 2 (אחרי 01/12/2022)";
+    default:
+      return "";
+  }
+};
 
 // Project types
 const PROJECT_TYPES = [
@@ -34,7 +64,7 @@ interface ProjectFormData {
   area?: string;
   type?: string;
   permissionDate: Date | null;
-  isBefore: boolean;
+  buildingVersion: string;
   image?: File | null;
   imageUrl?: string;
 }
@@ -92,7 +122,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     area: "",
     type: "",
     permissionDate: null,
-    isBefore: false,
+    buildingVersion: "",
     image: null,
     imageUrl: "",
   });
@@ -188,8 +218,8 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     setFormData({
       ...formData,
       permissionDate: date,
-      // Automatically set isBefore based on the date
-      isBefore: date ? date < new Date(2020, 0, 1) : false,
+      // Automatically set buildingVersion based on the date
+      buildingVersion: date ? getBuildingVersion(date) : "",
     });
 
     // Clear date error
@@ -255,7 +285,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         formData.permissionDate.toISOString()
       );
     }
-    submitData.append("isBefore", String(formData.isBefore));
+    submitData.append("buildingVersion", formData.buildingVersion);
     if (formData.image) {
       submitData.append("image", formData.image);
     }
@@ -386,19 +416,16 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             </LocalizationProvider>
           </Grid>
 
-          {/* Is Before 2020 */}
+          {/* Building Version (automatically calculated) */}
           <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="isBefore"
-                  checked={formData.isBefore}
-                  onChange={handleChange}
-                  color="primary"
-                  disabled // This is calculated automatically based on the date
-                />
-              }
-              label="תאריך ההיתר הוא לפני 01/01/2020"
+            <TextField
+              fullWidth
+              id="buildingVersion"
+              label="Building Version"
+              value={getDisplayVersion(formData.buildingVersion)}
+              InputProps={{
+                readOnly: true,
+              }}
             />
           </Grid>
 

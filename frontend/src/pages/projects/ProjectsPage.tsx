@@ -25,7 +25,7 @@ interface Project {
   address: string;
   location: string;
   area: "A" | "B" | "C" | "D";
-  isBefore: boolean;
+  buildingVersion: string;
   image?: string;
   permissionDate: Date;
 }
@@ -39,6 +39,22 @@ const ProjectsPage: React.FC = () => {
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [showDebug, setShowDebug] = useState(false);
   const projectsPerPage = 12;
+
+  // Helper function to get display version
+  const getDisplayVersion = (version: string): string => {
+    switch (version) {
+      case "version2011":
+        return "גרסה 2011";
+      case "version2019":
+        return "גרסה 2019";
+      case "fixSheet1":
+        return "תיקון 1";
+      case "fixSheet2":
+        return "תיקון 2";
+      default:
+        return version;
+    }
+  };
 
   // Function to fetch projects with detailed debugging
   const fetchProjects = async () => {
@@ -291,13 +307,8 @@ const ProjectsPage: React.FC = () => {
                     <Typography variant="body2">
                       אזור: {project.area}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: project.isBefore ? "success.main" : "error.main",
-                      }}
-                    >
-                      {project.isBefore ? "לפני 2020" : "אחרי 2020"}
+                    <Typography variant="body2">
+                      {getDisplayVersion(project.buildingVersion)}
                     </Typography>
                   </Box>
                 </Box>

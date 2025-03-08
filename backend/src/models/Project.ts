@@ -15,7 +15,7 @@ export interface IProject extends Document {
     | "Commercials"
     | "Public Gathering";
   permissionDate: Date;
-  isBefore: boolean;
+  buildingVersion: "version2011" | "version2019" | "fixSheet1" | "fixSheet2";
   image?: string;
   owner: mongoose.Schema.Types.ObjectId;
   sharedWith: Array<{
@@ -67,11 +67,25 @@ const ProjectSchema: Schema = new Schema(
       type: Date,
       required: [true, "Please add a permission date"],
     },
-    isBefore: {
-      type: Boolean,
+    buildingVersion: {
+      type: String,
+      enum: ["version2011", "version2019", "fixSheet1", "fixSheet2"],
+      required: [true, "Building version is required"],
       default: function (this: any) {
-        const cutoffDate = new Date("2020-01-01");
-        return this.permissionDate < cutoffDate;
+        const date = this.permissionDate;
+        const date2020 = new Date("2020-01-01");
+        const date2021June = new Date("2021-06-01");
+        const date2022Dec = new Date("2022-12-01");
+
+        if (date < date2020) {
+          return "version2011";
+        } else if (date >= date2020 && date < date2021June) {
+          return "version2019";
+        } else if (date >= date2021June && date < date2022Dec) {
+          return "fixSheet1";
+        } else {
+          return "fixSheet2";
+        }
       },
     },
     image: {
