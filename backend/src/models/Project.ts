@@ -7,13 +7,6 @@ export interface IProject extends Document {
   address: string;
   location: string;
   area: "A" | "B" | "C" | "D";
-  type:
-    | "Residential"
-    | "Schools"
-    | "Offices"
-    | "Hotels"
-    | "Commercials"
-    | "Public Gathering";
   permissionDate: Date;
   buildingVersion: "version2011" | "version2019" | "fixSheet1" | "fixSheet2";
   image?: string;
@@ -50,18 +43,6 @@ const ProjectSchema: Schema = new Schema(
       type: String,
       enum: ["A", "B", "C", "D"],
       required: [true, "Area is required"],
-    },
-    type: {
-      type: String,
-      enum: [
-        "Residential",
-        "Schools",
-        "Offices",
-        "Hotels",
-        "Commercials",
-        "Public Gathering",
-      ],
-      required: [true, "Project type is required"],
     },
     permissionDate: {
       type: Date,

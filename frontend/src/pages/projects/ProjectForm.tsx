@@ -46,29 +46,12 @@ const getDisplayVersion = (version: string): string => {
   }
 };
 
-// Project types mapping
-const PROJECT_TYPE_MAPPING: { [key: string]: string } = {
-  מגורים: "Residential",
-  "בתי ספר": "Schools",
-  משרדים: "Offices",
-  מלונות: "Hotels",
-  מסחר: "Commercials",
-  "התקהלות ציבורית": "Public Gathering",
-};
-
-const REVERSE_PROJECT_TYPE_MAPPING = Object.fromEntries(
-  Object.entries(PROJECT_TYPE_MAPPING).map(([key, value]) => [value, key])
-);
-
-const PROJECT_TYPES = Object.keys(PROJECT_TYPE_MAPPING);
-
 // Define the types for Project data
 interface ProjectFormData {
   name: string;
   address: string;
   location: string;
   area?: string;
-  type?: string;
   permissionDate: Date | null;
   buildingVersion: string;
   image?: File | null;
@@ -126,7 +109,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     address: "",
     location: "",
     area: "",
-    type: "",
     permissionDate: null,
     buildingVersion: "",
     image: null,
@@ -138,7 +120,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     name: "",
     address: "",
     location: "",
-    type: "",
     permissionDate: "",
   });
 
@@ -151,10 +132,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         permissionDate: initialData.permissionDate
           ? new Date(initialData.permissionDate)
           : null,
-        // Convert English type to Hebrew
-        type: initialData.type
-          ? REVERSE_PROJECT_TYPE_MAPPING[initialData.type]
-          : "",
       });
     }
   }, [initialData]);
@@ -204,25 +181,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     }
   };
 
-  // Handle type change
-  const handleTypeChange = (
-    _event: React.SyntheticEvent,
-    value: string | null
-  ) => {
-    setFormData({
-      ...formData,
-      type: value || "",
-    });
-
-    // Clear type error
-    if (errors.type) {
-      setErrors({
-        ...errors,
-        type: "",
-      });
-    }
-  };
-
   // Handle date change
   const handleDateChange = (date: Date | null) => {
     setFormData({
@@ -259,7 +217,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       name: formData.name ? "" : "שם הוא שדה חובה",
       address: formData.address ? "" : "כתובת היא שדה חובה",
       location: formData.location ? "" : "מיקום הוא שדה חובה",
-      type: formData.type ? "" : "סוג פרויקט הוא שדה חובה",
       permissionDate: formData.permissionDate ? "" : "תאריך היתר הוא שדה חובה",
     };
 
@@ -284,10 +241,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       // Convert Hebrew area back to English before sending to server
       const area = hebrewToArea[formData.area] || formData.area;
       submitData.append("area", area);
-    }
-    if (formData.type) {
-      // Convert Hebrew type back to English
-      submitData.append("type", PROJECT_TYPE_MAPPING[formData.type]);
     }
     if (formData.permissionDate) {
       // Format date in ISO format for backend
@@ -384,25 +337,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 readOnly: true,
                 sx: { backgroundColor: "#f0f0f0" },
               }}
-            />
-          </Grid>
-
-          {/* Project Type */}
-          <Grid item xs={12} md={6}>
-            <Autocomplete
-              id="type"
-              options={PROJECT_TYPES}
-              value={formData.type || null}
-              onChange={handleTypeChange}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  label="סוג פרויקט"
-                  error={!!errors.type}
-                  helperText={errors.type}
-                />
-              )}
             />
           </Grid>
 
