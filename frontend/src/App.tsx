@@ -10,6 +10,10 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 // Public Pages
 import HomePage from "./pages/projects/HomePage";
+import AboutPage from "./pages/AboutPage";
+import TeamPage from "./pages/TeamPage";
+import ContactPage from "./pages/ContactPage";
+import PricingPage from "./pages/PricingPage";
 
 // Protected Pages
 import ProjectsPage from "./pages/projects/ProjectsPage";
@@ -63,6 +67,10 @@ const App: React.FC = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<RootRedirect />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/team" element={<TeamPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
