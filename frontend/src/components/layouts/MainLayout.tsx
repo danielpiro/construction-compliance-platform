@@ -68,7 +68,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         }}
       >
         <Toolbar /> {/* Offset for fixed header */}
-        <Box sx={{ flexGrow: 1 }}>{children}</Box>
+        <Box
+          sx={{
+            flexGrow: 1,
+            maxWidth: "1200px",
+            width: "100%",
+            mx: "auto", // centers the container
+            px: { xs: 2, sm: 3, md: 4 }, // responsive padding
+            pb: 4, // bottom padding for consistent spacing
+          }}
+        >
+          {children}
+        </Box>
         {!isAuthPage && <Footer />}
       </Box>
     </Box>

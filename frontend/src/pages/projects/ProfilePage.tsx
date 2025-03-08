@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Container,
   TextField,
   Button,
   Paper,
@@ -131,15 +130,23 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+    <Box sx={{ p: 3 }}>
+      {/* Header */}
+      <Box mb={3}>
+        <Typography variant="h4" component="h1">
+          {i18n.t("profile.title")}
+        </Typography>
+      </Box>
+
+      {/* Content */}
+      <Paper elevation={1} sx={{ p: 3 }}>
         <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
           <Avatar
             sx={{
-              width: 80,
-              height: 80,
+              width: 64,
+              height: 64,
               bgcolor: "secondary.main",
-              fontSize: "2rem",
+              fontSize: "1.5rem",
               fontWeight: "bold",
               mr: 2,
             }}
@@ -147,17 +154,12 @@ const ProfilePage: React.FC = () => {
           >
             {formData.name?.charAt(0).toUpperCase()}
           </Avatar>
-          <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-              {i18n.t("profile.title")}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {i18n.t("profile.subtitle")}
-            </Typography>
-          </Box>
+          <Typography variant="body1" color="text.secondary">
+            {i18n.t("profile.subtitle")}
+          </Typography>
         </Box>
 
-        <form onSubmit={handleSubmit}>
+        <form>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="h6" sx={{ mb: 2 }}>
@@ -233,13 +235,12 @@ const ProfilePage: React.FC = () => {
                 {i18n.t("profile.emailNote")}
               </Typography>
             </Grid>
-
-            <Grid item xs={12} sx={{ mt: 2 }}>
-              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Grid item xs={12}>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
                 <Button
                   variant="contained"
                   color="primary"
-                  type="submit"
+                  onClick={handleSubmit}
                   disabled={saving}
                   sx={{ minWidth: 120 }}
                   aria-busy={saving}
@@ -274,7 +275,7 @@ const ProfilePage: React.FC = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 
