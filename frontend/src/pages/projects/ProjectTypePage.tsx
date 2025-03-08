@@ -10,23 +10,16 @@ import {
   Box,
   Typography,
   Grid,
-  Card,
-  CardContent,
   Button,
   Breadcrumbs,
   Link,
   CircularProgress,
-  IconButton,
-  Menu,
-  MenuItem,
-  ListItemIcon,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Paper,
-  Divider,
   Fab,
 } from "@mui/material";
 import {
@@ -34,7 +27,6 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
-  MoreVert as MoreVertIcon,
   ArrowBack as ArrowBackIcon,
   Chair as ChairIcon,
   Shield as ShieldIcon,
@@ -44,7 +36,6 @@ import {
 import { toast } from "react-toastify";
 import buildingTypeService from "../../services/buildingTypeService";
 import spaceService from "../../services/spaceService";
-import BuildingTypeForm from "./BuildingTypeForm";
 
 // Types
 interface BuildingType {
@@ -104,9 +95,7 @@ const ProjectTypePage: React.FC = () => {
   const [buildingType, setBuildingType] = useState<BuildingType | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [spaces, setSpaces] = useState<Space[]>([]);
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchBuildingTypeData = async () => {
@@ -140,7 +129,6 @@ const ProjectTypePage: React.FC = () => {
       } else {
         setError("אירעה שגיאה בטעינת פרטי סוג המבנה");
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching building type data:", err);
       setError("אירעה שגיאה בטעינת פרטי סוג המבנה. אנא נסה שוב מאוחר יותר.");
@@ -152,28 +140,6 @@ const ProjectTypePage: React.FC = () => {
   useEffect(() => {
     fetchBuildingTypeData();
   }, [typeId, projectId]);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-  };
-
-  const handleEditBuildingType = () => {
-    navigate(`/building-types/${typeId}/edit`);
-    handleMenuClose();
-  };
-
-  const handleDeleteDialogOpen = () => {
-    setDeleteDialogOpen(true);
-    handleMenuClose();
-  };
-
-  const handleDeleteDialogClose = () => {
-    setDeleteDialogOpen(false);
-  };
 
   const handleDeleteBuildingType = async () => {
     if (!typeId || !project) return;
@@ -190,22 +156,8 @@ const ProjectTypePage: React.FC = () => {
       console.error("Error deleting building type:", err);
       toast.error("שגיאה במחיקת סוג המבנה");
     } finally {
-      handleDeleteDialogClose();
+      setDeleteDialogOpen(false);
     }
-  };
-
-  const handleCreateTypeClick = () => {
-    setCreateDialogOpen(true);
-  };
-
-  const handleCreateDialogClose = () => {
-    setCreateDialogOpen(false);
-  };
-
-  const handleTypeCreated = () => {
-    setCreateDialogOpen(false);
-    // Refresh building types list
-    fetchBuildingTypeData();
   };
 
   const handleCreateSpace = () => {
@@ -229,7 +181,7 @@ const ProjectTypePage: React.FC = () => {
 
   if (error || !buildingType || !project) {
     return (
-      <Box>
+      <Box p={3}>
         <Typography color="error" variant="h6">
           {error || "סוג מבנה לא נמצא"}
         </Typography>
@@ -246,9 +198,49 @@ const ProjectTypePage: React.FC = () => {
   }
 
   return (
-    <Box>
+    <Box p={3}>
+      {/* Page Header */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h4" component="h1">
+          {buildingType.name}
+        </Typography>
+        <Box>
+          <Button
+            onClick={() => navigate(`/projects/${projectId}`)}
+            variant="outlined"
+            color="primary"
+            startIcon={<ArrowBackIcon />}
+            sx={{ mr: 1 }}
+          >
+            חזור לפרויקט
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<EditIcon />}
+            onClick={() => navigate(`/building-types/${typeId}/edit`)}
+            sx={{ mr: 1 }}
+          >
+            ערוך
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            מחק
+          </Button>
+        </Box>
+      </Box>
+
       {/* Breadcrumbs */}
-      <Breadcrumbs sx={{ mb: 2 }}>
+      <Breadcrumbs sx={{ mb: 3 }}>
         <Link component={RouterLink} to="/" underline="hover" color="inherit">
           <HomeIcon
             sx={{ ml: 0.5, verticalAlign: "middle" }}
@@ -275,109 +267,50 @@ const ProjectTypePage: React.FC = () => {
         <Typography color="text.primary">{buildingType.name}</Typography>
       </Breadcrumbs>
 
-      {/* Create Type FAB */}
-      <Fab
-        color="primary"
-        sx={{ position: "fixed", bottom: 24, right: 24 }}
-        onClick={handleCreateTypeClick}
-      >
-        <AddIcon />
-      </Fab>
-
-      {/* Create Type Dialog */}
-      <Dialog
-        open={createDialogOpen}
-        onClose={handleCreateDialogClose}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>יצירת סוג מבנה חדש</DialogTitle>
-        <DialogContent>
-          {projectId ? (
-            <BuildingTypeForm
-              projectId={projectId}
-              onSuccess={handleTypeCreated}
-            />
-          ) : (
-            <Typography color="error">פרטי הפרויקט חסרים</Typography>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Building Type Header */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          mb: 4,
-        }}
-      >
-        <Box>
-          <Button
-            onClick={() => navigate(`/projects/${projectId}`)}
-            startIcon={<ArrowBackIcon />}
-            sx={{ mb: 1 }}
-          >
-            חזור לפרויקט
-          </Button>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
-            {buildingType.name}
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            סוג: {buildingTypeLabels[buildingType.type]}
-          </Typography>
-        </Box>
-
-        <IconButton onClick={handleMenuOpen}>
-          <MoreVertIcon />
-        </IconButton>
-      </Box>
+      {/* Building Type Info */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="body1">
+              <strong>סוג:</strong> {buildingTypeLabels[buildingType.type]}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
 
       {/* Spaces Section */}
-      <Box sx={{ mb: 4 }}>
+      <Box>
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={3}
         >
-          <Typography variant="h5" fontWeight="bold">
+          <Typography variant="h5" component="h2">
             חללי המבנה
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={handleCreateSpace}
-          >
-            הוסף חלל
-          </Button>
         </Box>
 
-        <Divider sx={{ mb: 3 }} />
-
-        {spaces.length > 0 ? (
-          <Grid container spacing={3}>
-            {spaces.map((space) => (
-              <Grid item xs={12} sm={6} md={4} key={space._id}>
-                <Card
-                  component={RouterLink}
-                  to={`/spaces/${space._id}`}
-                  sx={{
-                    height: "100%",
-                    textDecoration: "none",
-                    color: "inherit",
-                    transition: "transform 0.2s, box-shadow 0.2s",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
-                    },
-                  }}
-                >
-                  <CardContent>
+        <Paper elevation={3} sx={{ p: 3 }}>
+          {spaces.length > 0 ? (
+            <Grid container spacing={3}>
+              {spaces.map((space) => (
+                <Grid item xs={12} sm={6} md={4} key={space._id}>
+                  <Paper
+                    component={RouterLink}
+                    to={`/spaces/${space._id}`}
+                    sx={{
+                      p: 3,
+                      textDecoration: "none",
+                      color: "inherit",
+                      transition: "transform 0.2s, box-shadow 0.2s",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: 3,
+                      },
+                      display: "block",
+                    }}
+                  >
                     <Box
                       sx={{
                         display: "flex",
@@ -405,66 +338,44 @@ const ProjectTypePage: React.FC = () => {
                     <Typography variant="body2" color="text.secondary">
                       סוג: {spaceTypeLabels[space.type]}
                     </Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        mt: 2,
-                      }}
-                    >
-                      <Button size="small" color="primary">
-                        ערוך
-                      </Button>
-                      <Button size="small" color="error" sx={{ mr: 1 }}>
-                        מחק
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Paper sx={{ p: 3, textAlign: "center" }}>
-            <Typography variant="body1" paragraph>
-              אין חללים מוגדרים עדיין. הוסף חלל חדש להתחלה.
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={handleCreateSpace}
-            >
-              הוסף חלל חדש
-            </Button>
-          </Paper>
-        )}
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box textAlign="center">
+              <Typography variant="body1" paragraph>
+                אין חללים מוגדרים עדיין
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={handleCreateSpace}
+              >
+                הוסף חלל חדש
+              </Button>
+            </Box>
+          )}
+        </Paper>
       </Box>
 
-      {/* Building Type Actions Menu */}
-      <Menu
-        anchorEl={menuAnchorEl}
-        open={Boolean(menuAnchorEl)}
-        onClose={handleMenuClose}
-        transformOrigin={{ horizontal: "left", vertical: "top" }}
-        anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
-      >
-        <MenuItem onClick={handleEditBuildingType}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          ערוך סוג מבנה
-        </MenuItem>
-        <MenuItem onClick={handleDeleteDialogOpen} sx={{ color: "error.main" }}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" color="error" />
-          </ListItemIcon>
-          מחק סוג מבנה
-        </MenuItem>
-      </Menu>
+      {/* Add Space FAB */}
+      {spaces.length > 0 && (
+        <Fab
+          color="primary"
+          sx={{ position: "fixed", bottom: 24, right: 24 }}
+          onClick={handleCreateSpace}
+        >
+          <AddIcon />
+        </Fab>
+      )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
         <DialogTitle>מחיקת סוג מבנה</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -473,7 +384,7 @@ const ProjectTypePage: React.FC = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteDialogClose}>ביטול</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>ביטול</Button>
           <Button onClick={handleDeleteBuildingType} color="error" autoFocus>
             מחק
           </Button>
