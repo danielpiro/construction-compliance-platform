@@ -45,17 +45,19 @@ const CreateSpaceForm: React.FC = () => {
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (data: SpaceFormData) => {
+  const handleSubmit = async (spaces: SpaceFormData[]) => {
     try {
       if (!typeId) throw new Error(t("errors.generic"));
       setError(null);
 
-      // Create space with elements
-      await spaceService.createSpace(typeId, {
-        name: data.name,
-        type: data.type,
-        elements: data.elements,
-      });
+      // Create each space with its elements
+      for (const space of spaces) {
+        await spaceService.createSpace(typeId, {
+          name: space.name,
+          type: space.type,
+          elements: space.elements,
+        });
+      }
 
       // Navigate back to project type page
       navigate(`/building-types/${typeId}`);

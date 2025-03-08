@@ -34,8 +34,11 @@ export const SpaceElementSection: React.FC<SpaceElementSectionProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"space" | "element">("space");
 
-  const handleAddSpace = (spaceData: SpaceFormData) => {
-    onSpacesChange([...spaces, { spaceData, elements: [] }]);
+  const handleAddSpace = (spacesData: SpaceFormData[]) => {
+    onSpacesChange([
+      ...spaces,
+      ...spacesData.map((spaceData) => ({ spaceData, elements: [] })),
+    ]);
     setIsDialogOpen(false);
   };
 

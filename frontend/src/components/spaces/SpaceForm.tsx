@@ -37,7 +37,7 @@ export interface SpaceFormData {
 }
 
 interface SpaceFormProps {
-  onSubmit: (data: SpaceFormData) => void;
+  onSubmit: (data: SpaceFormData[]) => void;
   initialData?: SpaceFormData;
 }
 
@@ -56,241 +56,331 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const [formData, setFormData] = useState<SpaceFormData>(
-    initialData || {
-      name: "",
-      type: "Bedroom",
-      elements: [],
-    }
-  );
-
-  const handleAddElement = () => {
-    setFormData((prev) => ({
-      ...prev,
-      elements: [
-        ...prev.elements,
-        {
-          name: "",
-          type: "Wall",
-        },
-      ],
-    }));
+  const emptySpace: SpaceFormData = {
+    name: "",
+    type: "Bedroom",
+    elements: [],
   };
 
-  const handleElementChange = (
+  const [spaces, setSpaces] = useState<SpaceFormData[]>(
+    initialData ? [initialData] : [{ ...emptySpace }]
+  );
+
+  const handleAddSpace = () => {
+    setSpaces((prev) => [...prev, { ...emptySpace }]);
+  };
+
+  const handleRemoveSpace = (spaceIndex: number) => {
+    setSpaces((prev) => prev.filter((_, index) => index !== spaceIndex));
+  };
+
+  const handleSpaceChange = (
     index: number,
-    field: keyof ElementData,
+    field: keyof SpaceFormData,
     value: string
   ) => {
-    setFormData((prev) => {
-      const elements = [...prev.elements];
-      elements[index] = {
-        ...elements[index],
+    setSpaces((prev) => {
+      const newSpaces = [...prev];
+      newSpaces[index] = {
+        ...newSpaces[index],
         [field]: value,
-        // Reset subType if type changes
-        ...(field === "type" && { subType: undefined }),
       };
-      return { ...prev, elements };
+      return newSpaces;
     });
   };
 
-  const handleRemoveElement = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      elements: prev.elements.filter((_, i) => i !== index),
-    }));
+  const handleAddElement = (spaceIndex: number) => {
+    setSpaces((prev) => {
+      const newSpaces = [...prev];
+      newSpaces[spaceIndex] = {
+        ...newSpaces[spaceIndex],
+        elements: [
+          ...newSpaces[spaceIndex].elements,
+          {
+            name: "",
+            type: "Wall",
+          },
+        ],
+      };
+      return newSpaces;
+    });
+  };
+
+  const handleElementChange = (
+    spaceIndex: number,
+    elementIndex: number,
+    field: keyof ElementData,
+    value: string
+  ) => {
+    setSpaces((prev) => {
+      const newSpaces = [...prev];
+      const elements = [...newSpaces[spaceIndex].elements];
+      elements[elementIndex] = {
+        ...elements[elementIndex],
+        [field]: value,
+        ...(field === "type" && { subType: undefined }),
+      };
+      newSpaces[spaceIndex] = { ...newSpaces[spaceIndex], elements };
+      return newSpaces;
+    });
+  };
+
+  const handleRemoveElement = (spaceIndex: number, elementIndex: number) => {
+    setSpaces((prev) => {
+      const newSpaces = [...prev];
+      newSpaces[spaceIndex] = {
+        ...newSpaces[spaceIndex],
+        elements: newSpaces[spaceIndex].elements.filter(
+          (_, i) => i !== elementIndex
+        ),
+      };
+      return newSpaces;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.name || !formData.type) {
+    if (spaces.some((space) => !space.name || !space.type)) {
       return;
     }
-    onSubmit(formData);
+    onSubmit(spaces);
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
       <Container maxWidth="md">
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Typography variant="h5" align="center" gutterBottom>
-            {t("spaces.addSpace")}
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 3,
+            }}
+          >
+            <Typography variant="h5">{t("spaces.addSpace")}</Typography>
+            <Button
+              startIcon={<AddIcon />}
+              onClick={handleAddSpace}
+              variant="contained"
+              color="primary"
+            >
+              {t("spaces.addAnotherSpace")}
+            </Button>
+          </Box>
 
-          {/* Space Details Section */}
-          <Card>
-            <CardContent>
-              <Stack spacing={3}>
-                <TextField
-                  required
-                  label={t("projects.form.name")}
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder={t("projects.form.name")}
-                  fullWidth
-                />
-
-                <FormControl required fullWidth>
-                  <InputLabel>{t("spaces.title")}</InputLabel>
-                  <Select
-                    value={formData.type}
-                    label={t("spaces.title")}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        type: e.target.value as SpaceFormData["type"],
-                      })
-                    }
-                  >
-                    {["Bedroom", "Protect Space", "Wet Room", "Balcony"].map(
-                      (type) => (
-                        <MenuItem key={type} value={type}>
-                          {t(
-                            `spaces.types.${type
-                              .toLowerCase()
-                              .replace(" ", "")}`
-                          )}
-                        </MenuItem>
-                      )
-                    )}
-                  </Select>
-                </FormControl>
-              </Stack>
-            </CardContent>
-          </Card>
-
-          {/* Elements Section */}
-          <Card>
-            <CardContent>
-              <Stack spacing={3}>
+          {spaces.map((space, spaceIndex) => (
+            <Card key={spaceIndex} sx={{ mb: 3 }}>
+              <CardContent>
                 <Box
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    mb: 2,
                   }}
                 >
-                  <Typography variant="h6">{t("elements.title")}</Typography>
-                  <Button
-                    startIcon={<AddIcon />}
-                    onClick={handleAddElement}
-                    variant="outlined"
-                  >
-                    {t("elements.addElement")}
-                  </Button>
+                  <Typography variant="h6">
+                    {t("spaces.space")} #{spaceIndex + 1}
+                  </Typography>
+                  {spaces.length > 1 && (
+                    <IconButton
+                      onClick={() => handleRemoveSpace(spaceIndex)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
                 </Box>
 
-                <Stack spacing={2}>
-                  {formData.elements.map((element, index) => (
-                    <Card
-                      key={index}
-                      variant="outlined"
-                      sx={{ backgroundColor: "background.paper" }}
+                <Stack spacing={3}>
+                  <TextField
+                    required
+                    label={t("projects.form.name")}
+                    value={space.name}
+                    onChange={(e) =>
+                      handleSpaceChange(spaceIndex, "name", e.target.value)
+                    }
+                    placeholder={t("projects.form.name")}
+                    fullWidth
+                  />
+
+                  <FormControl required fullWidth>
+                    <InputLabel>{t("spaces.title")}</InputLabel>
+                    <Select
+                      value={space.type}
+                      label={t("spaces.title")}
+                      onChange={(e) =>
+                        handleSpaceChange(
+                          spaceIndex,
+                          "type",
+                          e.target.value as SpaceFormData["type"]
+                        )
+                      }
                     >
-                      <CardContent>
-                        <Stack spacing={2}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Typography variant="subtitle1">
-                              {t("elements.addElement")} #{index + 1}
-                            </Typography>
-                            <IconButton
-                              onClick={() => handleRemoveElement(index)}
-                              color="error"
-                              size="small"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Box>
+                      {["Bedroom", "Protect Space", "Wet Room", "Balcony"].map(
+                        (type) => (
+                          <MenuItem key={type} value={type}>
+                            {t(
+                              `spaces.types.${type
+                                .toLowerCase()
+                                .replace(" ", "")}`
+                            )}
+                          </MenuItem>
+                        )
+                      )}
+                    </Select>
+                  </FormControl>
 
-                          <TextField
-                            required
-                            label={t("projects.form.name")}
-                            value={element.name}
-                            onChange={(e) =>
-                              handleElementChange(index, "name", e.target.value)
-                            }
-                            fullWidth
-                          />
+                  {/* Elements Section */}
+                  <Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 2,
+                      }}
+                    >
+                      <Typography variant="h6">
+                        {t("elements.title")}
+                      </Typography>
+                      <Button
+                        startIcon={<AddIcon />}
+                        onClick={() => handleAddElement(spaceIndex)}
+                        variant="outlined"
+                      >
+                        {t("elements.addElement")}
+                      </Button>
+                    </Box>
 
-                          <FormControl required fullWidth>
-                            <InputLabel>{t("elements.types.type")}</InputLabel>
-                            <Select
-                              value={element.type}
-                              label={t("elements.types.type")}
-                              onChange={(e) =>
-                                handleElementChange(
-                                  index,
-                                  "type",
-                                  e.target.value
-                                )
-                              }
-                            >
-                              {ELEMENT_TYPES.map((type) => (
-                                <MenuItem key={type} value={type}>
-                                  {t(
-                                    `elements.types.${type
-                                      .toLowerCase()
-                                      .replace(" ", "")}`
-                                  )}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                    <Stack spacing={2}>
+                      {space.elements.map((element, elementIndex) => (
+                        <Card
+                          key={elementIndex}
+                          variant="outlined"
+                          sx={{ backgroundColor: "background.paper" }}
+                        >
+                          <CardContent>
+                            <Stack spacing={2}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Typography variant="subtitle1">
+                                  {t("elements.addElement")} #{elementIndex + 1}
+                                </Typography>
+                                <IconButton
+                                  onClick={() =>
+                                    handleRemoveElement(
+                                      spaceIndex,
+                                      elementIndex
+                                    )
+                                  }
+                                  color="error"
+                                  size="small"
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Box>
 
-                          {SUBTYPE_MAP[element.type]?.length > 0 && (
-                            <FormControl required fullWidth>
-                              <InputLabel>
-                                {t("elements.subtypes.type")}
-                              </InputLabel>
-                              <Select
-                                value={element.subType || ""}
-                                label={t("elements.subtypes.type")}
+                              <TextField
+                                required
+                                label={t("projects.form.name")}
+                                value={element.name}
                                 onChange={(e) =>
                                   handleElementChange(
-                                    index,
-                                    "subType",
+                                    spaceIndex,
+                                    elementIndex,
+                                    "name",
                                     e.target.value
                                   )
                                 }
-                              >
-                                {SUBTYPE_MAP[element.type].map((subType) => (
-                                  <MenuItem key={subType} value={subType}>
-                                    {t(
-                                      `elements.subtypes.${subType
-                                        .toLowerCase()
-                                        .replace(" ", "")}`
-                                    )}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                          )}
-                        </Stack>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Stack>
+                                fullWidth
+                              />
 
-                {formData.elements.length === 0 && (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    align="center"
-                  >
-                    {t("elements.noElements")}
-                  </Typography>
-                )}
-              </Stack>
-            </CardContent>
-          </Card>
+                              <FormControl required fullWidth>
+                                <InputLabel>
+                                  {t("elements.types.type")}
+                                </InputLabel>
+                                <Select
+                                  value={element.type}
+                                  label={t("elements.types.type")}
+                                  onChange={(e) =>
+                                    handleElementChange(
+                                      spaceIndex,
+                                      elementIndex,
+                                      "type",
+                                      e.target.value
+                                    )
+                                  }
+                                >
+                                  {ELEMENT_TYPES.map((type) => (
+                                    <MenuItem key={type} value={type}>
+                                      {t(
+                                        `elements.types.${type
+                                          .toLowerCase()
+                                          .replace(" ", "")}`
+                                      )}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+
+                              {SUBTYPE_MAP[element.type]?.length > 0 && (
+                                <FormControl required fullWidth>
+                                  <InputLabel>
+                                    {t("elements.subtypes.type")}
+                                  </InputLabel>
+                                  <Select
+                                    value={element.subType || ""}
+                                    label={t("elements.subtypes.type")}
+                                    onChange={(e) =>
+                                      handleElementChange(
+                                        spaceIndex,
+                                        elementIndex,
+                                        "subType",
+                                        e.target.value
+                                      )
+                                    }
+                                  >
+                                    {SUBTYPE_MAP[element.type].map(
+                                      (subType) => (
+                                        <MenuItem key={subType} value={subType}>
+                                          {t(
+                                            `elements.subtypes.${subType
+                                              .toLowerCase()
+                                              .replace(" ", "")}`
+                                          )}
+                                        </MenuItem>
+                                      )
+                                    )}
+                                  </Select>
+                                </FormControl>
+                              )}
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </Stack>
+
+                    {space.elements.length === 0 && (
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        align="center"
+                      >
+                        {t("elements.noElements")}
+                      </Typography>
+                    )}
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          ))}
 
           <Button
             type="submit"

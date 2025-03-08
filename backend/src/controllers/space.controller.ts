@@ -270,16 +270,65 @@ export const updateSpace = async (
       });
     }
 
-    // Update space
-    space = await Space.findByIdAndUpdate(spaceId, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    res.status(200).json({
-      success: true,
-      data: space,
-    });
+    try {
+      // Update space
+      space = await Space.findByIdAndUpdate(
+        spaceId,
+        { name: req.body.name, type: req.body.type },
+        {
+          new: true,
+          runValidators: true,
+          session,
+        }
+      );
+
+      // Update elements if provided
+      if (req.body.elements && Array.isArray(req.body.elements)) {
+        // Delete existing elements
+        await Element.deleteMany({ space: spaceId }).session(session);
+
+        // Create new elements
+        const elements = await Element.create(
+          req.body.elements.map((element: any) => ({
+            ...element,
+            space: spaceId,
+          })),
+          { session }
+        );
+
+        // Commit transaction
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({
+          success: true,
+          data: {
+            space,
+            elements,
+          },
+        });
+      } else {
+        // Commit transaction even if no elements
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({
+          success: true,
+          data: {
+            space,
+            elements: [],
+          },
+        });
+      }
+    } catch (error) {
+      // Abort transaction on error
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({
