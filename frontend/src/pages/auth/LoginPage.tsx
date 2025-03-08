@@ -96,13 +96,14 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xs">
+    <Container maxWidth="sm">
       <Box
         sx={{
           marginTop: 8,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Paper elevation={3} sx={{ p: 4, width: "100%" }}>

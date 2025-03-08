@@ -46,15 +46,21 @@ const getDisplayVersion = (version: string): string => {
   }
 };
 
-// Project types
-const PROJECT_TYPES = [
-  "Residential",
-  "Schools",
-  "Offices",
-  "Hotels",
-  "Commercials",
-  "Public Gathering",
-];
+// Project types mapping
+const PROJECT_TYPE_MAPPING: { [key: string]: string } = {
+  מגורים: "Residential",
+  "בתי ספר": "Schools",
+  משרדים: "Offices",
+  מלונות: "Hotels",
+  מסחר: "Commercials",
+  "התקהלות ציבורית": "Public Gathering",
+};
+
+const REVERSE_PROJECT_TYPE_MAPPING = Object.fromEntries(
+  Object.entries(PROJECT_TYPE_MAPPING).map(([key, value]) => [value, key])
+);
+
+const PROJECT_TYPES = Object.keys(PROJECT_TYPE_MAPPING);
 
 // Define the types for Project data
 interface ProjectFormData {
@@ -145,6 +151,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         permissionDate: initialData.permissionDate
           ? new Date(initialData.permissionDate)
           : null,
+        // Convert English type to Hebrew
+        type: initialData.type
+          ? REVERSE_PROJECT_TYPE_MAPPING[initialData.type]
+          : "",
       });
     }
   }, [initialData]);
@@ -276,7 +286,8 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       submitData.append("area", area);
     }
     if (formData.type) {
-      submitData.append("type", formData.type);
+      // Convert Hebrew type back to English
+      submitData.append("type", PROJECT_TYPE_MAPPING[formData.type]);
     }
     if (formData.permissionDate) {
       // Format date in ISO format for backend
@@ -365,11 +376,13 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
+              disabled
               id="area"
               label="אזור"
               value={formData.area || ""}
               InputProps={{
                 readOnly: true,
+                sx: { backgroundColor: "#f0f0f0" },
               }}
             />
           </Grid>
@@ -420,11 +433,13 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
+              disabled
               id="buildingVersion"
-              label="Building Version"
+              label="גרסת היתר"
               value={getDisplayVersion(formData.buildingVersion)}
               InputProps={{
                 readOnly: true,
+                sx: { backgroundColor: "#f0f0f0" },
               }}
             />
           </Grid>

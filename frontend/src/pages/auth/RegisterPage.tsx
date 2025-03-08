@@ -78,7 +78,7 @@ const RegisterPage: React.FC = () => {
 
   if (success) {
     return (
-      <Container maxWidth="xs">
+      <Container maxWidth="sm">
         <Box
           sx={{
             marginTop: 8,

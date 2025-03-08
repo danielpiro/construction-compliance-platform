@@ -22,7 +22,7 @@ import BugReportIcon from "@mui/icons-material/BugReport";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import api from "../../services/api";
 import { getToken, removeToken } from "../../utils/tokenStorage";
-
+import { areaToHebrew } from "../../utils/areaMapping";
 import buildingTypeService from "../../services/buildingTypeService";
 import BuildingTypeForm from "./BuildingTypeForm";
 
@@ -376,7 +376,7 @@ const ProjectDetailPage: React.FC = () => {
                 </Typography>
                 <Typography variant="body1">
                   <strong>מיקום:</strong> {project.location} (אזור{" "}
-                  {project.area})
+                  {areaToHebrew[project.area] || project.area})
                 </Typography>
                 <Typography variant="body1">
                   <strong>תאריך היתר:</strong>{" "}

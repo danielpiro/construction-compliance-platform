@@ -17,6 +17,7 @@ import BugReportIcon from "@mui/icons-material/BugReport";
 
 import projectService from "../../services/projectService";
 import { getToken } from "../../utils/tokenStorage";
+import { areaToHebrew } from "../../utils/areaMapping";
 
 interface Project {
   _id: string;
@@ -305,7 +306,7 @@ const ProjectsPage: React.FC = () => {
                     mt={1}
                   >
                     <Typography variant="body2">
-                      אזור: {project.area}
+                      אזור: {areaToHebrew[project.area] || project.area}
                     </Typography>
                     <Typography variant="body2">
                       {getDisplayVersion(project.buildingVersion)}
