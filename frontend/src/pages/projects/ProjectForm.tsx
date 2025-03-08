@@ -13,6 +13,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { he as heLocale } from "date-fns/locale";
 import { areaToHebrew, hebrewToArea } from "../../utils/areaMapping";
+import {
+  SpaceElementSection,
+  SpaceWithElements,
+} from "../../components/spaces/SpaceElementSection";
 
 // Helper functions for building version
 const getBuildingVersion = (date: Date): string => {
@@ -56,6 +60,7 @@ interface ProjectFormData {
   buildingVersion: string;
   image?: File | null;
   imageUrl?: string;
+  spaces: SpaceWithElements[];
 }
 
 // Define city data structure
@@ -113,6 +118,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     buildingVersion: "",
     image: null,
     imageUrl: "",
+    spaces: [],
   });
 
   // Error state
@@ -253,6 +259,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     if (formData.image) {
       submitData.append("image", formData.image);
     }
+    submitData.append("spaces", JSON.stringify(formData.spaces));
 
     try {
       await onSubmit(submitData);
@@ -403,8 +410,21 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             )}
           </Grid>
 
-          {/* Submit Button */}
+          {/* Spaces and Elements Section */}
           <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+              חללים ואלמנטים
+            </Typography>
+            <SpaceElementSection
+              spaces={formData.spaces}
+              onSpacesChange={(spaces) =>
+                setFormData((prev) => ({ ...prev, spaces }))
+              }
+            />
+          </Grid>
+
+          {/* Submit Button */}
+          <Grid item xs={12} sx={{ mt: 4 }}>
             <Button
               type="submit"
               variant="contained"

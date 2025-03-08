@@ -15,6 +15,7 @@ export interface IProject extends Document {
     user: mongoose.Schema.Types.ObjectId;
     role: "editor" | "viewer";
   }>;
+  spaces: mongoose.Schema.Types.ObjectId[];
 }
 
 const ProjectSchema: Schema = new Schema(
@@ -88,6 +89,12 @@ const ProjectSchema: Schema = new Schema(
           enum: ["editor", "viewer"],
           default: "viewer",
         },
+      },
+    ],
+    spaces: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Space",
       },
     ],
   },

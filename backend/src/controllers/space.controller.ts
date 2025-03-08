@@ -163,16 +163,62 @@ export const createSpace = async (
       });
     }
 
-    // Create space
-    const space = await Space.create({
-      ...req.body,
-      buildingType: buildingTypeId,
-    });
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    res.status(201).json({
-      success: true,
-      data: space,
-    });
+    try {
+      // Create space
+      const space = await Space.create(
+        [
+          {
+            name: req.body.name,
+            type: req.body.type,
+            buildingType: buildingTypeId,
+          },
+        ],
+        { session }
+      );
+
+      // Create elements if provided
+      if (req.body.elements && Array.isArray(req.body.elements)) {
+        const elements = await Element.create(
+          req.body.elements.map((element: any) => ({
+            ...element,
+            space: space[0]._id,
+          })),
+          { session }
+        );
+
+        // Commit transaction
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(201).json({
+          success: true,
+          data: {
+            space: space[0],
+            elements,
+          },
+        });
+      } else {
+        // Commit transaction even if no elements
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(201).json({
+          success: true,
+          data: {
+            space: space[0],
+            elements: [],
+          },
+        });
+      }
+    } catch (error) {
+      // Abort transaction on error
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({

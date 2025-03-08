@@ -1,5 +1,13 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useState } from "react";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useParams,
+  useNavigate,
+} from "react-router-dom";
+import { Box, Alert } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import MainLayout from "./components/layouts/MainLayout";
 
 // Auth Pages
@@ -23,12 +31,51 @@ import ProjectDetailPage from "./pages/projects/ProjectDetailPage";
 import ProjectTypePage from "./pages/projects/ProjectTypePage";
 import SpacesPage from "./pages/spaces/SpacesPage";
 import ElementsPage from "./pages/elements/ElementsPage";
-
-// Error Pages
 import NotFoundPage from "./pages/NotFoundPage";
 import { useAuth } from "./hooks/useAuth";
 import ProfilePage from "./pages/projects/ProfilePage";
 import SettingsPage from "./pages/settings/SettingsPage";
+import { SpaceForm, SpaceFormData } from "./components/spaces/SpaceForm";
+import spaceService from "./services/spaceService";
+
+// Create Space Form Component
+const CreateSpaceForm: React.FC = () => {
+  const { typeId } = useParams();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (data: SpaceFormData) => {
+    try {
+      if (!typeId) throw new Error(t("errors.generic"));
+      setError(null);
+
+      // Create space with elements
+      await spaceService.createSpace(typeId, {
+        name: data.name,
+        type: data.type,
+        elements: data.elements,
+      });
+
+      // Navigate back to project type page
+      navigate(`/building-types/${typeId}`);
+    } catch (error) {
+      console.error("Failed to create space:", error);
+      setError(error instanceof Error ? error.message : t("errors.generic"));
+    }
+  };
+
+  return (
+    <>
+      {error && (
+        <Box sx={{ mb: 2 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      )}
+      <SpaceForm onSubmit={handleSubmit} />
+    </>
+  );
+};
 
 // Root redirect component that checks auth state
 const RootRedirect: React.FC = () => {
@@ -148,6 +195,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <SpacesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/building-types/:typeId/spaces/create"
+          element={
+            <ProtectedRoute>
+              <CreateSpaceForm />
             </ProtectedRoute>
           }
         />
