@@ -129,6 +129,7 @@ const ProjectTypePage: React.FC = () => {
       } else {
         setError("אירעה שגיאה בטעינת פרטי סוג המבנה");
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching building type data:", err);
       setError("אירעה שגיאה בטעינת פרטי סוג המבנה. אנא נסה שוב מאוחר יותר.");
