@@ -1,6 +1,20 @@
 import api from "./api";
 
-interface ProfileData {
+export interface UserSettings {
+  notifications: {
+    email: boolean;
+    push: boolean;
+    projectUpdates: boolean;
+    systemAnnouncements: boolean;
+  };
+  appearance: {
+    theme: "light" | "dark" | "system";
+    language: string;
+    density: string;
+  };
+}
+
+export interface ProfileData {
   name: string;
   email: string;
   phone?: string;
@@ -26,4 +40,20 @@ export const updateProfile = async (
   return response.data.data;
 };
 
-// Email change functionality removed for now
+/**
+ * Get user settings
+ */
+export const getSettings = async (): Promise<UserSettings> => {
+  const response = await api.get("/user/settings");
+  return response.data.data;
+};
+
+/**
+ * Update user settings
+ */
+export const updateSettings = async (
+  data: UserSettings
+): Promise<UserSettings> => {
+  const response = await api.put("/user/settings", data);
+  return response.data.data;
+};

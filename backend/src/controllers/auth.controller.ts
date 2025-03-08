@@ -1,6 +1,6 @@
 // src/controllers/auth.controller.ts
 import { Request, Response, NextFunction } from "express";
-import User, { IUser } from "../models/User";
+import User, { IUser, UserSettings } from "../models/User";
 import crypto from "crypto";
 import { sendEmail } from "../utils/mailgun";
 
@@ -27,7 +27,7 @@ export const register = async (
     // Generate verification token
     const verificationToken = crypto.randomBytes(20).toString("hex");
 
-    // Create user
+    // Create user with default settings
     const user = await User.create({
       name,
       email,
@@ -35,6 +35,19 @@ export const register = async (
       companyName,
       companyAddress,
       verificationToken,
+      settings: {
+        notifications: {
+          email: true,
+          push: false,
+          projectUpdates: true,
+          systemAnnouncements: true,
+        },
+        appearance: {
+          theme: "light",
+          language: "he",
+          density: "comfortable",
+        },
+      },
     });
     const BASE_URL =
       process.env.BACKEND_URL || `${req.protocol}://${req.get("host")}`;
@@ -480,6 +493,71 @@ export const deleteAccount = async (
     res.status(200).json({
       success: true,
       message: "Account deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+// @desc    Get user settings
+// @route   GET /api/user/settings
+// @access  Private
+export const getSettings = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.findById((req as any).user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user.settings,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+// @desc    Update user settings
+// @route   PUT /api/user/settings
+// @access  Private
+export const updateSettings = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.findById((req as any).user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.settings = req.body as UserSettings;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: user.settings,
     });
   } catch (error) {
     console.error(error);

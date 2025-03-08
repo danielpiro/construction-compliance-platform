@@ -27,6 +27,17 @@ import DashboardPage from "./pages/projects/DashboardPage";
 import ProfilePage from "./pages/projects/ProfilePage";
 import SettingsPage from "./pages/settings/SettingsPage";
 
+// Root redirect component that checks auth state
+const RootRedirect: React.FC = () => {
+  const { isLoggedIn, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return isLoggedIn ? <Navigate to="/dashboard" /> : <HomePage />;
+};
+
 // Protected Route Component
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -51,7 +62,7 @@ const App: React.FC = () => {
     <MainLayout>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

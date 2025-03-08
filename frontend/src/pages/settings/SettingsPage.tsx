@@ -1,4 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  getSettings,
+  updateSettings,
+  UserSettings,
+} from "../../services/userService";
+import { useAuth } from "../../hooks/useAuth";
+import { SelectChangeEvent } from "@mui/material/Select";
 import {
   Box,
   Typography,
@@ -40,22 +47,43 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
+const defaultSettings: UserSettings = {
+  notifications: {
+    email: true,
+    push: false,
+    projectUpdates: true,
+    systemAnnouncements: true,
+  },
+  appearance: {
+    theme: "light" as const,
+    language: "he",
+    density: "comfortable",
+  },
+};
+
 const SettingsPage: React.FC = () => {
+  const { user, updateUserData } = useAuth();
   const [currentTab, setCurrentTab] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [settings, setSettings] = useState({
-    notifications: {
-      email: true,
-      push: false,
-      projectUpdates: true,
-      systemAnnouncements: true,
-    },
-    appearance: {
-      theme: "light",
-      language: "he",
-      density: "comfortable",
-    },
-  });
+  const [settings, setSettings] = useState<UserSettings>(defaultSettings);
+
+  // Initialize settings from user data or fetch from API
+  useEffect(() => {
+    if (user?.settings) {
+      setSettings(user.settings);
+    } else {
+      const loadSettings = async () => {
+        try {
+          const userSettings = await getSettings();
+          setSettings(userSettings);
+          updateUserData({ settings: userSettings });
+        } catch (error) {
+          console.error("Failed to load settings:", error);
+        }
+      };
+      loadSettings();
+    }
+  }, [user, updateUserData]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -64,32 +92,69 @@ const SettingsPage: React.FC = () => {
   const handleSwitchChange =
     (category: "notifications", setting: string) =>
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setSettings({
+      const newSettings = {
         ...settings,
         [category]: {
           ...(settings[category] as typeof settings.notifications),
           [setting]: event.target.checked,
         },
+      };
+      setSettings(newSettings);
+      updateSettings(newSettings).catch((error) => {
+        console.error("Failed to save setting:", error);
+        setSuccessMessage("שגיאה בשמירת הגדרות");
+        setTimeout(() => setSuccessMessage(null), 3000);
       });
     };
 
   const handleSelectChange =
     (category: "appearance", setting: string) =>
-    (event: React.ChangeEvent<{ value: unknown }>) => {
-      setSettings({
-        ...settings,
-        [category]: {
-          ...(settings[category] as typeof settings.appearance),
-          [setting]: event.target.value,
-        },
-      });
+    async (event: SelectChangeEvent<string>) => {
+      try {
+        // Validate theme value
+        if (category === "appearance" && setting === "theme") {
+          const themeValue = event.target.value as string;
+          if (!["light", "dark", "system"].includes(themeValue)) {
+            throw new Error("Invalid theme value");
+          }
+        }
+
+        const newSettings = {
+          ...settings,
+          [category]: {
+            ...(settings[category] as typeof settings.appearance),
+            [setting]: event.target.value,
+          },
+        };
+        setSettings(newSettings);
+
+        // Save settings and update user data
+        const updatedSettings = await updateSettings(newSettings);
+        updateUserData({ settings: updatedSettings });
+
+        // Show success message only for non-theme changes
+        if (category !== "appearance" || setting !== "theme") {
+          setSuccessMessage("ההגדרות נשמרו בהצלחה!");
+          setTimeout(() => setSuccessMessage(null), 3000);
+        }
+      } catch (error) {
+        console.error("Failed to save settings:", error);
+        setSuccessMessage("שגיאה בשמירת הגדרות");
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }
     };
 
-  const handleSaveSettings = () => {
-    // Here you would normally save the settings to your backend
-    console.log("Saving settings:", settings);
-    setSuccessMessage("ההגדרות נשמרו בהצלחה!");
-    setTimeout(() => setSuccessMessage(null), 3000);
+  const handleSaveSettings = async () => {
+    try {
+      const updatedSettings = await updateSettings(settings);
+      updateUserData({ settings: updatedSettings });
+      setSuccessMessage("ההגדרות נשמרו בהצלחה!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      setSuccessMessage("שגיאה בשמירת ההגדרות");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    }
   };
 
   return (
@@ -185,8 +250,9 @@ const SettingsPage: React.FC = () => {
                   <InputLabel>ערכת נושא</InputLabel>
                   <Select
                     value={settings.appearance.theme}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onChange={handleSelectChange("appearance", "theme") as any}
+                    onChange={(event: SelectChangeEvent<string>) => {
+                      handleSelectChange("appearance", "theme")(event);
+                    }}
                     label="ערכת נושא"
                   >
                     <MenuItem value="light">בהיר</MenuItem>
@@ -200,10 +266,9 @@ const SettingsPage: React.FC = () => {
                   <InputLabel>שפה</InputLabel>
                   <Select
                     value={settings.appearance.language}
-                    onChange={
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      handleSelectChange("appearance", "language") as any
-                    }
+                    onChange={(event: SelectChangeEvent<string>) => {
+                      handleSelectChange("appearance", "language")(event);
+                    }}
                     label="שפה"
                   >
                     <MenuItem value="he">עברית</MenuItem>
@@ -217,10 +282,9 @@ const SettingsPage: React.FC = () => {
                   <InputLabel>צפיפות תצוגה</InputLabel>
                   <Select
                     value={settings.appearance.density}
-                    onChange={
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      handleSelectChange("appearance", "density") as any
-                    }
+                    onChange={(event: SelectChangeEvent<string>) => {
+                      handleSelectChange("appearance", "density")(event);
+                    }}
                     label="צפיפות תצוגה"
                   >
                     <MenuItem value="comfortable">נוח</MenuItem>
@@ -246,28 +310,6 @@ const SettingsPage: React.FC = () => {
               </Typography>
               <Button variant="outlined" color="primary">
                 שנה סיסמה
-              </Button>
-            </Box>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="body1" gutterBottom>
-                אימות דו-שלבי
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                הוסף שכבת אבטחה נוספת לחשבונך
-              </Typography>
-              <Button variant="outlined" color="primary">
-                הגדר אימות דו-שלבי
-              </Button>
-            </Box>
-            <Box>
-              <Typography variant="body1" gutterBottom>
-                ניהול מכשירים מחוברים
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                נהל את המכשירים שמחוברים לחשבונך
-              </Typography>
-              <Button variant="outlined" color="primary">
-                צפה במכשירים
               </Button>
             </Box>
           </TabPanel>

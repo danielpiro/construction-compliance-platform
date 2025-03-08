@@ -3,6 +3,20 @@ import authService from "../services/authService";
 import { saveToken, removeToken, hasToken } from "../utils/tokenStorage";
 
 // User interface
+interface UserSettings {
+  notifications: {
+    email: boolean;
+    push: boolean;
+    projectUpdates: boolean;
+    systemAnnouncements: boolean;
+  };
+  appearance: {
+    theme: "light" | "dark" | "system";
+    language: string;
+    density: string;
+  };
+}
+
 export interface User {
   id: string;
   name: string;
@@ -10,6 +24,7 @@ export interface User {
   role?: string;
   companyName?: string;
   companyAddress?: string;
+  settings: UserSettings;
 }
 
 // AuthContext interface

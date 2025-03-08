@@ -3,6 +3,20 @@ import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from "jsonwebtoken";
 
+export interface UserSettings {
+  notifications: {
+    email: boolean;
+    push: boolean;
+    projectUpdates: boolean;
+    systemAnnouncements: boolean;
+  };
+  appearance: {
+    theme: string;
+    language: string;
+    density: string;
+  };
+}
+
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -19,6 +33,7 @@ export interface IUser extends Document {
   role: "user" | "admin";
   createdAt: Date;
   active: boolean;
+  settings: UserSettings;
   matchPassword(enteredPassword: string): Promise<boolean>;
   getSignedJwtToken(): string;
 }
@@ -77,6 +92,42 @@ const UserSchema: Schema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  settings: {
+    type: {
+      notifications: {
+        email: { type: Boolean, default: true },
+        push: { type: Boolean, default: false },
+        projectUpdates: { type: Boolean, default: true },
+        systemAnnouncements: { type: Boolean, default: true },
+      },
+      appearance: {
+        theme: {
+          type: String,
+          default: "light",
+          enum: ["light", "dark", "system"],
+        },
+        language: { type: String, default: "he", enum: ["he", "en", "ar"] },
+        density: {
+          type: String,
+          default: "comfortable",
+          enum: ["comfortable", "compact", "standard"],
+        },
+      },
+    },
+    default: {
+      notifications: {
+        email: true,
+        push: false,
+        projectUpdates: true,
+        systemAnnouncements: true,
+      },
+      appearance: {
+        theme: "light",
+        language: "he",
+        density: "comfortable",
+      },
+    },
   },
 });
 
