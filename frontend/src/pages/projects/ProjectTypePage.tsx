@@ -1,6 +1,11 @@
 // src/pages/projects/ProjectTypePage.tsx
 import React, { useEffect, useState } from "react";
-import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
+import {
+  Link as RouterLink,
+  useParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import {
   Box,
   Typography,
@@ -22,6 +27,7 @@ import {
   DialogTitle,
   Paper,
   Divider,
+  Fab,
 } from "@mui/material";
 import {
   Home as HomeIcon,
@@ -38,6 +44,7 @@ import {
 import { toast } from "react-toastify";
 import buildingTypeService from "../../services/buildingTypeService";
 import spaceService from "../../services/spaceService";
+import BuildingTypeForm from "./BuildingTypeForm";
 
 // Types
 interface BuildingType {
@@ -90,6 +97,8 @@ const spaceTypeLabels: Record<string, string> = {
 
 const ProjectTypePage: React.FC = () => {
   const { typeId } = useParams<{ typeId: string }>();
+  const location = useLocation();
+  const projectId = location.state?.projectId;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [buildingType, setBuildingType] = useState<BuildingType | null>(null);
@@ -97,46 +106,52 @@ const ProjectTypePage: React.FC = () => {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchBuildingTypeData = async () => {
-      if (!typeId) return;
+  const fetchBuildingTypeData = async () => {
+    if (!typeId) return;
 
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        // Fetch building type details
-        const typeResponse = await buildingTypeService.getBuildingType(typeId);
-        if (typeResponse.success) {
-          setBuildingType(typeResponse.data);
-
-          // Set project info
-          setProject({
-            _id: typeResponse.data.project,
-            name: typeResponse.data.projectName || "פרויקט",
-          });
-
-          // Fetch spaces
-          const spacesResponse = await spaceService.getSpaces(typeId);
-          if (spacesResponse.success) {
-            setSpaces(spacesResponse.data);
-          }
-        } else {
-          setError("אירעה שגיאה בטעינת פרטי סוג המבנה");
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        console.error("Error fetching building type data:", err);
-        setError("אירעה שגיאה בטעינת פרטי סוג המבנה. אנא נסה שוב מאוחר יותר.");
-      } finally {
-        setLoading(false);
+    try {
+      if (!projectId) {
+        setError("פרטי הפרויקט חסרים");
+        return;
       }
-    };
 
+      // Fetch building type details
+      const typeResponse = await buildingTypeService.getBuildingType(typeId);
+      if (typeResponse.success) {
+        setBuildingType(typeResponse.data);
+
+        // Set project info
+        setProject({
+          _id: typeResponse.data.project,
+          name: typeResponse.data.projectName || "פרויקט",
+        });
+
+        // Fetch spaces
+        const spacesResponse = await spaceService.getSpaces(typeId);
+        if (spacesResponse.success) {
+          setSpaces(spacesResponse.data);
+        }
+      } else {
+        setError("אירעה שגיאה בטעינת פרטי סוג המבנה");
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error("Error fetching building type data:", err);
+      setError("אירעה שגיאה בטעינת פרטי סוג המבנה. אנא נסה שוב מאוחר יותר.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchBuildingTypeData();
-  }, [typeId]);
+  }, [typeId, projectId]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchorEl(event.currentTarget);
@@ -177,6 +192,20 @@ const ProjectTypePage: React.FC = () => {
     } finally {
       handleDeleteDialogClose();
     }
+  };
+
+  const handleCreateTypeClick = () => {
+    setCreateDialogOpen(true);
+  };
+
+  const handleCreateDialogClose = () => {
+    setCreateDialogOpen(false);
+  };
+
+  const handleTypeCreated = () => {
+    setCreateDialogOpen(false);
+    // Refresh building types list
+    fetchBuildingTypeData();
   };
 
   const handleCreateSpace = () => {
@@ -245,6 +274,35 @@ const ProjectTypePage: React.FC = () => {
         </Link>
         <Typography color="text.primary">{buildingType.name}</Typography>
       </Breadcrumbs>
+
+      {/* Create Type FAB */}
+      <Fab
+        color="primary"
+        sx={{ position: "fixed", bottom: 24, right: 24 }}
+        onClick={handleCreateTypeClick}
+      >
+        <AddIcon />
+      </Fab>
+
+      {/* Create Type Dialog */}
+      <Dialog
+        open={createDialogOpen}
+        onClose={handleCreateDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>יצירת סוג מבנה חדש</DialogTitle>
+        <DialogContent>
+          {projectId ? (
+            <BuildingTypeForm
+              projectId={projectId}
+              onSuccess={handleTypeCreated}
+            />
+          ) : (
+            <Typography color="error">פרטי הפרויקט חסרים</Typography>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Building Type Header */}
       <Box

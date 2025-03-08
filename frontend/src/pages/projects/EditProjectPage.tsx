@@ -97,10 +97,9 @@ const EditProjectPage: React.FC = () => {
     );
   }
 
-  // Parse date in format DD/MM/YYYY
+  // Parse date from ISO format
   const parseDate = (dateString: string): Date => {
-    const [day, month, year] = dateString.split("/").map(Number);
-    return new Date(year, month - 1, day);
+    return new Date(dateString);
   };
 
   const initialData = {

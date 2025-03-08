@@ -1,14 +1,6 @@
 // src/services/projectService.ts
 import apiClient from "./api";
 
-interface ProjectData {
-  name: string;
-  address: string;
-  location: string;
-  permissionDate: string; // format: YYYY-MM-DD
-  image?: File;
-}
-
 interface ShareProjectData {
   email: string;
   role: "editor" | "viewer";
@@ -51,23 +43,18 @@ const projectService = {
   },
 
   // Update project
-  updateProject: async (
-    projectId: string,
-    projectData: Partial<ProjectData>
-  ) => {
-    // First update the project without the image
-    const { image, ...data } = projectData;
-    const response = await apiClient.put(`/projects/${projectId}`, data);
-
-    // If there's an image, upload it in a separate request
-    if (image && response.data.success) {
-      await projectService.uploadProjectImage(projectId, image);
-
-      // Refresh project data after image upload
-      return projectService.getProject(projectId);
+  updateProject: async (projectId: string, formData: FormData) => {
+    try {
+      const response = await apiClient.put(`/projects/${projectId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to update project:", error);
+      throw error;
     }
-
-    return response.data;
   },
 
   // Upload project image

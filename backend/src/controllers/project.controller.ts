@@ -197,6 +197,7 @@ export const createProject = async (
       address: req.body.address,
       location: req.body.location,
       area: req.body.area,
+      type: req.body.type,
       permissionDate,
       owner: userId,
       ...(req.file && { image: `/api/uploads/${req.file.filename}` }),
@@ -270,8 +271,53 @@ export const updateProject = async (
       });
     }
 
-    // Update project
-    project = await Project.findByIdAndUpdate(projectId, req.body, {
+    // Parse and validate data from FormData
+    const updateData: any = {};
+
+    // Handle basic fields
+    if (req.body.name) updateData.name = req.body.name;
+    if (req.body.address) updateData.address = req.body.address;
+    if (req.body.location) updateData.location = req.body.location;
+    if (req.body.area) updateData.area = req.body.area;
+    if (req.body.type) updateData.type = req.body.type;
+
+    // Handle permission date
+    if (req.body.permissionDate) {
+      const permissionDate = new Date(req.body.permissionDate);
+      if (isNaN(permissionDate.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid permission date format",
+        });
+      }
+      updateData.permissionDate = permissionDate;
+    }
+
+    if (req.body.isBefore) {
+      updateData.isBefore = req.body.isBefore === "true";
+    }
+
+    // Handle image if it exists in the request
+    if ((req as RequestWithFile).file) {
+      // If project already has an image, delete the old one
+      if (project.image) {
+        const oldImagePath = path.join(
+          __dirname,
+          "../../uploads",
+          project.image.split("/").pop() || ""
+        );
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      const file = (req as RequestWithFile).file;
+      if (file && file.filename) {
+        updateData.image = `/api/uploads/${file.filename}`;
+      }
+    }
+
+    // Update project with parsed data
+    project = await Project.findByIdAndUpdate(projectId, updateData, {
       new: true,
       runValidators: true,
     });

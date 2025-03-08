@@ -33,7 +33,11 @@ router
   .get(getProjects)
   .post(uploadImage, handleUploadError, createProject);
 
-router.route("/:id").get(getProject).put(updateProject).delete(deleteProject);
+router
+  .route("/:id")
+  .get(getProject)
+  .put(uploadImage, handleUploadError, updateProject)
+  .delete(deleteProject);
 
 // Project image upload route with multer middleware
 router

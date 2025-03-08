@@ -13,9 +13,18 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { format } from "date-fns";
 import { he as heLocale } from "date-fns/locale";
 import { areaToHebrew, hebrewToArea } from "../../utils/areaMapping";
+
+// Project types
+const PROJECT_TYPES = [
+  "Residential",
+  "Schools",
+  "Offices",
+  "Hotels",
+  "Commercials",
+  "Public Gathering",
+];
 
 // Define the types for Project data
 interface ProjectFormData {
@@ -23,6 +32,7 @@ interface ProjectFormData {
   address: string;
   location: string;
   area?: string;
+  type?: string;
   permissionDate: Date | null;
   isBefore: boolean;
   image?: File | null;
@@ -80,6 +90,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     address: "",
     location: "",
     area: "",
+    type: "",
     permissionDate: null,
     isBefore: false,
     image: null,
@@ -91,6 +102,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     name: "",
     address: "",
     location: "",
+    type: "",
     permissionDate: "",
   });
 
@@ -152,6 +164,25 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     }
   };
 
+  // Handle type change
+  const handleTypeChange = (
+    _event: React.SyntheticEvent,
+    value: string | null
+  ) => {
+    setFormData({
+      ...formData,
+      type: value || "",
+    });
+
+    // Clear type error
+    if (errors.type) {
+      setErrors({
+        ...errors,
+        type: "",
+      });
+    }
+  };
+
   // Handle date change
   const handleDateChange = (date: Date | null) => {
     setFormData({
@@ -188,6 +219,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       name: formData.name ? "" : "שם הוא שדה חובה",
       address: formData.address ? "" : "כתובת היא שדה חובה",
       location: formData.location ? "" : "מיקום הוא שדה חובה",
+      type: formData.type ? "" : "סוג פרויקט הוא שדה חובה",
       permissionDate: formData.permissionDate ? "" : "תאריך היתר הוא שדה חובה",
     };
 
@@ -213,11 +245,14 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       const area = hebrewToArea[formData.area] || formData.area;
       submitData.append("area", area);
     }
+    if (formData.type) {
+      submitData.append("type", formData.type);
+    }
     if (formData.permissionDate) {
-      // Format date in yyyy-MM-dd format for backend
+      // Format date in ISO format for backend
       submitData.append(
         "permissionDate",
-        format(formData.permissionDate, "yyyy-MM-dd")
+        formData.permissionDate.toISOString()
       );
     }
     submitData.append("isBefore", String(formData.isBefore));
@@ -306,6 +341,25 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               InputProps={{
                 readOnly: true,
               }}
+            />
+          </Grid>
+
+          {/* Project Type */}
+          <Grid item xs={12} md={6}>
+            <Autocomplete
+              id="type"
+              options={PROJECT_TYPES}
+              value={formData.type || null}
+              onChange={handleTypeChange}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  label="סוג פרויקט"
+                  error={!!errors.type}
+                  helperText={errors.type}
+                />
+              )}
             />
           </Grid>
 
