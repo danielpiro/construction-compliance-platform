@@ -315,8 +315,7 @@ const ProjectTypePage: React.FC = () => {
       >
         <Box>
           <Button
-            component={RouterLink}
-            to={`/projects/${project._id}`}
+            onClick={() => navigate(`/projects/${projectId}`)}
             startIcon={<ArrowBackIcon />}
             sx={{ mb: 1 }}
           >

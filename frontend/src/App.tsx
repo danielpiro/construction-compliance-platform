@@ -128,7 +128,7 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/projects/:projectId/types/:typeId"
+          path="/building-types/:typeId"
           element={
             <ProtectedRoute>
               <ProjectTypePage />

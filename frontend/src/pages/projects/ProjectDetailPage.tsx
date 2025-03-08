@@ -23,6 +23,9 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import api from "../../services/api";
 import { getToken, removeToken } from "../../utils/tokenStorage";
 
+import buildingTypeService from "../../services/buildingTypeService";
+import BuildingTypeForm from "./BuildingTypeForm";
+
 // Project interface
 interface Project {
   _id: string;
@@ -37,6 +40,27 @@ interface Project {
   owner: string;
   sharedWith?: Array<{ user: string; role: string }>;
 }
+
+interface BuildingType {
+  _id: string;
+  name: string;
+  type:
+    | "Residential"
+    | "Schools"
+    | "Offices"
+    | "Hotels"
+    | "Commercials"
+    | "Public Gathering";
+}
+
+const buildingTypeLabels: Record<string, string> = {
+  Residential: "מגורים",
+  Schools: "בתי ספר",
+  Offices: "משרדים",
+  Hotels: "מלונות",
+  Commercials: "מסחר",
+  "Public Gathering": "התקהלות ציבורית",
+};
 
 // Format date to local string
 const formatDate = (date: string) => {
@@ -67,9 +91,12 @@ const ProjectDetailPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [project, setProject] = useState<Project | null>(null);
+  const [buildingTypes, setBuildingTypes] = useState<BuildingType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [createTypeDialogOpen, setCreateTypeDialogOpen] =
+    useState<boolean>(false);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [showDebug, setShowDebug] = useState<boolean>(false);
 
@@ -166,11 +193,30 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
+  const fetchBuildingTypes = async () => {
+    if (!projectId) return;
+
+    try {
+      const response = await buildingTypeService.getBuildingTypes(projectId);
+      if (response.success) {
+        setBuildingTypes(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching building types:", err);
+    }
+  };
+
   useEffect(() => {
     if (projectId) {
       fetchProjectData();
+      fetchBuildingTypes();
     }
   }, [projectId, navigate]);
+
+  const handleTypeCreated = () => {
+    setCreateTypeDialogOpen(false);
+    fetchBuildingTypes();
+  };
 
   const handleDeleteProject = async () => {
     try {
@@ -349,25 +395,91 @@ const ProjectDetailPage: React.FC = () => {
             </Grid>
           </Paper>
 
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={3}
-          >
-            <Typography variant="h5" component="h2">
-              סוגי המבנה
-            </Typography>
-            <Button
-              component={Link}
-              to={`/projects/${projectId}/building-types`}
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
+          {/* Building Types Section */}
+          <Box sx={{ mt: 4 }}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={3}
             >
-              נהל סוגי מבנה
-            </Button>
+              <Typography variant="h5" component="h2">
+                סוגי המבנה
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={() => setCreateTypeDialogOpen(true)}
+              >
+                הוסף סוג מבנה
+              </Button>
+            </Box>
+
+            {buildingTypes.length > 0 ? (
+              <Grid container spacing={3}>
+                {buildingTypes.map((type) => (
+                  <Grid item xs={12} sm={6} md={4} key={type._id}>
+                    <Paper
+                      component={Link}
+                      to={`/building-types/${type._id}`}
+                      state={{ projectId }}
+                      sx={{
+                        p: 3,
+                        textDecoration: "none",
+                        color: "inherit",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: 3,
+                        },
+                        display: "block",
+                      }}
+                    >
+                      <Typography variant="h6" gutterBottom>
+                        {type.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        סוג: {buildingTypeLabels[type.type]}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Paper sx={{ p: 3, textAlign: "center" }}>
+                <Typography variant="body1" paragraph>
+                  אין סוגי מבנים מוגדרים עדיין
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<AddIcon />}
+                  onClick={() => setCreateTypeDialogOpen(true)}
+                >
+                  צור סוג מבנה חדש
+                </Button>
+              </Paper>
+            )}
           </Box>
+
+          {/* Create Type Dialog */}
+          <Dialog
+            open={createTypeDialogOpen}
+            onClose={() => setCreateTypeDialogOpen(false)}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>יצירת סוג מבנה חדש</DialogTitle>
+            <DialogContent>
+              {projectId && (
+                <BuildingTypeForm
+                  projectId={projectId}
+                  onSuccess={handleTypeCreated}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
 
           {/* Delete Confirmation Dialog */}
           <Dialog
