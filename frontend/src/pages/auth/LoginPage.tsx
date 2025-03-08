@@ -79,7 +79,7 @@ const LoginPage: React.FC = () => {
           autoClose: TOAST_DURATION,
           hideProgressBar: false,
         });
-        navigate("/dashboard");
+        navigate("/projects");
       } else {
         // Show detailed error toast
         toast.error(error || "ההתחברות נכשלה, אנא נסה שנית", {

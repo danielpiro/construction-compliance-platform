@@ -134,7 +134,7 @@ const Header: React.FC = () => {
           >
             <Box
               component={Link}
-              to={isLoggedIn ? "/dashboard" : "/"}
+              to={"/"}
               sx={{
                 display: "flex",
                 alignItems: "center",

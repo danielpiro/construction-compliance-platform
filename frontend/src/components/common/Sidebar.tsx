@@ -13,7 +13,6 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
-import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
@@ -35,11 +34,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const location = useLocation();
 
   const menuItems = [
-    {
-      text: i18n.t("nav.dashboard"),
-      icon: <DashboardIcon />,
-      path: "/dashboard",
-    },
     {
       text: i18n.t("nav.projects"),
       icon: <FolderIcon />,

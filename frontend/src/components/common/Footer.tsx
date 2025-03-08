@@ -34,7 +34,6 @@ const Footer: React.FC = () => {
       links: [
         { name: "אודות", url: "/about" },
         { name: "צוות", url: "/team" },
-        { name: "קריירה", url: "/careers" },
         { name: "צור קשר", url: "/contact" },
       ],
     },

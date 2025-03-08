@@ -30,6 +30,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     location.pathname.startsWith("/dashboard") ||
     location.pathname.startsWith("/profile");
 
+  // Check if the current page should be full width
+  const isFullWidthPage =
+    location.pathname === "/" ||
+    location.pathname === "/about" ||
+    location.pathname === "/contact" ||
+    location.pathname === "/team" ||
+    location.pathname === "/pricing";
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -95,10 +103,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <Box
           sx={{
             flexGrow: 1,
-            maxWidth: "1200px",
+            maxWidth: isFullWidthPage ? "100%" : "1200px",
             width: "100%",
             mx: "auto", // centers the container
-            px: { xs: 2, sm: 3, md: 4 }, // responsive padding
+            px: isFullWidthPage ? 0 : { xs: 2, sm: 3, md: 4 }, // responsive padding only for non-full-width pages
             pb: 4, // bottom padding for consistent spacing
           }}
         >

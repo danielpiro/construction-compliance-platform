@@ -280,7 +280,7 @@ const ProjectsPage: React.FC = () => {
                     color: "inherit",
                     border: "1px solid #e0e0e0",
                     borderRadius: 1,
-                    p: 2,
+                    overflow: "hidden",
                     transition: "transform 0.2s, box-shadow 0.2s",
                     "&:hover": {
                       transform: "translateY(-4px)",
@@ -288,29 +288,52 @@ const ProjectsPage: React.FC = () => {
                     },
                   }}
                 >
-                  <Typography variant="h6" component="h2" noWrap>
-                    {project.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    נוצר:{" "}
-                    {new Date(project.creationDate).toLocaleDateString("he-IL")}
-                  </Typography>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    mt={1}
-                  >
-                    <Typography variant="body2">
-                      אזור: {areaToHebrew[project.area] || project.area}
+                  {project.image && (
+                    <Box
+                      sx={{
+                        width: "100%",
+                        height: 160,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/${project.image}`}
+                        alt={project.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </Box>
+                  )}
+                  <Box sx={{ p: 2 }}>
+                    <Typography variant="h6" component="h2" noWrap>
+                      {project.name}
                     </Typography>
-                    <Typography variant="body2">
-                      {getDisplayVersion(project.buildingVersion)}
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      gutterBottom
+                    >
+                      נוצר:{" "}
+                      {new Date(project.creationDate).toLocaleDateString(
+                        "he-IL"
+                      )}
                     </Typography>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mt={1}
+                    >
+                      <Typography variant="body2">
+                        אזור: {areaToHebrew[project.area] || project.area}
+                      </Typography>
+                      <Typography variant="body2">
+                        {getDisplayVersion(project.buildingVersion)}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </Grid>

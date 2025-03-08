@@ -203,7 +203,7 @@ const PricingPage: React.FC = () => {
 
                 <Button
                   component={RouterLink}
-                  to={isLoggedIn ? "/dashboard" : "/register"}
+                  to={isLoggedIn ? "/projects" : "/register"}
                   variant={plan.recommended ? "contained" : "outlined"}
                   fullWidth
                   size="large"

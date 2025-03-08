@@ -106,7 +106,7 @@ const HomePage: React.FC = () => {
                 {isLoggedIn ? (
                   <Button
                     component={RouterLink}
-                    to="/dashboard"
+                    to="/projects"
                     variant="contained"
                     color="secondary"
                     size="large"
@@ -368,7 +368,7 @@ const HomePage: React.FC = () => {
           <Box sx={{ textAlign: "center", mt: { xs: 4, md: 8 } }}>
             <Button
               component={RouterLink}
-              to={isLoggedIn ? "/dashboard" : "/register"}
+              to={isLoggedIn ? "/projects" : "/register"}
               variant="contained"
               size="large"
               sx={{

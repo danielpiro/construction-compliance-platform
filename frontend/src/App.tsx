@@ -27,7 +27,6 @@ import ElementsPage from "./pages/elements/ElementsPage";
 // Error Pages
 import NotFoundPage from "./pages/NotFoundPage";
 import { useAuth } from "./hooks/useAuth";
-import DashboardPage from "./pages/projects/DashboardPage";
 import ProfilePage from "./pages/projects/ProfilePage";
 import SettingsPage from "./pages/settings/SettingsPage";
 
@@ -39,7 +38,7 @@ const RootRedirect: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  return isLoggedIn ? <Navigate to="/dashboard" /> : <HomePage />;
+  return isLoggedIn ? <Navigate to="/projects" /> : <HomePage />;
 };
 
 // Protected Route Component
@@ -77,6 +76,7 @@ const App: React.FC = () => {
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
         {/* Protected Routes */}
+        {/* Dashboard route temporarily hidden
         <Route
           path="/dashboard"
           element={
@@ -84,7 +84,7 @@ const App: React.FC = () => {
               <DashboardPage />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/profile"
           element={
