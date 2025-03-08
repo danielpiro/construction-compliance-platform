@@ -139,13 +139,12 @@ export const createProject = async (
       });
     }
 
-    // Parse and validate permissionDate
-    const [day, month, year] = (req.body.permissionDate as string).split("/");
-    const permissionDate = new Date(`${year}-${month}-${day}`);
+    // Parse and validate permissionDate (expected format: yyyy-MM-dd)
+    const permissionDate = new Date(req.body.permissionDate);
     if (isNaN(permissionDate.getTime())) {
       return res.status(400).json({
         success: false,
-        message: "Invalid permission date format. Expected dd/MM/yyyy",
+        message: "Invalid permission date format. Expected yyyy-MM-dd",
       });
     }
 
@@ -157,7 +156,7 @@ export const createProject = async (
       area: req.body.area,
       permissionDate,
       owner: userId,
-      ...(req.file && { image: `/uploads/${req.file.filename}` }),
+      ...(req.file && { image: `/api/uploads/${req.file.filename}` }),
     };
 
     // Create project
@@ -521,7 +520,7 @@ export const uploadProjectImage = async (
     }
 
     // Update project with new image path
-    project.image = `/uploads/${req.file.filename}`;
+    project.image = `/api/uploads/${req.file.filename}`;
     await project.save();
 
     res.status(200).json({

@@ -16,9 +16,9 @@ const CreateProjectPage: React.FC = () => {
         formData
       );
 
-      if (response.success) {
-        // Redirect to projects page after successful creation
-        navigate("/projects");
+      if (response.success && response.data?._id) {
+        // Redirect to the newly created project's detail page
+        navigate(`/projects/${response.data._id}`);
       } else {
         const errorMessage =
           response.errors?.[0] ||

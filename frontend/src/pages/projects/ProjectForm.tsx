@@ -214,9 +214,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       submitData.append("area", area);
     }
     if (formData.permissionDate) {
+      // Format date in yyyy-MM-dd format for backend
       submitData.append(
         "permissionDate",
-        format(formData.permissionDate, "dd/MM/yyyy")
+        format(formData.permissionDate, "yyyy-MM-dd")
       );
     }
     submitData.append("isBefore", String(formData.isBefore));

@@ -29,8 +29,22 @@ interface Project {
   area: string;
   permissionDate: string;
   isBefore: boolean;
-  imageUrl?: string;
+  image?: string;
 }
+
+// Format date to local string
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString("he-IL");
+};
+
+// Get the full image URL
+const getImageUrl = (imagePath: string) => {
+  // Remove /api from the base URL since uploads are served at root
+  const baseUrl = (
+    import.meta.env.VITE_API_URL || "http://localhost:5000"
+  ).replace(/\/api$/, "");
+  return `${baseUrl}${imagePath}`;
+};
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -148,20 +162,20 @@ const ProjectDetailPage: React.FC = () => {
               <strong>מיקום:</strong> {project.location} (אזור {project.area})
             </Typography>
             <Typography variant="body1">
-              <strong>תאריך היתר:</strong> {project.permissionDate}
+              <strong>תאריך היתר:</strong> {formatDate(project.permissionDate)}
             </Typography>
             <Typography variant="body1">
               <strong>לפני 2020:</strong> {project.isBefore ? "כן" : "לא"}
             </Typography>
             <Typography variant="body1">
-              <strong>נוצר:</strong> {project.creationDate}
+              <strong>נוצר:</strong> {formatDate(project.creationDate)}
             </Typography>
           </Grid>
-          {project.imageUrl && (
+          {project.image && (
             <Grid item xs={12} md={6}>
               <Box
                 component="img"
-                src={project.imageUrl}
+                src={project.image ? getImageUrl(project.image) : ""}
                 alt={project.name}
                 sx={{
                   maxWidth: "100%",

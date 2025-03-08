@@ -50,11 +50,11 @@ const connectDB = async (): Promise<void> => {
   }
 };
 
-// Set up static folders
+// Set up static folders before API routes to avoid auth middleware
 app.use(express.static(path.join(__dirname, "../public")));
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/api/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// Mount routes
+// Mount API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/building-types", buildingTypeRoutes);
@@ -69,6 +69,9 @@ app.use("/api/user", userRoutes);
 app.get("/", (req: Request, res: Response) => {
   res.send("Construction Compliance Platform API");
 });
+
+// Also serve uploads at root path for backward compatibility
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
