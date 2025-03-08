@@ -63,27 +63,82 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Cache keys
+  const USER_CACHE_KEY = "userData";
+  const CACHE_EXPIRY_KEY = "userCacheExpiry";
+  const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
+  // Cache management functions
+  const setCachedUser = (userData: User) => {
+    localStorage.setItem(USER_CACHE_KEY, JSON.stringify(userData));
+    localStorage.setItem(
+      CACHE_EXPIRY_KEY,
+      (Date.now() + CACHE_DURATION).toString()
+    );
+  };
+
+  const getCachedUser = (): User | null => {
+    const cached = localStorage.getItem(USER_CACHE_KEY);
+    const expiry = localStorage.getItem(CACHE_EXPIRY_KEY);
+
+    if (cached && expiry && Date.now() < parseInt(expiry)) {
+      try {
+        return JSON.parse(cached);
+      } catch {
+        // Ignore parse error
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const clearUserCache = () => {
+    localStorage.removeItem(USER_CACHE_KEY);
+    localStorage.removeItem(CACHE_EXPIRY_KEY);
+  };
+
   // Check if user is already authenticated on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
         if (hasToken()) {
-          // Verify token and get user data
-          const response = await authService.getCurrentUser();
-
-          if (response.success && response.data) {
-            setUser(response.data);
+          // 1. Quick local check with cached data
+          const cachedUser = getCachedUser();
+          if (cachedUser) {
+            setUser(cachedUser);
             setIsLoggedIn(true);
-          } else {
-            // If getting user data fails, remove token
-            removeToken();
-            setIsLoggedIn(false);
-            setUser(null);
+            setLoading(false);
+          }
+
+          // 2. Background sync for fresh data
+          try {
+            const response = await authService.getCurrentUser();
+            if (response.success && response.data) {
+              setUser(response.data);
+              setCachedUser(response.data);
+              setIsLoggedIn(true);
+            } else {
+              if (!cachedUser) {
+                // Only clear if we didn't have cached data
+                removeToken();
+                setIsLoggedIn(false);
+                setUser(null);
+              }
+            }
+          } catch (error) {
+            console.error("Background sync failed:", error);
+            if (!cachedUser) {
+              // Only clear if we didn't have cached data
+              removeToken();
+              setIsLoggedIn(false);
+              setUser(null);
+            }
           }
         }
       } catch (error) {
         console.error("Authentication check failed:", error);
         removeToken();
+        clearUserCache();
         setIsLoggedIn(false);
         setUser(null);
       } finally {
@@ -169,6 +224,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     authService.logout();
     removeToken();
+    clearUserCache();
     setIsLoggedIn(false);
     setUser(null);
   };
@@ -181,7 +237,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Update user data
   const updateUserData = (newUserData: Partial<User>) => {
     if (user) {
-      setUser({ ...user, ...newUserData });
+      const updatedUser = { ...user, ...newUserData };
+      setUser(updatedUser);
+      setCachedUser(updatedUser);
     }
   };
 
