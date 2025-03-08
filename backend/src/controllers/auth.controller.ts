@@ -305,9 +305,18 @@ export const getProfile = async (
     // user is already available in req due to the auth middleware
     const user = await User.findById((req as any).user.id);
 
+    // Transform the user data to match frontend expectations
+    const userData = {
+      name: user?.name,
+      email: user?.email,
+      phone: user?.phone,
+      company: user?.companyName, // Map companyName to company
+      role: user?.role,
+    };
+
     res.status(200).json({
       success: true,
-      data: user,
+      data: userData,
     });
   } catch (error) {
     console.error(error);
@@ -345,9 +354,18 @@ export const updateDetails = async (
       }
     );
 
+    // Transform the user data to match frontend expectations
+    const userData = {
+      name: user?.name,
+      email: user?.email,
+      phone: user?.phone,
+      company: user?.companyName, // Map companyName to company
+      role: user?.role,
+    };
+
     res.status(200).json({
       success: true,
-      data: user,
+      data: userData,
     });
   } catch (error) {
     console.error(error);
