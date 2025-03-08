@@ -1,18 +1,38 @@
 // src/controllers/project.controller.ts
 import { Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
 import Project, { IProject } from "../models/Project";
 import BuildingType from "../models/BuildingType";
 import Space from "../models/Space";
 import Element from "../models/Element";
-import User from "../models/User";
-import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
+import User from "../models/User";
 
 // Extended Request interface to include file property from multer
 interface RequestWithFile extends Request {
   file?: Express.Multer.File;
 }
+
+// Helper function to normalize MongoDB ObjectIds for comparison
+const normalizeId = (id: any): string => {
+  if (!id) return "";
+
+  // If it's already a string, return it
+  if (typeof id === "string") return id;
+
+  // If it's a MongoDB ObjectId, convert to string
+  if (id instanceof mongoose.Types.ObjectId) return id.toString();
+
+  // If it's an object with _id (populated document), get the _id
+  if (id._id) return normalizeId(id._id);
+
+  // If it's an object with toString method, use that
+  if (id.toString && typeof id.toString === "function") return id.toString();
+
+  // Fallback - stringify the object
+  return String(id);
+};
 
 // @desc    Get all projects
 // @route   GET /api/projects
@@ -23,7 +43,7 @@ export const getProjects = async (
   next: NextFunction
 ) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = normalizeId((req as any).user.id);
 
     // Pagination
     const page = parseInt(req.query.page as string) || 1;
@@ -46,6 +66,17 @@ export const getProjects = async (
       .limit(limit)
       .sort({ creationDate: -1 });
 
+    // Debug logging
+    console.log(`User ID: ${userId}`);
+    console.log(`Found ${projects.length} projects for this user`);
+    projects.forEach((project, index) => {
+      console.log(
+        `Project ${index + 1}: ${project._id}, Owner: ${normalizeId(
+          project.owner
+        )}`
+      );
+    });
+
     // Pagination result
     const pagination = {
       total,
@@ -61,7 +92,7 @@ export const getProjects = async (
       data: projects,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error in getProjects:", error);
     res.status(500).json({
       success: false,
       message: "Server Error",
@@ -78,8 +109,10 @@ export const getProject = async (
   next: NextFunction
 ) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = normalizeId((req as any).user.id);
     const projectId = req.params.id;
+
+    console.log(`GET project/${projectId} - User ID: ${userId}`);
 
     // Find project
     const project = await Project.findById(projectId)
@@ -87,17 +120,26 @@ export const getProject = async (
       .populate("sharedWith.user", "name email");
 
     if (!project) {
+      console.log(`Project ${projectId} not found`);
       return res.status(404).json({
         success: false,
         message: "Project not found",
       });
     }
 
+    // Get owner ID in a standardized format
+    const ownerId = normalizeId(project.owner);
+    console.log(`Project owner: ${ownerId}, Request user: ${userId}`);
+
     // Check if user owns or has access to the project
-    const isOwner = project.owner.toString() === userId;
-    const isShared = project.sharedWith.some(
-      (s) => s.user.toString() === userId
-    );
+    const isOwner = ownerId === userId;
+
+    // Check if the project is shared with the user
+    const isShared =
+      project.sharedWith &&
+      project.sharedWith.some((s) => normalizeId(s.user) === userId);
+
+    console.log(`Access check - Is owner: ${isOwner}, Is shared: ${isShared}`);
 
     if (!isOwner && !isShared) {
       return res.status(403).json({
@@ -111,7 +153,7 @@ export const getProject = async (
       data: project,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error in getProject:", error);
     res.status(500).json({
       success: false,
       message: "Server Error",
@@ -128,7 +170,8 @@ export const createProject = async (
   next: NextFunction
 ) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = normalizeId((req as any).user.id);
+    console.log(`Creating project - User ID: ${userId}`);
 
     // Check for project limit (50 per user)
     const projectCount = await Project.countDocuments({ owner: userId });
@@ -149,7 +192,7 @@ export const createProject = async (
     }
 
     // Prepare project data
-    const projectData: Partial<IProject> = {
+    const projectData = {
       name: req.body.name,
       address: req.body.address,
       location: req.body.location,
@@ -159,8 +202,11 @@ export const createProject = async (
       ...(req.file && { image: `/api/uploads/${req.file.filename}` }),
     };
 
+    console.log("Creating project with data:", JSON.stringify(projectData));
+
     // Create project
     const project = await Project.create(projectData);
+    console.log(`Project created with ID: ${project._id}`);
 
     res.status(201).json({
       success: true,
@@ -187,6 +233,8 @@ export const createProject = async (
   }
 };
 
+// Rest of the controller remains the same...
+
 // @desc    Update project
 // @route   PUT /api/projects/:id
 // @access  Private
@@ -196,7 +244,7 @@ export const updateProject = async (
   next: NextFunction
 ) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = normalizeId((req as any).user.id);
     const projectId = req.params.id;
 
     // Find project
@@ -210,9 +258,9 @@ export const updateProject = async (
     }
 
     // Check if user owns or has editor access to the project
-    const isOwner = project.owner.toString() === userId;
+    const isOwner = normalizeId(project.owner) === userId;
     const hasEditorAccess = project.sharedWith.some(
-      (s) => s.user.toString() === userId && s.role === "editor"
+      (s) => normalizeId(s.user) === userId && s.role === "editor"
     );
 
     if (!isOwner && !hasEditorAccess) {
@@ -250,7 +298,7 @@ export const deleteProject = async (
   next: NextFunction
 ) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = normalizeId((req as any).user.id);
     const projectId = req.params.id;
 
     const session = await mongoose.startSession();
@@ -268,7 +316,7 @@ export const deleteProject = async (
       }
 
       // Check if user owns the project
-      if (project.owner.toString() !== userId) {
+      if (normalizeId(project.owner) !== userId) {
         return res.status(403).json({
           success: false,
           message: "Not authorized to delete this project",
@@ -323,6 +371,8 @@ export const deleteProject = async (
     });
   }
 };
+
+// Other methods (share, upload, etc.) would be updated similarly...
 
 // @desc    Share project with another user
 // @route   POST /api/projects/:id/share
