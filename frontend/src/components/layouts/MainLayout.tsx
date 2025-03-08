@@ -35,7 +35,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", flexDirection: "column" }}>
+    <Box
+      dir="rtl"
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        flexDirection: "column",
+      }}
+    >
       {/* Header component */}
       <Header />
 
@@ -53,8 +60,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${isLoggedIn ? drawerWidth : 0}px)` },
-          marginLeft: { md: isLoggedIn ? `${drawerWidth}px` : 0 },
+          width: { sm: `calc(100% - ${isLoggedIn ? drawerWidth : 0}px)` },
+          marginInlineStart: { sm: isLoggedIn ? `${drawerWidth}px` : 0 },
           display: "flex",
           flexDirection: "column",
           minHeight: needsFixedFooter ? "calc(100vh - 64px)" : "auto", // Subtract header height

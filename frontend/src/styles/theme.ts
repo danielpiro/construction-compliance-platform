@@ -155,11 +155,11 @@ const createAppTheme = (mode: "light" | "dark"): Theme => {
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            borderRight: "none",
+            borderLeft: "none",
             boxShadow:
               mode === "light"
-                ? "2px 0 10px rgba(0, 0, 0, 0.05)"
-                : "2px 0 10px rgba(0, 0, 0, 0.2)",
+                ? "-2px 0 10px rgba(0, 0, 0, 0.05)"
+                : "-2px 0 10px rgba(0, 0, 0, 0.2)",
           },
         },
       },
