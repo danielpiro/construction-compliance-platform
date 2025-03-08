@@ -297,12 +297,43 @@ const ProjectsPage: React.FC = () => {
                       }}
                     >
                       <img
-                        src={`${import.meta.env.VITE_API_URL}/${project.image}`}
+                        src={`${import.meta.env.VITE_API_URL}/api/${
+                          project.image
+                        }`}
                         alt={project.name}
                         style={{
                           width: "100%",
                           height: "100%",
                           objectFit: "cover",
+                        }}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null; // Prevent infinite loop
+                          const fullUrl = `${
+                            import.meta.env.VITE_API_URL
+                          }/api/${project.image}`;
+                          console.error("Failed to load image:", {
+                            url: fullUrl,
+                            image: project.image,
+                            apiUrl: import.meta.env.VITE_API_URL,
+                          });
+                          // Replace with a placeholder div
+                          const parent = target.parentElement;
+                          if (parent) {
+                            target.style.display = "none";
+                            const placeholder = document.createElement("div");
+                            placeholder.style.width = "100%";
+                            placeholder.style.height = "100%";
+                            placeholder.style.backgroundColor = "#f0f0f0";
+                            placeholder.style.display = "flex";
+                            placeholder.style.alignItems = "center";
+                            placeholder.style.justifyContent = "center";
+                            placeholder.textContent =
+                              project.name[0].toUpperCase();
+                            placeholder.style.fontSize = "2rem";
+                            placeholder.style.color = "#666";
+                            parent.appendChild(placeholder);
+                          }
                         }}
                       />
                     </Box>

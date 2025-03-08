@@ -5,6 +5,7 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 
 // Import route files
 import authRoutes from "./routes/auth.routes";
@@ -22,22 +23,65 @@ dotenv.config();
 
 const app: Application = express();
 
-// Middleware
-app.use(helmet());
-app.use(cors()); // TODO - restrict to specific origins in production
+// Set up static folders and paths
+const uploadsPath = path.join(__dirname, "../uploads");
+console.log("Setting up static upload directory at:", uploadsPath);
 
-// Body parser middleware for most routes
+// Configure security middleware
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "blob:", "*"],
+        mediaSrc: ["'self'", "*"],
+        connectSrc: ["'self'", "*"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        fontSrc: ["'self'", "data:", "https:", "*"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: false,
+  })
+);
+
+// Body parser middleware
 app.use(express.json({ limit: "10mb" }));
-
-// Special handling for Stripe webhook - this should come AFTER the general body parser
-// but BEFORE the routes are mounted
 app.use(
   "/api/subscriptions/webhook",
   express.raw({ type: "application/json" })
 );
 
+// Set up static file serving with debug logging
+app.use(
+  "/api/uploads",
+  (req, res, next) => {
+    const filePath = path.join(uploadsPath, req.path);
+    console.log("Attempting to serve file:", {
+      requestPath: req.path,
+      fullFilePath: filePath,
+      exists: fs.existsSync(filePath),
+    });
+    next();
+  },
+  express.static(uploadsPath)
+);
+
 // Database connection
-const connectDB = async (): Promise<void> => {
+export const connectDB = async (): Promise<void> => {
   try {
     const conn = await mongoose.connect(
       process.env.MONGO_URI ||
@@ -50,9 +94,20 @@ const connectDB = async (): Promise<void> => {
   }
 };
 
-// Set up static folders before API routes to avoid auth middleware
+// Log files in uploads directory
+fs.readdir(
+  uploadsPath,
+  (err: NodeJS.ErrnoException | null, files: string[]) => {
+    if (err) {
+      console.error("Error reading uploads directory:", err);
+    } else {
+      console.log("Files in uploads directory:", files);
+    }
+  }
+);
+
+// Set up static directories
 app.use(express.static(path.join(__dirname, "../public")));
-app.use("/api/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Mount API routes
 app.use("/api/auth", authRoutes);
@@ -79,4 +134,4 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).send("Something went wrong!");
 });
 
-export { app, connectDB };
+export { app };

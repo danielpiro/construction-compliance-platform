@@ -34,6 +34,7 @@ const projectService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        withCredentials: false,
       });
       return response.data;
     } catch (error) {
@@ -49,6 +50,7 @@ const projectService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        withCredentials: false,
       });
       return response.data;
     } catch (error) {
@@ -69,6 +71,7 @@ const projectService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        withCredentials: false,
       }
     );
 

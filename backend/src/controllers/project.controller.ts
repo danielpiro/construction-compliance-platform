@@ -200,8 +200,17 @@ export const createProject = async (
       type: req.body.type,
       permissionDate,
       owner: userId,
-      ...(req.file && { image: `/api/uploads/${req.file.filename}` }),
+      ...(req.file && {
+        image: `uploads/${req.file.filename}`,
+      }),
     };
+
+    console.log("File upload info:", {
+      file: req.file,
+      path: req.file?.path,
+      uploadedUrl: `uploads/${req.file?.filename}`,
+      fullPath: path.resolve(req.file?.path || ""),
+    });
 
     console.log("Creating project with data:", JSON.stringify(projectData));
 
@@ -324,7 +333,7 @@ export const updateProject = async (
       }
       const file = (req as RequestWithFile).file;
       if (file && file.filename) {
-        updateData.image = `/api/uploads/${file.filename}`;
+        updateData.image = `uploads/${file.filename}`;
       }
     }
 
@@ -628,7 +637,7 @@ export const uploadProjectImage = async (
     }
 
     // Update project with new image path
-    project.image = `/api/uploads/${req.file.filename}`;
+    project.image = `uploads/${req.file.filename}`;
     await project.save();
 
     res.status(200).json({
