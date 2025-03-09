@@ -137,14 +137,7 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/projects/:projectId/types"
-          element={
-            <ProtectedRoute>
-              <ProjectTypePage />
-            </ProtectedRoute>
-          }
-        />
+        {/* Project Type Routes - Order matters for proper matching */}
         <Route
           path="/projects/:projectId/types/create"
           element={
@@ -154,18 +147,18 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/projects/:projectId/types/:typeId"
-          element={
-            <ProtectedRoute>
-              <ProjectTypePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/projects/:projectId/types/:typeId/edit"
           element={
             <ProtectedRoute>
               <EditProjectTypePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:projectId/types/:typeId"
+          element={
+            <ProtectedRoute>
+              <ProjectTypePage />
             </ProtectedRoute>
           }
         />
