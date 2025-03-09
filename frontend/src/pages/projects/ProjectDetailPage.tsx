@@ -15,6 +15,7 @@ import {
   Alert,
 } from "@mui/material";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -103,6 +104,7 @@ const getImageUrl = (imagePath: string) => {
 };
 
 const ProjectDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
@@ -183,9 +185,7 @@ const ProjectDetailPage: React.FC = () => {
 
       // Handle 403 Forbidden error specifically
       if (err.response?.status === 403) {
-        setError(
-          "אין לך הרשאה לצפות בפרויקט זה. בדוק שאתה מחובר עם המשתמש הנכון."
-        );
+        setError(t("projects.errors.noPermission"));
 
         // If we received a 403, there might be an issue with the token
         // Let's refresh the page after a short delay to attempt reauthorization
@@ -195,14 +195,14 @@ const ProjectDetailPage: React.FC = () => {
       }
       // Handle 401 Unauthorized error
       else if (err.response?.status === 401) {
-        setError("פג תוקף החיבור. מועבר לדף ההתחברות...");
+        setError(t("auth.sessionExpired"));
         // Clear token and redirect to login
         removeToken();
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       } else {
-        setError("נכשל בטעינת נתוני הפרויקט. אנא נסה שוב.");
+        setError(t("projects.errors.loadFailed"));
       }
     } finally {
       setLoading(false);
@@ -245,9 +245,9 @@ const ProjectDetailPage: React.FC = () => {
     } catch (error: any) {
       console.error("Error deleting project:", error);
       if (error.response?.status === 403) {
-        setError("אין לך הרשאה למחוק פרויקט זה.");
+        setError(t("projects.errors.deleteNoPermission"));
       } else {
-        setError("נכשל במחיקת הפרויקט. אנא נסה שוב.");
+        setError(t("projects.errors.deleteFailed"));
       }
       setDeleteDialogOpen(false);
     }
@@ -279,7 +279,7 @@ const ProjectDetailPage: React.FC = () => {
         mb={3}
       >
         <Typography variant="h4" component="h1">
-          {project?.name || "פרויקט"}
+          {project?.name || t("projects.project")}
         </Typography>
         <Box>
           <Button
@@ -289,7 +289,7 @@ const ProjectDetailPage: React.FC = () => {
             startIcon={<BugReportIcon />}
             sx={{ mr: 1 }}
           >
-            {showDebug ? "הסתר מידע לדיבוג" : "הצג מידע לדיבוג"}
+            {showDebug ? t("common.hideDebug") : t("common.showDebug")}
           </Button>
           {project && (
             <>
@@ -301,7 +301,7 @@ const ProjectDetailPage: React.FC = () => {
                 startIcon={<EditIcon />}
                 sx={{ mr: 1 }}
               >
-                ערוך
+                {t("common.edit")}
               </Button>
               <Button
                 variant="outlined"
@@ -309,7 +309,7 @@ const ProjectDetailPage: React.FC = () => {
                 startIcon={<DeleteIcon />}
                 onClick={() => setDeleteDialogOpen(true)}
               >
-                מחק
+                {t("common.delete")}
               </Button>
             </>
           )}
@@ -341,7 +341,7 @@ const ProjectDetailPage: React.FC = () => {
             onClick={fetchProjectData}
             startIcon={<RefreshIcon />}
           >
-            נסה שוב
+            {t("common.retry")}
           </Button>
           <Button
             component={Link}
@@ -350,12 +350,12 @@ const ProjectDetailPage: React.FC = () => {
             color="primary"
             sx={{ ml: 2 }}
           >
-            חזור לרשימת הפרויקטים
+            {t("projects.backToList")}
           </Button>
         </Box>
       ) : !project ? (
         <Box p={3}>
-          <Alert severity="warning">פרויקט לא נמצא.</Alert>
+          <Alert severity="warning">{t("projects.notFound")}</Alert>
           <Button
             component={Link}
             to="/projects"
@@ -363,7 +363,7 @@ const ProjectDetailPage: React.FC = () => {
             color="primary"
             sx={{ mt: 2 }}
           >
-            חזור לרשימת הפרויקטים
+            {t("projects.backToList")}
           </Button>
         </Box>
       ) : (
@@ -372,22 +372,25 @@ const ProjectDetailPage: React.FC = () => {
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <Typography variant="body1">
-                  <strong>כתובת:</strong> {project.address}
+                  <strong>{t("projects.details.address")}:</strong>{" "}
+                  {project.address}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>מיקום:</strong> {project.location} (אזור{" "}
+                  <strong>{t("projects.details.location")}:</strong>{" "}
+                  {project.location} ({t("projects.details.area")}{" "}
                   {areaToHebrew[project.area] || project.area})
                 </Typography>
                 <Typography variant="body1">
-                  <strong>תאריך היתר:</strong>{" "}
+                  <strong>{t("projects.details.permissionDate")}:</strong>{" "}
                   {formatDate(project.permissionDate)}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>גרסת בנייה:</strong>{" "}
+                  <strong>{t("projects.details.buildingVersion")}:</strong>{" "}
                   {getDisplayVersion(project.buildingVersion)}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>נוצר:</strong> {formatDate(project.creationDate)}
+                  <strong>{t("projects.details.created")}:</strong>{" "}
+                  {formatDate(project.creationDate)}
                 </Typography>
               </Grid>
               {project.image && (
@@ -421,7 +424,7 @@ const ProjectDetailPage: React.FC = () => {
               mb={3}
             >
               <Typography variant="h5" component="h2">
-                סוגי המבנה
+                {t("projects.buildingTypes")}
               </Typography>
               <Button
                 variant="contained"
@@ -429,7 +432,7 @@ const ProjectDetailPage: React.FC = () => {
                 startIcon={<AddIcon />}
                 onClick={() => setCreateTypeDialogOpen(true)}
               >
-                הוסף סוג מבנה
+                {t("projects.types.add")}
               </Button>
             </Box>
 
@@ -457,7 +460,8 @@ const ProjectDetailPage: React.FC = () => {
                         {type.name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        סוג: {buildingTypeLabels[type.type]}
+                        {t("projects.types.type")}:{" "}
+                        {t(`types.${type.type.toLowerCase()}`)}
                       </Typography>
                     </Paper>
                   </Grid>
@@ -466,7 +470,7 @@ const ProjectDetailPage: React.FC = () => {
             ) : (
               <Paper sx={{ p: 3, textAlign: "center" }}>
                 <Typography variant="body1" paragraph>
-                  אין סוגי מבנים מוגדרים עדיין
+                  {t("projects.types.noTypesYet")}
                 </Typography>
                 <Button
                   variant="contained"
@@ -474,7 +478,7 @@ const ProjectDetailPage: React.FC = () => {
                   startIcon={<AddIcon />}
                   onClick={() => setCreateTypeDialogOpen(true)}
                 >
-                  צור סוג מבנה חדש
+                  {t("projects.types.createNew")}
                 </Button>
               </Paper>
             )}
@@ -487,7 +491,7 @@ const ProjectDetailPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>יצירת סוג מבנה חדש</DialogTitle>
+            <DialogTitle>{t("projects.types.createNew")}</DialogTitle>
             <DialogContent>
               {projectId && (
                 <BuildingTypeForm
@@ -503,11 +507,10 @@ const ProjectDetailPage: React.FC = () => {
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen(false)}
           >
-            <DialogTitle>מחק פרויקט</DialogTitle>
+            <DialogTitle>{t("projects.delete.title")}</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                האם אתה בטוח שברצונך למחוק את "{project.name}"? פעולה זו אינה
-                ניתנת לביטול.
+                {t("projects.delete.confirm", { name: project.name })}
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -515,10 +518,10 @@ const ProjectDetailPage: React.FC = () => {
                 onClick={() => setDeleteDialogOpen(false)}
                 color="primary"
               >
-                ביטול
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleDeleteProject} color="error">
-                מחק
+                {t("common.delete")}
               </Button>
             </DialogActions>
           </Dialog>

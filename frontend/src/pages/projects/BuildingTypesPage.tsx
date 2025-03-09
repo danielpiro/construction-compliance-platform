@@ -29,15 +29,6 @@ interface BuildingType {
     | "Public Gathering";
 }
 
-const buildingTypeLabels: Record<string, string> = {
-  Residential: "מגורים",
-  Schools: "בתי ספר",
-  Offices: "משרדים",
-  Hotels: "מלונות",
-  Commercials: "מסחר",
-  "Public Gathering": "התקהלות ציבורית",
-};
-
 const BuildingTypesPage: React.FC = () => {
   const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
@@ -54,11 +45,11 @@ const BuildingTypesPage: React.FC = () => {
       if (response.success) {
         setBuildingTypes(response.data);
       } else {
-        setError("Failed to load building types");
+        setError(t("buildingTypes.loadError"));
       }
     } catch (err) {
       console.error("Error fetching building types:", err);
-      setError("שגיאה בטעינת סוגי המבנים");
+      setError(t("buildingTypes.loadError"));
     } finally {
       setLoading(false);
     }
@@ -108,7 +99,7 @@ const BuildingTypesPage: React.FC = () => {
           variant="contained"
           sx={{ mt: 2 }}
         >
-          חזור לרשימת הפרויקטים
+          {t("buildingTypes.backToProjects")}
         </Button>
       </Box>
     );
@@ -125,7 +116,7 @@ const BuildingTypesPage: React.FC = () => {
         }}
       >
         <Typography variant="h4" component="h1">
-          {t("projects.buildingTypes")}
+          {t("buildingTypes.title")}
         </Typography>
       </Box>
 
@@ -152,7 +143,8 @@ const BuildingTypesPage: React.FC = () => {
                   {type.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  סוג: {buildingTypeLabels[type.type]}
+                  {t("buildingTypes.type")}:{" "}
+                  {t(`buildingTypes.labels.${type.type}`)}
                 </Typography>
               </Paper>
             </Grid>
@@ -161,7 +153,7 @@ const BuildingTypesPage: React.FC = () => {
       ) : (
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <Typography variant="h6" paragraph>
-            אין סוגי מבנים מוגדרים עדיין
+            {t("buildingTypes.noTypes")}
           </Typography>
           <Button
             variant="contained"
@@ -169,7 +161,7 @@ const BuildingTypesPage: React.FC = () => {
             startIcon={<AddIcon />}
             onClick={handleCreateClick}
           >
-            צור סוג מבנה חדש
+            {t("buildingTypes.create")}
           </Button>
         </Paper>
       )}
@@ -188,7 +180,7 @@ const BuildingTypesPage: React.FC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>יצירת סוג מבנה חדש</DialogTitle>
+        <DialogTitle>{t("buildingTypes.createNew")}</DialogTitle>
         <DialogContent>
           {projectId ? (
             <BuildingTypeForm
@@ -196,7 +188,9 @@ const BuildingTypesPage: React.FC = () => {
               onSuccess={handleTypeCreated}
             />
           ) : (
-            <Typography color="error">פרטי הפרויקט חסרים</Typography>
+            <Typography color="error">
+              {t("buildingTypes.missingProject")}
+            </Typography>
           )}
         </DialogContent>
       </Dialog>

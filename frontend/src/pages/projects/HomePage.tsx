@@ -21,27 +21,29 @@ import {
   Description as DescriptionIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 // Feature list for the landing page
 const features = [
   {
-    title: "אימות תוכניות בנייה",
-    description: "בדיקה אוטומטית של תוכניות בנייה אל מול תקנות ותקנים ארציים",
+    title: "home.features.validation.title",
+    description: "home.features.validation.description",
     icon: <ComplianceIcon fontSize="large" color="primary" />,
   },
   {
-    title: "ניהול פרויקטים",
-    description: "ניהול פשוט של פרויקטי בנייה ומעקב אחר התקדמות האימות",
+    title: "home.features.workflow.title",
+    description: "home.features.workflow.description",
     icon: <BuildingIcon fontSize="large" color="primary" />,
   },
   {
-    title: "ביצועים מהירים",
-    description: "קבלת תוצאות אימות מהירות ומדויקות בזמן אמת",
+    title: "home.features.performance.title",
+    description: "home.features.performance.description",
     icon: <PerformanceIcon fontSize="large" color="primary" />,
   },
 ];
 
 const HomePage: React.FC = () => {
+  const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
 
   return (
@@ -87,7 +89,7 @@ const HomePage: React.FC = () => {
                   fontSize: { xs: "2.5rem", md: "3.5rem" },
                 }}
               >
-                פלטפורמת בדיקת תאימות בנייה
+                {t("home.title")}
               </Typography>
               <Typography
                 variant="h5"
@@ -99,8 +101,7 @@ const HomePage: React.FC = () => {
                   fontSize: { xs: "1.2rem", md: "1.5rem" },
                 }}
               >
-                אמת את תוכניות הבנייה שלך מול תקנות ותקני בנייה ישראליים באופן
-                אוטומטי ובמהירות.
+                {t("home.subtitle")}
               </Typography>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                 {isLoggedIn ? (
@@ -118,7 +119,7 @@ const HomePage: React.FC = () => {
                       fontSize: "1.1rem",
                     }}
                   >
-                    לך ללוח הבקרה
+                    {t("home.dashboard")}
                   </Button>
                 ) : (
                   <Button
@@ -135,7 +136,7 @@ const HomePage: React.FC = () => {
                       fontSize: "1.1rem",
                     }}
                   >
-                    התחל עכשיו
+                    {t("home.getStarted")}
                   </Button>
                 )}
               </Stack>
@@ -231,7 +232,7 @@ const HomePage: React.FC = () => {
                     fontSize: "1.3rem",
                   }}
                 >
-                  פתרון מתקדם לבדיקת תאימות תכניות בנייה
+                  {t("home.heroText")}
                 </Typography>
               </Paper>
             </Grid>
@@ -253,7 +254,7 @@ const HomePage: React.FC = () => {
           gutterBottom
           sx={{ mb: { xs: 4, md: 8 } }}
         >
-          איך הפלטפורמה עובדת
+          {t("home.features.title")}
         </Typography>
 
         <Grid container spacing={4}>
@@ -293,14 +294,14 @@ const HomePage: React.FC = () => {
                     fontWeight="bold"
                     sx={{ mb: 2 }}
                   >
-                    {feature.title}
+                    {t(feature.title)}
                   </Typography>
                   <Typography
                     variant="body1"
                     color="text.secondary"
                     sx={{ fontSize: "1.1rem" }}
                   >
-                    {feature.description}
+                    {t(feature.description)}
                   </Typography>
                 </CardContent>
               </Card>
@@ -330,17 +331,17 @@ const HomePage: React.FC = () => {
             gutterBottom
             sx={{ mb: { xs: 4, md: 8 } }}
           >
-            יתרונות השימוש בפלטפורמה
+            {t("home.benefits.title")}
           </Typography>
 
           <Grid container spacing={4}>
             {[
-              "חיסכון בזמן ומשאבים",
-              "יותר בטחון בתוכניות הבנייה",
-              "הפחתת טעויות אנוש",
-              "התאמה לתקנים העדכניים ביותר",
-              "מעקב פשוט אחר התקדמות",
-              "ממשק ידידותי למשתמש",
+              t("home.benefits.items.timeSaving"),
+              t("home.benefits.items.confidence"),
+              t("home.benefits.items.errorReduction"),
+              t("home.benefits.items.compliance"),
+              t("home.benefits.items.progress"),
+              t("home.benefits.items.userFriendly"),
             ].map((benefit, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Paper
@@ -378,7 +379,7 @@ const HomePage: React.FC = () => {
                 fontWeight: "bold",
               }}
             >
-              {isLoggedIn ? "לך ללוח הבקרה" : "הירשם עכשיו"}
+              {isLoggedIn ? t("home.dashboard") : t("home.getStarted")}
             </Button>
           </Box>
         </Container>
@@ -395,15 +396,14 @@ const HomePage: React.FC = () => {
           gutterBottom
           sx={{ mb: { xs: 2, md: 3 } }}
         >
-          מוכנים להתחיל?
+          {t("home.cta.title")}
         </Typography>
         <Typography
           variant="h6"
           paragraph
           sx={{ mb: 4, color: "text.secondary", maxWidth: "600px", mx: "auto" }}
         >
-          התחל להשתמש בפלטפורמת בדיקת תאימות הבנייה כבר היום וחסוך זמן יקר
-          בתהליך האישורים.
+          {t("home.cta.description")}
         </Typography>
         <Button
           component={RouterLink}
@@ -413,12 +413,12 @@ const HomePage: React.FC = () => {
           size="large"
           sx={{
             py: 2,
-            px: 8,
-            fontSize: "1.2rem",
+            px: 6,
+            fontSize: "1.1rem",
             fontWeight: "bold",
           }}
         >
-          {isLoggedIn ? "צור פרויקט חדש" : "צור חשבון חדש"}
+          {isLoggedIn ? t("home.createProject") : t("home.cta.button")}
         </Button>
       </Container>
     </Box>

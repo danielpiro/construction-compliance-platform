@@ -1,41 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
-  Grid,
   Button,
-  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  IconButton,
   Breadcrumbs,
-  Link as MuiLink,
-  Fab,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AddIcon from "@mui/icons-material/Add";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ChairIcon from "@mui/icons-material/Chair";
-import ShieldIcon from "@mui/icons-material/Shield";
-import BathtubIcon from "@mui/icons-material/Bathtub";
-import BalconyIcon from "@mui/icons-material/Balcony";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import spaceService from "../../services/spaceService";
-import buildingTypeService from "../../services/buildingTypeService";
-import projectService from "../../services/projectService";
+import { toast } from "react-toastify";
 
-// Define Space interface
 interface Space {
   _id: string;
   name: string;
-  type: "Bedroom" | "Protect Space" | "Wet Room" | "Balcony";
+  type: string;
   buildingType: string;
+  elements: any[];
 }
-
-// Space type icons mapping
-const spaceTypeIcons: Record<string, React.ReactNode> = {
-  Bedroom: <ChairIcon />,
-  "Protect Space": <ShieldIcon />,
-  "Wet Room": <BathtubIcon />,
-  Balcony: <BalconyIcon />,
-};
 
 const SpacesPage: React.FC = () => {
   const { t } = useTranslation();
@@ -43,212 +34,217 @@ const SpacesPage: React.FC = () => {
     projectId: string;
     typeId: string;
   }>();
+
   const [spaces, setSpaces] = useState<Space[]>([]);
-  const [projectName, setProjectName] = useState("");
-  const [typeName, setTypeName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [projectName, setProjectName] = useState("");
+  const [buildingTypeName, setBuildingTypeName] = useState("");
 
-  const spaceTypeLabels: Record<string, string> = {
-    Bedroom: t("spaces.types.bedroom"),
-    "Protect Space": t("spaces.types.protectspace"),
-    "Wet Room": t("spaces.types.wetroom"),
-    Balcony: t("spaces.types.balcony"),
-  };
-
-  // Fetch project and building type data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!projectId || !typeId)
-          throw new Error("Project ID and Building type ID are required");
-
-        // Get building type data
-        const buildingTypeData = await buildingTypeService.getBuildingType(
-          typeId
-        );
-        setTypeName(buildingTypeData.data.name);
-
-        // Get project data
-        const projectData = await projectService.getProject(projectId);
-        setProjectName(projectData.data.name);
-      } catch (error) {
-        console.error("Failed to fetch project/type data:", error);
-        setError(
-          error instanceof Error ? error.message : "Failed to fetch data"
-        );
-      }
-    };
-
-    fetchData();
-  }, [projectId, typeId]);
-
-  // Fetch spaces
   useEffect(() => {
     const fetchSpaces = async () => {
+      if (!typeId) return;
+
       try {
-        if (!typeId) throw new Error("Building type ID is required");
+        setLoading(true);
         const response = await spaceService.getSpaces(typeId);
-        setSpaces(response.data);
+
+        if (response.success) {
+          setSpaces(response.data);
+
+          if (response.projectName) {
+            setProjectName(response.projectName);
+          }
+
+          if (response.buildingTypeName) {
+            setBuildingTypeName(response.buildingTypeName);
+          }
+        } else {
+          throw new Error(response.message || t("errors.generic"));
+        }
       } catch (error) {
         console.error("Failed to fetch spaces:", error);
-        setError(
-          error instanceof Error ? error.message : "Failed to fetch spaces"
-        );
+        setError(t("spaces.errors.fetchFailed"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchSpaces();
-  }, [typeId]);
+  }, [typeId, t]);
 
-  if (loading) return <Typography>{t("common.loading")}</Typography>;
-  if (error) return <Typography color="error">{error}</Typography>;
+  const handleDeleteSpace = async (spaceId: string) => {
+    if (!window.confirm(t("spaces.confirmDelete"))) {
+      return;
+    }
 
-  return (
-    <Box p={3}>
-      {/* Page Header */}
+    try {
+      const response = await spaceService.deleteSpace(spaceId);
+
+      if (response.success) {
+        toast.success(t("spaces.deleteSuccess"));
+        // Remove deleted space from state
+        setSpaces(spaces.filter((space) => space._id !== spaceId));
+      } else {
+        throw new Error(response.message || t("errors.generic"));
+      }
+    } catch (error) {
+      console.error("Failed to delete space:", error);
+      toast.error(t("spaces.errors.deleteFailed"));
+    }
+  };
+
+  if (loading) {
+    return (
       <Box
         display="flex"
-        justifyContent="space-between"
+        justifyContent="center"
         alignItems="center"
-        mb={3}
+        minHeight="50vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ p: 3 }}>
+      {/* Breadcrumbs */}
+      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
+        <Link to="/projects" style={{ textDecoration: "none" }}>
+          {t("nav.projects")}
+        </Link>
+        {projectId && projectName && (
+          <Link
+            to={`/projects/${projectId}`}
+            style={{ textDecoration: "none" }}
+          >
+            {projectName}
+          </Link>
+        )}
+        {typeId && buildingTypeName && (
+          <Link
+            to={`/building-types/${typeId}`}
+            style={{ textDecoration: "none" }}
+          >
+            {buildingTypeName}
+          </Link>
+        )}
+        <Typography color="text.primary">{t("spaces.title")}</Typography>
+      </Breadcrumbs>
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
       >
         <Typography variant="h4" component="h1">
           {t("spaces.title")}
         </Typography>
-        <Box>
-          <Link
-            to={`/projects/${projectId}/types/${typeId}`}
-            style={{ textDecoration: "none" }}
-          >
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<ArrowBackIcon />}
-              sx={{ mr: 1 }}
-            >
-              {t("common.back")}
-            </Button>
-          </Link>
-        </Box>
-      </Box>
-
-      {/* Breadcrumbs */}
-      <Box sx={{ mb: 3 }}>
-        <Breadcrumbs>
-          <MuiLink
-            component={Link}
-            to="/projects"
-            underline="hover"
-            color="inherit"
-          >
-            {t("nav.projects")}
-          </MuiLink>
-          <MuiLink
-            component={Link}
-            to={`/projects/${projectId}`}
-            underline="hover"
-            color="inherit"
-          >
-            {projectName}
-          </MuiLink>
-          <MuiLink
-            component={Link}
-            to={`/projects/${projectId}/types/${typeId}`}
-            underline="hover"
-            color="inherit"
-          >
-            {typeName}
-          </MuiLink>
-          <Typography color="text.primary">{t("spaces.title")}</Typography>
-        </Breadcrumbs>
-      </Box>
-
-      {/* Spaces Section */}
-      <Paper elevation={3} sx={{ p: 3 }}>
-        {spaces.length > 0 ? (
-          <Grid container spacing={3}>
-            {spaces.map((space) => (
-              <Grid item key={space._id} xs={12} sm={6} md={4}>
-                <Paper
-                  component={Link}
-                  to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/edit`}
-                  sx={{
-                    p: 3,
-                    textDecoration: "none",
-                    color: "inherit",
-                    transition: "transform 0.2s, box-shadow 0.2s",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: 3,
-                    },
-                    display: "block",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      mb: 2,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        mr: 2,
-                        color: "primary.main",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        p: 1,
-                        borderRadius: "50%",
-                        bgcolor: "primary.light",
-                        opacity: 0.8,
-                      }}
-                    >
-                      {spaceTypeIcons[space.type]}
-                    </Box>
-                    <Typography variant="h6">{space.name}</Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {t("common.type")}: {spaceTypeLabels[space.type]}
-                  </Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Box textAlign="center">
-            <Typography variant="body1" paragraph>
-              {t("spaces.noSpaces")}
-            </Typography>
-            <Link
-              to={`/projects/${projectId}/types/${typeId}/spaces/create`}
-              style={{ textDecoration: "none" }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-              >
-                {t("spaces.addSpace")}
-              </Button>
-            </Link>
-          </Box>
-        )}
-      </Paper>
-      {/* Add Space FAB */}
-      {spaces.length > 0 && (
-        <Fab
+        <Button
+          component={Link}
+          to={`/projects/${projectId}/types/${typeId}/spaces/create`}
+          variant="contained"
           color="primary"
-          sx={{ position: "fixed", bottom: 24, right: 24 }}
-          onClick={() => {
-            window.location.href = `/projects/${projectId}/types/${typeId}/spaces/create`;
-          }}
+          startIcon={<AddIcon />}
         >
-          <AddIcon />
-        </Fab>
+          {t("spaces.addSpace")}
+        </Button>
+      </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {spaces.length === 0 ? (
+        <Box textAlign="center" py={5}>
+          <Typography variant="h6" paragraph>
+            {t("spaces.noSpaces")}
+          </Typography>
+          <Button
+            component={Link}
+            to={`/projects/${projectId}/types/${typeId}/spaces/create`}
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+          >
+            {t("spaces.addSpace")}
+          </Button>
+        </Box>
+      ) : (
+        <Grid container spacing={3}>
+          {spaces.map((space) => (
+            <Grid item xs={12} sm={6} md={4} key={space._id}>
+              <Card
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "transform 0.2s ease",
+                  "&:hover": { transform: "translateY(-5px)" },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    {space.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    {t(
+                      `spaces.types.${space.type
+                        .toLowerCase()
+                        .replace(/\s+/g, "")}`
+                    )}
+                  </Typography>
+                  <Typography variant="body2">
+                    {t("elements.count", {
+                      count: space.elements?.length || 0,
+                    })}
+                  </Typography>
+                </CardContent>
+                <CardActions
+                  sx={{ justifyContent: "space-between", p: 2, pt: 0 }}
+                >
+                  <Button
+                    component={Link}
+                    to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/elements`}
+                    size="small"
+                    color="primary"
+                  >
+                    {t("elements.viewElements")}
+                  </Button>
+                  <Box>
+                    <IconButton
+                      component={Link}
+                      to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/edit`}
+                      size="small"
+                      color="primary"
+                      aria-label={t("common.edit")}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleDeleteSpace(space._id)}
+                      aria-label={t("common.delete")}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       )}
     </Box>
   );

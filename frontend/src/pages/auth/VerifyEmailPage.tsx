@@ -13,8 +13,10 @@ import {
 } from "@mui/material";
 import authService from "../../services/authService";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const VerifyEmailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [verifying, setVerifying] = useState(true);
@@ -24,7 +26,7 @@ const VerifyEmailPage: React.FC = () => {
   useEffect(() => {
     const verifyToken = async () => {
       if (!token) {
-        setError("Token is missing");
+        setError(t("auth.errors.tokenMissing"));
         setVerifying(false);
         return;
       }
@@ -34,27 +36,24 @@ const VerifyEmailPage: React.FC = () => {
 
         if (response.success) {
           setSuccess(true);
-          toast.success('הדוא"ל שלך אומת בהצלחה!');
+          toast.success(t("auth.verifySuccess"));
           // Redirect to login page after 3 seconds
           setTimeout(() => {
             navigate("/login");
           }, 3000);
         } else {
-          setError(response.message || 'שגיאה באימות הדוא"ל');
+          setError(response.message || t("auth.errors.verifyFailed"));
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
-        setError(
-          err.response?.data?.message ||
-            'שגיאה באימות הדוא"ל. יתכן שהקישור פג תוקף או שכבר השתמשת בו.'
-        );
+        setError(err.response?.data?.message || t("auth.errors.verifyFailed"));
       } finally {
         setVerifying(false);
       }
     };
 
     verifyToken();
-  }, [token, navigate]);
+  }, [token, navigate, t]);
 
   if (verifying) {
     return (
@@ -73,7 +72,7 @@ const VerifyEmailPage: React.FC = () => {
           >
             <CircularProgress />
             <Typography variant="body1" sx={{ mt: 2 }}>
-              מאמת את הדוא"ל שלך...
+              {t("auth.verifying")}
             </Typography>
           </Paper>
         </Box>
@@ -97,13 +96,13 @@ const VerifyEmailPage: React.FC = () => {
             sx={{ p: 4, width: "100%", textAlign: "center" }}
           >
             <Alert severity="success" sx={{ mb: 2 }}>
-              הדוא"ל שלך אומת בהצלחה!
+              {t("auth.verifySuccess")}
             </Alert>
             <Typography variant="body1" paragraph>
-              מועבר למסך ההתחברות...
+              {t("auth.redirecting")}
             </Typography>
             <Link component={RouterLink} to="/login" variant="body2">
-              אם אינך מועבר אוטומטית, לחץ כאן
+              {t("auth.manualRedirect")}
             </Link>
           </Paper>
         </Box>
@@ -123,11 +122,10 @@ const VerifyEmailPage: React.FC = () => {
       >
         <Paper elevation={3} sx={{ p: 4, width: "100%", textAlign: "center" }}>
           <Alert severity="error" sx={{ mb: 2 }}>
-            {error || 'שגיאה באימות הדוא"ל'}
+            {error || t("auth.errors.verifyFailed")}
           </Alert>
           <Typography variant="body1" paragraph>
-            אירעה שגיאה בעת אימות הדוא"ל שלך. יתכן שהקישור פג תוקף או שכבר
-            השתמשת בו.
+            {t("auth.errors.verifyTokenExpired")}
           </Typography>
           <Button
             component={RouterLink}
@@ -136,7 +134,7 @@ const VerifyEmailPage: React.FC = () => {
             color="primary"
             sx={{ mt: 2 }}
           >
-            חזור למסך ההתחברות
+            {t("auth.backToLogin")}
           </Button>
         </Paper>
       </Box>

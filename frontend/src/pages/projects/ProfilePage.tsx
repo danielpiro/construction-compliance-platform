@@ -14,9 +14,10 @@ import {
 } from "@mui/material";
 import * as userService from "../../services/userService";
 import { useAuth } from "../../hooks/useAuth";
-import i18n from "../../utils/i18n";
+import { useTranslation } from "react-i18next";
 
 const ProfilePage: React.FC = () => {
+  const { t } = useTranslation();
   const { updateUserData } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,7 +55,7 @@ const ProfilePage: React.FC = () => {
         console.error("Failed to fetch profile data:", error);
         setSnackbar({
           open: true,
-          message: i18n.t("profile.fetchError"),
+          message: t("profile.fetchError"),
           severity: "error",
         });
       } finally {
@@ -95,14 +96,14 @@ const ProfilePage: React.FC = () => {
 
       setSnackbar({
         open: true,
-        message: i18n.t("profile.updateSuccess"),
+        message: t("profile.updateSuccess"),
         severity: "success",
       });
     } catch (error) {
       console.error("Failed to update profile:", error);
       setSnackbar({
         open: true,
-        message: i18n.t("profile.updateError"),
+        message: t("profile.updateError"),
         severity: "error",
       });
     } finally {
@@ -124,7 +125,7 @@ const ProfilePage: React.FC = () => {
           height: "50vh",
         }}
       >
-        <CircularProgress aria-label={i18n.t("common.loading")} />
+        <CircularProgress aria-label={t("common.loading")} />
       </Box>
     );
   }
@@ -134,7 +135,7 @@ const ProfilePage: React.FC = () => {
       {/* Header */}
       <Box mb={3}>
         <Typography variant="h4" component="h1">
-          {i18n.t("profile.title")}
+          {t("profile.title")}
         </Typography>
       </Box>
 
@@ -150,12 +151,12 @@ const ProfilePage: React.FC = () => {
               fontWeight: "bold",
               mr: 2,
             }}
-            aria-label={i18n.t("profile.userAvatar")}
+            aria-label={t("profile.userAvatar")}
           >
             {formData.name?.charAt(0).toUpperCase()}
           </Avatar>
           <Typography variant="body1" color="text.secondary">
-            {i18n.t("profile.subtitle")}
+            {t("profile.subtitle")}
           </Typography>
         </Box>
 
@@ -163,59 +164,59 @@ const ProfilePage: React.FC = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                {i18n.t("profile.personalInfo")}
+                {t("profile.personalInfo")}
               </Typography>
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={i18n.t("profile.name")}
+                label={t("profile.name")}
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                placeholder={i18n.t("profile.namePlaceholder")}
+                placeholder={t("profile.namePlaceholder")}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={i18n.t("profile.phone")}
+                label={t("profile.phone")}
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                placeholder={i18n.t("profile.phonePlaceholder")}
+                placeholder={t("profile.phonePlaceholder")}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={i18n.t("profile.company")}
+                label={t("profile.company")}
                 name="company"
                 value={formData.company}
                 onChange={handleInputChange}
-                placeholder={i18n.t("profile.companyPlaceholder")}
+                placeholder={t("profile.companyPlaceholder")}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={i18n.t("profile.role")}
+                label={t("profile.role")}
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
-                placeholder={i18n.t("profile.rolePlaceholder")}
+                placeholder={t("profile.rolePlaceholder")}
               />
             </Grid>
 
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Typography variant="h6" sx={{ mb: 2 }}>
-                {i18n.t("profile.accountSettings")}
+                {t("profile.accountSettings")}
               </Typography>
             </Grid>
 
@@ -223,7 +224,7 @@ const ProfilePage: React.FC = () => {
               <TextField
                 fullWidth
                 disabled
-                label={i18n.t("profile.email")}
+                label={t("profile.email")}
                 value={formData.email}
                 aria-readonly="true"
               />
@@ -232,7 +233,7 @@ const ProfilePage: React.FC = () => {
                 color="text.secondary"
                 sx={{ mt: 1, display: "block" }}
               >
-                {i18n.t("profile.emailNote")}
+                {t("profile.emailNote")}
               </Typography>
             </Grid>
             <Grid item xs={12}>
@@ -249,10 +250,10 @@ const ProfilePage: React.FC = () => {
                     <CircularProgress
                       size={24}
                       color="inherit"
-                      aria-label={i18n.t("common.processing")}
+                      aria-label={t("common.processing")}
                     />
                   ) : (
-                    i18n.t("common.save")
+                    t("common.save")
                   )}
                 </Button>
               </Box>

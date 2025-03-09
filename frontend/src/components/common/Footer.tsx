@@ -15,35 +15,37 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Logo from "./Logo";
+import { useTranslation } from "react-i18next";
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   // Reduced to 3 sections by removing the "מדיניות" section
   const footerSections = [
     {
-      title: "מוצרים",
+      title: t("footer.products"),
       links: [
-        { name: "בדיקת תאימות", url: "/features#compliance" },
-        { name: "ניהול פרויקטים", url: "/features#projects" },
-        { name: "מחירים", url: "/pricing" },
+        { name: t("footer.compliance"), url: "/features#compliance" },
+        { name: t("footer.projectManagement"), url: "/features#projects" },
+        { name: t("footer.pricing"), url: "/pricing" },
       ],
     },
     {
-      title: "חברה",
+      title: t("footer.company"),
       links: [
-        { name: "אודות", url: "/about" },
-        { name: "צוות", url: "/team" },
-        { name: "צור קשר", url: "/contact" },
+        { name: t("footer.about"), url: "/about" },
+        { name: t("footer.team"), url: "/team" },
+        { name: t("footer.contact"), url: "/contact" },
       ],
     },
     {
-      title: "משאבים",
+      title: t("footer.resources"),
       links: [
-        { name: "מדריכים", url: "/guides" },
-        { name: "מרכז ידע", url: "/knowledge" },
-        { name: "בלוג", url: "/blog" },
-        { name: "שאלות נפוצות", url: "/faq" },
+        { name: t("footer.guides"), url: "/guides" },
+        { name: t("footer.knowledgeCenter"), url: "/knowledge" },
+        { name: t("footer.blog"), url: "/blog" },
+        { name: t("footer.faq"), url: "/faq" },
       ],
     },
   ];
@@ -70,12 +72,11 @@ const Footer: React.FC = () => {
                 variant="h6"
                 sx={{ ml: 1, fontWeight: 700, color: "primary.main" }}
               >
-                פלטפורמת בדיקת תאימות
+                {t("footer.platformName")}
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" paragraph>
-              המערכת המובילה לאימות תוכניות בנייה אל מול תקנות ותקנים של מדינת
-              ישראל. חסכו זמן ומשאבים וקבלו אישורים מהר יותר.
+              {t("footer.platformDescription")}
             </Typography>
             <Stack direction="row" spacing={1.5}>
               <IconButton
@@ -158,10 +159,10 @@ const Footer: React.FC = () => {
             align="center"
             sx={{ mb: { xs: 2, sm: 0 } }}
           >
-            © {currentYear} פלטפורמת בדיקת תאימות בנייה. כל הזכויות שמורות.
+            {t("footer.copyright", { year: currentYear })}
           </Typography>
           <Typography variant="body2" color="text.secondary" align="center">
-            פותח בישראל עם ❤️
+            {t("footer.madeInIsrael")}
           </Typography>
         </Box>
       </Container>

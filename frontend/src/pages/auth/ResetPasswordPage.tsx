@@ -20,8 +20,10 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import authService from "../../services/authService";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const ResetPasswordPage: React.FC = () => {
+  const { t } = useTranslation();
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -32,11 +34,11 @@ const ResetPasswordPage: React.FC = () => {
   // Validation schema
   const validationSchema = Yup.object({
     password: Yup.string()
-      .required("סיסמה היא שדה חובה")
-      .min(6, "סיסמה חייבת להכיל לפחות 6 תווים"),
+      .required(t("auth.errors.requiredPassword"))
+      .min(6, t("auth.errors.passwordTooShort")),
     confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password")], "הסיסמאות אינן תואמות")
-      .required("אישור סיסמה הוא שדה חובה"),
+      .oneOf([Yup.ref("password")], t("auth.errors.passwordMismatch"))
+      .required(t("auth.errors.requiredConfirmPassword")),
   });
 
   const formik = useFormik({
@@ -47,7 +49,7 @@ const ResetPasswordPage: React.FC = () => {
     validationSchema,
     onSubmit: async (values) => {
       if (!token) {
-        setError("Token is missing");
+        setError(t("auth.errors.tokenMissing"));
         return;
       }
 
@@ -61,19 +63,18 @@ const ResetPasswordPage: React.FC = () => {
 
         if (response.success) {
           setSuccess(true);
-          toast.success("הסיסמה שלך אופסה בהצלחה!");
+          toast.success(t("auth.passwordResetSuccess"));
           // Redirect to login page after 3 seconds
           setTimeout(() => {
             navigate("/login");
           }, 3000);
         } else {
-          setError(response.message || "שגיאה באיפוס הסיסמה");
+          setError(response.message || t("auth.errors.resetFailed"));
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(
-          err.response?.data?.message ||
-            "שגיאה באיפוס הסיסמה. יתכן שהקישור פג תוקף, אנא נסה לבקש קישור חדש."
+          err.response?.data?.message || t("auth.errors.resetLinkExpired")
         );
       } finally {
         setLoading(false);
@@ -98,13 +99,13 @@ const ResetPasswordPage: React.FC = () => {
         >
           <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
             <Alert severity="success" sx={{ mb: 2 }}>
-              הסיסמה שלך אופסה בהצלחה!
+              {t("auth.passwordResetSuccess")}
             </Alert>
             <Typography variant="body1" paragraph>
-              מועבר למסך ההתחברות...
+              {t("auth.redirecting")}
             </Typography>
             <Link component={RouterLink} to="/login" variant="body2">
-              אם אינך מועבר אוטומטית, לחץ כאן
+              {t("auth.manualRedirect")}
             </Link>
           </Paper>
         </Box>
@@ -125,11 +126,11 @@ const ResetPasswordPage: React.FC = () => {
         <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
           <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>
             <Typography variant="h5" align="center" gutterBottom>
-              איפוס סיסמה
+              {t("auth.resetPassword")}
             </Typography>
 
             <Typography variant="body2" color="text.secondary" paragraph>
-              אנא הזן את הסיסמה החדשה שלך.
+              {t("auth.enterNewPassword")}
             </Typography>
 
             {error && (
@@ -143,7 +144,7 @@ const ResetPasswordPage: React.FC = () => {
               fullWidth
               id="password"
               name="password"
-              label="סיסמה חדשה"
+              label={t("auth.newPassword")}
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               dir="ltr"
@@ -172,7 +173,7 @@ const ResetPasswordPage: React.FC = () => {
               fullWidth
               id="confirmPassword"
               name="confirmPassword"
-              label="אימות סיסמה חדשה"
+              label={t("auth.confirmNewPassword")}
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               dir="ltr"
@@ -208,13 +209,17 @@ const ResetPasswordPage: React.FC = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} /> : "אפס סיסמה"}
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : (
+                t("auth.resetPassword")
+              )}
             </Button>
 
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link component={RouterLink} to="/login" variant="body2">
-                  חזור למסך ההתחברות
+                  {t("auth.backToLogin")}
                 </Link>
               </Grid>
             </Grid>

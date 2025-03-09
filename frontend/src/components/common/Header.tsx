@@ -22,7 +22,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import i18n from "../../utils/i18n";
+import { useTranslation } from "react-i18next";
 import Logo from "./Logo";
 
 // Navigation items for homepage
@@ -33,6 +33,7 @@ const homeNavItems = [
 ];
 
 const Header: React.FC = () => {
+  const { t } = useTranslation();
   const { isLoggedIn, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -273,7 +274,7 @@ const Header: React.FC = () => {
                           },
                         }}
                       >
-                        {i18n.t("nav.home")}
+                        {t("nav.home")}
                       </MenuItem>
                     )}
 
@@ -296,7 +297,7 @@ const Header: React.FC = () => {
                               : "inherit",
                           }}
                         >
-                          {i18n.t("auth.login")}
+                          {t("auth.login")}
                         </MenuItem>
                       </>
                     ) : (
@@ -318,7 +319,7 @@ const Header: React.FC = () => {
                           }}
                         >
                           <DashboardIcon fontSize="small" sx={{ mr: 1.5 }} />
-                          {i18n.t("nav.dashboard")}
+                          {t("nav.dashboard")}
                         </MenuItem>
                         <MenuItem
                           component={Link}
@@ -336,7 +337,7 @@ const Header: React.FC = () => {
                               : "inherit",
                           }}
                         >
-                          {i18n.t("nav.projects")}
+                          {t("nav.projects")}
                         </MenuItem>
                         <Divider sx={{ my: 1 }} />
                         <MenuItem
@@ -355,7 +356,7 @@ const Header: React.FC = () => {
                               : "inherit",
                           }}
                         >
-                          {i18n.t("nav.profile")}
+                          {t("nav.profile")}
                         </MenuItem>
                         <MenuItem
                           onClick={() => {
@@ -369,7 +370,7 @@ const Header: React.FC = () => {
                             color: "error.main",
                           }}
                         >
-                          {i18n.t("auth.logout")}
+                          {t("auth.logout")}
                         </MenuItem>
                       </>
                     )}
@@ -386,7 +387,7 @@ const Header: React.FC = () => {
                       color="primary"
                       sx={{ mr: 1 }}
                     >
-                      {i18n.t("auth.login")}
+                      {t("auth.login")}
                     </Button>
                   ) : (
                     <>
@@ -459,7 +460,7 @@ const Header: React.FC = () => {
                             "&:hover": { bgcolor: "action.hover" },
                           }}
                         >
-                          {i18n.t("nav.profile")}
+                          {t("nav.profile")}
                         </MenuItem>
                         <MenuItem
                           onClick={handleLogout}
@@ -474,7 +475,7 @@ const Header: React.FC = () => {
                             },
                           }}
                         >
-                          {i18n.t("auth.logout")}
+                          {t("auth.logout")}
                         </MenuItem>
                       </Menu>
 

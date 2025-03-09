@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import buildingTypeService from "../../services/buildingTypeService";
+import { useTranslation } from "react-i18next";
 
 type BuildingType =
   | "Residential"
@@ -22,12 +23,12 @@ type BuildingType =
 
 // Building type options
 const BUILDING_TYPES = [
-  { value: "Residential", label: "מגורים" },
-  { value: "Schools", label: "בתי ספר" },
-  { value: "Offices", label: "משרדים" },
-  { value: "Hotels", label: "מלונות" },
-  { value: "Commercials", label: "מסחר" },
-  { value: "Public Gathering", label: "התקהלות ציבורית" },
+  { value: "Residential", label: "types.residential" },
+  { value: "Schools", label: "types.schools" },
+  { value: "Offices", label: "types.offices" },
+  { value: "Hotels", label: "types.hotels" },
+  { value: "Commercials", label: "types.commercials" },
+  { value: "Public Gathering", label: "types.publicGathering" },
 ];
 
 interface BuildingTypeFormProps {
@@ -44,6 +45,8 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
   projectId,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
+
   const [formData, setFormData] = useState<FormData>({
     name: "",
     type: "Residential",
@@ -72,8 +75,8 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
 
   const validateForm = (): boolean => {
     const newErrors = {
-      name: formData.name ? "" : "שם הוא שדה חובה",
-      type: formData.type ? "" : "סוג הוא שדה חובה",
+      name: formData.name ? "" : t("common.required"),
+      type: formData.type ? "" : t("common.required"),
     };
 
     setErrors(newErrors);
@@ -93,16 +96,16 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
         formData
       );
       if (response.success) {
-        toast.success("סוג המבנה נוצר בהצלחה");
+        toast.success(t("projects.types.createSuccess"));
         if (onSuccess) {
           onSuccess();
         }
       } else {
-        toast.error("שגיאה ביצירת סוג המבנה");
+        toast.error(t("projects.types.createError"));
       }
     } catch (error) {
       console.error("Error creating building type:", error);
-      toast.error("שגיאה ביצירת סוג המבנה");
+      toast.error(t("projects.types.createError"));
     }
   };
 
@@ -110,7 +113,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
     <Paper elevation={3} sx={{ p: 3 }}>
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <Typography variant="h5" gutterBottom>
-          יצירת סוג מבנה חדש
+          {t("projects.types.createNew")}
         </Typography>
 
         <Grid container spacing={3}>
@@ -121,7 +124,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
               fullWidth
               id="name"
               name="name"
-              label="שם סוג המבנה"
+              label={t("projects.types.name")}
               value={formData.name}
               onChange={handleChange}
               error={!!errors.name}
@@ -137,14 +140,14 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
               fullWidth
               id="type"
               name="type"
-              label="סוג"
+              label={t("projects.types.type")}
               value={formData.type}
               onChange={handleChange}
               error={!!errors.type}
             >
               {BUILDING_TYPES.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
-                  {option.label}
+                  {t(option.label)}
                 </MenuItem>
               ))}
             </TextField>
@@ -162,7 +165,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
               fullWidth
               size="large"
             >
-              צור סוג מבנה
+              {t("projects.types.create")}
             </Button>
           </Grid>
         </Grid>

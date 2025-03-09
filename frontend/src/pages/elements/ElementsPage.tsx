@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { Box, Typography, Grid, Button, Paper, Chip } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Grid,
+  Paper,
+  Button,
+  Chip,
+  Breadcrumbs,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AddIcon from "@mui/icons-material/Add";
 
 // Define Element interface
@@ -25,9 +35,12 @@ const ElementsPage: React.FC = () => {
   const [projectName, setProjectName] = useState("");
   const [typeName, setTypeName] = useState("");
   const [spaceName, setSpaceName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch elements (mock data for now)
   useEffect(() => {
+    setLoading(true);
     // This would be replaced with an actual API call
     const mockElements: Element[] = [
       {
@@ -70,6 +83,7 @@ const ElementsPage: React.FC = () => {
     setProjectName("פרויקט לדוגמה");
     setTypeName("מגורים");
     setSpaceName("חדר שינה");
+    setLoading(false);
   }, [spaceId]);
 
   const getChipColor = (type: string) => {
@@ -87,40 +101,54 @@ const ElementsPage: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="50vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="caption" component="div">
+        <Breadcrumbs aria-label="breadcrumb">
           <Link to="/projects" style={{ textDecoration: "none" }}>
             {t("nav.projects")}
-          </Link>{" "}
-          &gt;
+          </Link>
           <Link
             to={`/projects/${projectId}`}
             style={{ textDecoration: "none" }}
           >
-            {" "}
             {projectName}
-          </Link>{" "}
-          &gt;
+          </Link>
           <Link
-            to={`/projects/${projectId}/types/${typeId}`}
+            to={`/building-types/${typeId}`}
             style={{ textDecoration: "none" }}
           >
-            {" "}
             {typeName}
-          </Link>{" "}
-          &gt;
+          </Link>
           <Link
             to={`/projects/${projectId}/types/${typeId}/spaces`}
             style={{ textDecoration: "none" }}
           >
-            {" "}
             {t("spaces.title")}
-          </Link>{" "}
-          &gt;
-          {spaceName}
-        </Typography>
+          </Link>
+          <Typography color="text.primary">{spaceName}</Typography>
+        </Breadcrumbs>
       </Box>
 
       <Box
@@ -147,44 +175,64 @@ const ElementsPage: React.FC = () => {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
+                transition: "transform 0.2s ease-in-out",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: 3,
+                },
               }}
             >
               <Box>
-                <Typography variant="h6" component="h2" gutterBottom>
+                <Typography variant="h6" gutterBottom>
                   {element.name}
                 </Typography>
-                <Chip
-                  label={t(`elements.types.${element.type}`)}
-                  color={
-                    getChipColor(element.type) as
-                      | "primary"
-                      | "secondary"
-                      | "success"
-                      | "warning"
-                      | "default"
-                  }
-                  size="small"
-                  sx={{ mb: 1 }}
-                />
-                {element.subType && (
-                  <Typography variant="body2" color="text.secondary">
-                    {t(`elements.subtypes.${element.subType}`)}
-                  </Typography>
-                )}
+
+                <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                  <Chip
+                    label={t(`elements.types.${element.type}`)}
+                    color={getChipColor(element.type) as any}
+                    size="small"
+                  />
+                  {element.subType && (
+                    <Chip
+                      label={t(`elements.subtypes.${element.subType}`)}
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                </Box>
+
+                <Typography variant="body2" color="text.secondary">
+                  {element.type === "wall"
+                    ? t("elements.descriptions.wall")
+                    : element.type === "floor"
+                    ? t("elements.descriptions.floor")
+                    : element.type === "ceiling"
+                    ? t("elements.descriptions.ceiling")
+                    : t("elements.descriptions.thermalBridge")}
+                </Typography>
               </Box>
 
-              <Box display="flex" justifyContent="flex-end" mt={2}>
-                <Button size="small" color="primary">
-                  {t("common.edit")}
-                </Button>
-                <Button size="small" color="error" sx={{ mr: 1 }}>
-                  {t("common.delete")}
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+                <Button size="small" variant="outlined">
+                  {t("elements.details")}
                 </Button>
               </Box>
             </Paper>
           </Grid>
         ))}
       </Grid>
+
+      {elements.length === 0 && (
+        <Box textAlign="center" py={5}>
+          <Typography variant="h6" paragraph>
+            {t("elements.noElements")}
+          </Typography>
+          <Button variant="contained" color="primary" startIcon={<AddIcon />}>
+            {t("elements.addElement")}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

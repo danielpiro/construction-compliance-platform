@@ -16,7 +16,7 @@ import { Link, useLocation } from "react-router-dom";
 import FolderIcon from "@mui/icons-material/Folder";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
-import i18n from "../../utils/i18n";
+import { useTranslation } from "react-i18next";
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -29,23 +29,24 @@ const Sidebar: React.FC<SidebarProps> = ({
   handleDrawerToggle,
   drawerWidth,
 }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
 
   const menuItems = [
     {
-      text: i18n.t("nav.projects"),
+      text: t("nav.projects"),
       icon: <FolderIcon />,
       path: "/projects",
     },
     {
-      text: i18n.t("nav.profile"),
+      text: t("nav.profile"),
       icon: <PersonIcon />,
       path: "/profile",
     },
     {
-      text: i18n.t("nav.settings"),
+      text: t("nav.settings"),
       icon: <SettingsIcon />,
       path: "/settings",
     },

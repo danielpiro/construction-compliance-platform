@@ -17,8 +17,10 @@ import {
 } from "@mui/material";
 import authService from "../../services/authService";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const ForgotPasswordPage: React.FC = () => {
+  const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -26,8 +28,8 @@ const ForgotPasswordPage: React.FC = () => {
   // Validation schema
   const validationSchema = Yup.object({
     email: Yup.string()
-      .email('כתובת דוא"ל אינה תקינה')
-      .required('דוא"ל הוא שדה חובה'),
+      .email(t("auth.errors.invalidEmail"))
+      .required(t("auth.errors.requiredEmail")),
   });
 
   const formik = useFormik({
@@ -44,16 +46,13 @@ const ForgotPasswordPage: React.FC = () => {
 
         if (response.success) {
           setSuccess(true);
-          toast.success('הוראות לאיפוס הסיסמה נשלחו לדוא"ל שלך');
+          toast.success(t("auth.passwordResetSent"));
         } else {
-          setError(response.message || "שגיאה בתהליך שחזור הסיסמה");
+          setError(response.message || t("auth.errors.resetFailed"));
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
-        setError(
-          err.response?.data?.message ||
-            "שגיאה בתהליך שחזור הסיסמה. אנא נסה שוב מאוחר יותר."
-        );
+        setError(err.response?.data?.message || t("auth.errors.resetFailed"));
       } finally {
         setLoading(false);
       }
@@ -73,13 +72,13 @@ const ForgotPasswordPage: React.FC = () => {
         >
           <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
             <Alert severity="success" sx={{ mb: 2 }}>
-              הוראות לאיפוס הסיסמה נשלחו לדוא"ל שלך.
+              {t("auth.passwordResetSent")}
             </Alert>
             <Typography variant="body1" paragraph>
-              אנא בדוק את תיבת הדוא"ל שלך ועקוב אחר ההוראות לאיפוס הסיסמה שלך.
+              {t("auth.checkEmail")}
             </Typography>
             <Link component={RouterLink} to="/login" variant="body2">
-              חזור למסך ההתחברות
+              {t("auth.backToLogin")}
             </Link>
           </Paper>
         </Box>
@@ -100,11 +99,11 @@ const ForgotPasswordPage: React.FC = () => {
         <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
           <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>
             <Typography variant="h5" align="center" gutterBottom>
-              שחזור סיסמה
+              {t("auth.resetPassword")}
             </Typography>
 
             <Typography variant="body2" color="text.secondary" paragraph>
-              אנא הזן את כתובת הדוא"ל שלך ואנו נשלח לך קישור לאיפוס הסיסמה.
+              {t("auth.enterEmail")}
             </Typography>
 
             {error && (
@@ -118,7 +117,7 @@ const ForgotPasswordPage: React.FC = () => {
               fullWidth
               id="email"
               name="email"
-              label="דוא״ל"
+              label={t("auth.email")}
               autoComplete="email"
               autoFocus
               dir="ltr"
@@ -139,14 +138,14 @@ const ForgotPasswordPage: React.FC = () => {
               {loading ? (
                 <CircularProgress size={24} />
               ) : (
-                "שלח קישור לאיפוס סיסמה"
+                t("auth.sendResetLink")
               )}
             </Button>
 
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link component={RouterLink} to="/login" variant="body2">
-                  חזור למסך ההתחברות
+                  {t("auth.backToLogin")}
                 </Link>
               </Grid>
             </Grid>

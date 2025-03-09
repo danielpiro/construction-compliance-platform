@@ -39,6 +39,8 @@ import { SpaceForm, SpaceFormData } from "./components/spaces/SpaceForm";
 import EditSpaceForm from "./components/spaces/EditSpaceForm";
 import spaceService from "./services/spaceService";
 
+import "./utils/i18n"; // Import your i18n configuration
+
 // Create Space Form Component
 const CreateSpaceForm: React.FC = () => {
   const { typeId, projectId } = useParams();
@@ -86,8 +88,9 @@ const CreateSpaceForm: React.FC = () => {
 const RootRedirect: React.FC = () => {
   const { isLoggedIn, loading } = useAuth();
 
+  const { t } = useTranslation();
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>{t("common.loading")}</div>;
   }
 
   return isLoggedIn ? <Navigate to="/projects" /> : <HomePage />;
@@ -99,10 +102,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { t } = useTranslation();
   const { isLoggedIn, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>; // You could create a nice loading component here
+    return <div>{t("common.loadingMessage")}</div>;
   }
 
   if (!isLoggedIn) {
