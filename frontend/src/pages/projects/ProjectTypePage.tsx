@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Link as RouterLink,
-  useParams,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -78,9 +73,10 @@ const spaceTypeLabels: Record<string, string> = {
 
 const ProjectTypePage: React.FC = () => {
   const { t } = useTranslation();
-  const { typeId } = useParams<{ typeId: string }>();
-  const location = useLocation();
-  const projectId = location.state?.projectId;
+  const { typeId, projectId } = useParams<{
+    typeId: string;
+    projectId: string;
+  }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [buildingType, setBuildingType] = useState<BuildingType | null>(null);
@@ -100,8 +96,12 @@ const ProjectTypePage: React.FC = () => {
       const typeResponse = await buildingTypeService.getBuildingType(typeId);
       if (typeResponse.success) {
         setBuildingType(typeResponse.data);
+
+        // If projectId is not in URL, get it from the building type
+        const actualProjectId = projectId || typeResponse.data.project;
+
         const projectResponse = await projectService.getProject(
-          typeResponse.data.project
+          actualProjectId
         );
 
         // Set project info
@@ -153,7 +153,11 @@ const ProjectTypePage: React.FC = () => {
   };
 
   const handleCreateSpace = () => {
-    navigate(`/projects/${projectId}/types/${typeId}/spaces/create`);
+    if (!projectId && project) {
+      navigate(`/projects/${project._id}/types/${typeId}/spaces/create`);
+    } else {
+      navigate(`/projects/${projectId}/types/${typeId}/spaces/create`);
+    }
   };
 
   if (loading) {
@@ -189,6 +193,8 @@ const ProjectTypePage: React.FC = () => {
     );
   }
 
+  const actualProjectId = projectId || project._id;
+
   return (
     <Box p={3}>
       {/* Page Header */}
@@ -203,7 +209,7 @@ const ProjectTypePage: React.FC = () => {
         </Typography>
         <Box>
           <Button
-            onClick={() => navigate(`/projects/${projectId}`)}
+            onClick={() => navigate(`/projects/${actualProjectId}`)}
             variant="outlined"
             color="primary"
             startIcon={<ArrowBackIcon />}
@@ -216,7 +222,7 @@ const ProjectTypePage: React.FC = () => {
             color="primary"
             startIcon={<EditIcon />}
             onClick={() =>
-              navigate(`/projects/${projectId}/types/${typeId}/edit`)
+              navigate(`/projects/${actualProjectId}/types/${typeId}/edit`)
             }
             sx={{ mr: 1 }}
           >
@@ -252,7 +258,7 @@ const ProjectTypePage: React.FC = () => {
         </Link>
         <Link
           component={RouterLink}
-          to={`/projects/${project._id}`}
+          to={`/projects/${actualProjectId}`}
           underline="hover"
           color="inherit"
         >
@@ -300,7 +306,7 @@ const ProjectTypePage: React.FC = () => {
                     <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
                       <Button
                         component={RouterLink}
-                        to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/elements`}
+                        to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}/elements`}
                         variant="outlined"
                         fullWidth
                       >
@@ -308,7 +314,7 @@ const ProjectTypePage: React.FC = () => {
                       </Button>
                       <Button
                         component={RouterLink}
-                        to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/edit`}
+                        to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}/edit`}
                         variant="outlined"
                       >
                         עריכה

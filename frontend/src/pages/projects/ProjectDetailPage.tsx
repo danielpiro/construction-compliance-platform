@@ -54,15 +54,6 @@ interface BuildingType {
     | "Public Gathering";
 }
 
-const buildingTypeLabels: Record<string, string> = {
-  Residential: "מגורים",
-  Schools: "בתי ספר",
-  Offices: "משרדים",
-  Hotels: "מלונות",
-  Commercials: "מסחר",
-  "Public Gathering": "התקהלות ציבורית",
-};
-
 // Helper function to get display version
 const getDisplayVersion = (version: string): string => {
   switch (version) {
@@ -442,8 +433,7 @@ const ProjectDetailPage: React.FC = () => {
                   <Grid item xs={12} sm={6} md={4} key={type._id}>
                     <Paper
                       component={Link}
-                      to={`/building-types/${type._id}`}
-                      state={{ projectId }}
+                      to={`/projects/${projectId}/types/${type._id}`}
                       sx={{
                         p: 3,
                         textDecoration: "none",

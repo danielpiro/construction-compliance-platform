@@ -192,7 +192,7 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/building-types/:typeId"
+          path="/projects/:projectId/types/:typeId"
           element={
             <ProtectedRoute>
               <ProjectTypePage />
@@ -231,6 +231,12 @@ const App: React.FC = () => {
               <EditSpaceForm />
             </ProtectedRoute>
           }
+        />
+
+        {/* Redirect legacy routes */}
+        <Route
+          path="/building-types/:typeId"
+          element={<Navigate to="/projects" />}
         />
 
         {/* 404 Route */}

@@ -136,7 +136,7 @@ const ElementsPage: React.FC = () => {
             {projectName}
           </Link>
           <Link
-            to={`/building-types/${typeId}`}
+            to={`/projects/${projectId}/types/${typeId}`}
             style={{ textDecoration: "none" }}
           >
             {typeName}
