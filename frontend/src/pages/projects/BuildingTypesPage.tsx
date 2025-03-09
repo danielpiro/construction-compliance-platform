@@ -11,11 +11,15 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  Breadcrumbs,
+  IconButton,
 } from "@mui/material";
-import { Link as RouterLink, useParams } from "react-router-dom";
+import { Link as RouterLink, useParams, Link } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import buildingTypeService from "../../services/buildingTypeService";
 import BuildingTypeForm from "./BuildingTypeForm";
+import { toast } from "react-toastify";
 
 interface BuildingType {
   _id: string;
@@ -36,6 +40,7 @@ const BuildingTypesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [projectName, setProjectName] = useState("");
 
   const fetchBuildingTypes = async () => {
     if (!projectId) return;
@@ -44,6 +49,9 @@ const BuildingTypesPage: React.FC = () => {
       const response = await buildingTypeService.getBuildingTypes(projectId);
       if (response.success) {
         setBuildingTypes(response.data);
+        if (response.projectName) {
+          setProjectName(response.projectName);
+        }
       } else {
         setError(t("buildingTypes.loadError"));
       }
@@ -70,6 +78,25 @@ const BuildingTypesPage: React.FC = () => {
   const handleTypeCreated = () => {
     setCreateDialogOpen(false);
     fetchBuildingTypes();
+  };
+
+  const handleDeleteType = async (typeId: string) => {
+    if (!window.confirm(t("buildingTypes.confirmDelete"))) {
+      return;
+    }
+
+    try {
+      const response = await buildingTypeService.deleteBuildingType(typeId);
+      if (response.success) {
+        toast.success(t("buildingTypes.deleteSuccess"));
+        setBuildingTypes(buildingTypes.filter((type) => type._id !== typeId));
+      } else {
+        throw new Error(response.message || t("errors.generic"));
+      }
+    } catch (error) {
+      console.error("Failed to delete building type:", error);
+      toast.error(t("buildingTypes.deleteFailed"));
+    }
   };
 
   if (loading) {
@@ -107,6 +134,22 @@ const BuildingTypesPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Breadcrumbs */}
+      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
+        <Link to="/projects" style={{ textDecoration: "none" }}>
+          {t("nav.projects")}
+        </Link>
+        {projectId && projectName && (
+          <Link
+            to={`/projects/${projectId}`}
+            style={{ textDecoration: "none" }}
+          >
+            {projectName}
+          </Link>
+        )}
+        <Typography color="text.primary">{t("buildingTypes.title")}</Typography>
+      </Breadcrumbs>
+
       <Box
         sx={{
           display: "flex",
@@ -116,7 +159,9 @@ const BuildingTypesPage: React.FC = () => {
         }}
       >
         <Typography variant="h4" component="h1">
-          {t("buildingTypes.title")}
+          {projectName
+            ? `${projectName} - ${t("buildingTypes.title")}`
+            : t("buildingTypes.title")}
         </Typography>
       </Box>
 
@@ -137,15 +182,40 @@ const BuildingTypesPage: React.FC = () => {
                     boxShadow: 3,
                   },
                   display: "block",
+                  position: "relative", // For absolute positioning of delete button
                 }}
               >
                 <Typography variant="h6" gutterBottom>
                   {type.name}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {t("buildingTypes.type")}:{" "}
-                  {t(`buildingTypes.labels.${type.type}`)}
-                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    {t("buildingTypes.type")}:{" "}
+                    {t(`buildingTypes.labels.${type.type}`)}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={(e) => {
+                      e.preventDefault(); // Prevent navigation
+                      handleDeleteType(type._id);
+                    }}
+                    aria-label={t("common.delete")}
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
               </Paper>
             </Grid>
           ))}

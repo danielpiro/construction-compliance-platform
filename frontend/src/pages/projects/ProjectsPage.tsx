@@ -9,11 +9,14 @@ import {
   CircularProgress,
   Alert,
   Paper,
+  IconButton,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import BugReportIcon from "@mui/icons-material/BugReport";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { toast } from "react-toastify";
 
 import projectService from "../../services/projectService";
 import { getToken } from "../../utils/tokenStorage";
@@ -54,6 +57,34 @@ const ProjectsPage: React.FC = () => {
         return "תיקון 2";
       default:
         return version;
+    }
+  };
+
+  const handleDeleteProject = async (
+    e: React.MouseEvent,
+    projectId: string,
+    projectName: string
+  ) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Stop event propagation
+
+    if (
+      !window.confirm(`האם אתה בטוח שברצונך למחוק את הפרויקט "${projectName}"?`)
+    ) {
+      return;
+    }
+
+    try {
+      const response = await projectService.deleteProject(projectId);
+      if (response.success) {
+        toast.success("הפרויקט נמחק בהצלחה");
+        setProjects(projects.filter((project) => project._id !== projectId));
+      } else {
+        throw new Error(response.message || "Failed to delete project");
+      }
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+      toast.error("שגיאה במחיקת הפרויקט");
     }
   };
 
@@ -286,8 +317,30 @@ const ProjectsPage: React.FC = () => {
                       transform: "translateY(-4px)",
                       boxShadow: 3,
                     },
+                    position: "relative", // For delete button positioning
                   }}
                 >
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={(e) =>
+                      handleDeleteProject(e, project._id, project.name)
+                    }
+                    aria-label="delete project"
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      zIndex: 2,
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 1)",
+                      },
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+
                   {project.image && (
                     <Box
                       sx={{

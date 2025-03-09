@@ -23,12 +23,12 @@ type BuildingType =
 
 // Building type options
 const BUILDING_TYPES = [
-  { value: "Residential", label: "types.residential" },
-  { value: "Schools", label: "types.schools" },
-  { value: "Offices", label: "types.offices" },
-  { value: "Hotels", label: "types.hotels" },
-  { value: "Commercials", label: "types.commercials" },
-  { value: "Public Gathering", label: "types.publicGathering" },
+  { value: "Residential", label: "buildingTypes.labels.Residential" },
+  { value: "Schools", label: "buildingTypes.labels.Schools" },
+  { value: "Offices", label: "buildingTypes.labels.Offices" },
+  { value: "Hotels", label: "buildingTypes.labels.Hotels" },
+  { value: "Commercials", label: "buildingTypes.labels.Commercials" },
+  { value: "Public Gathering", label: "buildingTypes.labels.Public Gathering" },
 ];
 
 interface BuildingTypeFormProps {
@@ -96,16 +96,16 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
         formData
       );
       if (response.success) {
-        toast.success(t("projects.types.createSuccess"));
+        toast.success(t("buildingTypes.createSuccess"));
         if (onSuccess) {
           onSuccess();
         }
       } else {
-        toast.error(t("projects.types.createError"));
+        toast.error(t("buildingTypes.createError"));
       }
     } catch (error) {
       console.error("Error creating building type:", error);
-      toast.error(t("projects.types.createError"));
+      toast.error(t("buildingTypes.createError"));
     }
   };
 
@@ -113,7 +113,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
     <Paper elevation={3} sx={{ p: 3 }}>
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <Typography variant="h5" gutterBottom>
-          {t("projects.types.createNew")}
+          {t("buildingTypes.createNew")}
         </Typography>
 
         <Grid container spacing={3}>
@@ -124,7 +124,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
               fullWidth
               id="name"
               name="name"
-              label={t("projects.types.name")}
+              label={t("buildingTypes.name")}
               value={formData.name}
               onChange={handleChange}
               error={!!errors.name}
@@ -140,7 +140,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
               fullWidth
               id="type"
               name="type"
-              label={t("projects.types.type")}
+              label={t("buildingTypes.type")}
               value={formData.type}
               onChange={handleChange}
               error={!!errors.type}
@@ -165,7 +165,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
               fullWidth
               size="large"
             >
-              {t("projects.types.create")}
+              {t("buildingTypes.create")}
             </Button>
           </Grid>
         </Grid>

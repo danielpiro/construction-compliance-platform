@@ -20,12 +20,26 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import spaceService from "../../services/spaceService";
 import { toast } from "react-toastify";
 
+interface Element {
+  _id: string;
+  name: string;
+  type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
+  subType?:
+    | "Outside Wall"
+    | "Isolation Wall"
+    | "Upper Open Space"
+    | "Upper Close Room"
+    | "Upper Roof"
+    | "Under Roof";
+  parameters: Record<string, string | number | boolean | null>;
+}
+
 interface Space {
   _id: string;
   name: string;
   type: string;
   buildingType: string;
-  elements: any[];
+  elements: Element[];
 }
 
 const SpacesPage: React.FC = () => {
@@ -124,7 +138,7 @@ const SpacesPage: React.FC = () => {
         )}
         {typeId && buildingTypeName && (
           <Link
-            to={`/building-types/${typeId}`}
+            to={`/projects/${projectId}/types/${typeId}`}
             style={{ textDecoration: "none" }}
           >
             {buildingTypeName}
@@ -142,7 +156,9 @@ const SpacesPage: React.FC = () => {
         }}
       >
         <Typography variant="h4" component="h1">
-          {t("spaces.title")}
+          {projectName && buildingTypeName
+            ? `${projectName} - ${buildingTypeName} - ${t("spaces.title")}`
+            : t("spaces.title")}
         </Typography>
         <Button
           component={Link}
