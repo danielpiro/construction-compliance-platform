@@ -129,7 +129,8 @@ const EditProjectPage: React.FC = () => {
     permissionDate: parsedDate,
     buildingVersion: project.buildingVersion || getBuildingVersion(parsedDate),
     imageUrl: project.imageUrl,
-    image: null, // Initialize image as null
+    image: null,
+    spaces: [],
   };
 
   return (

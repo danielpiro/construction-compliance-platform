@@ -16,6 +16,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { toast } from "react-toastify";
 
 import projectService from "../../services/projectService";
@@ -320,26 +321,49 @@ const ProjectsPage: React.FC = () => {
                     position: "relative", // For delete button positioning
                   }}
                 >
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={(e) =>
-                      handleDeleteProject(e, project._id, project.name)
-                    }
-                    aria-label="delete project"
+                  <Box
                     sx={{
                       position: "absolute",
                       top: 8,
                       right: 8,
                       zIndex: 2,
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 1)",
-                      },
+                      display: "flex",
+                      gap: 1,
                     }}
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                    <IconButton
+                      component={Link}
+                      to={`/projects/${project._id}/edit`}
+                      size="small"
+                      color="primary"
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label="edit project"
+                      sx={{
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 1)",
+                        },
+                      }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={(e) =>
+                        handleDeleteProject(e, project._id, project.name)
+                      }
+                      aria-label="delete project"
+                      sx={{
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 1)",
+                        },
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
 
                   {project.image && (
                     <Box

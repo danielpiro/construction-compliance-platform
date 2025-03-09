@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, MouseEvent } from "react";
 import {
   Box,
   Typography,
@@ -13,6 +13,7 @@ import {
   DialogTitle,
   CircularProgress,
   Alert,
+  IconButton,
 } from "@mui/material";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -22,6 +23,7 @@ import AddIcon from "@mui/icons-material/Add";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import api from "../../services/api";
+import { toast } from "react-toastify";
 import { getToken, removeToken } from "../../utils/tokenStorage";
 import { areaToHebrew } from "../../utils/areaMapping";
 import buildingTypeService from "../../services/buildingTypeService";
@@ -53,6 +55,15 @@ interface BuildingType {
     | "Commercials"
     | "Public Gathering";
 }
+
+const buildingTypeLabels: Record<string, string> = {
+  Residential: "מגורים",
+  Schools: "בתי ספר",
+  Offices: "משרדים",
+  Hotels: "מלונות",
+  Commercials: "מסחר",
+  "Public Gathering": "התקהלות ציבורית",
+};
 
 // Helper function to get display version
 const getDisplayVersion = (version: string): string => {
@@ -104,6 +115,9 @@ const ProjectDetailPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [deleteTypeDialogOpen, setDeleteTypeDialogOpen] =
+    useState<boolean>(false);
+  const [typeToDelete, setTypeToDelete] = useState<BuildingType | null>(null);
   const [createTypeDialogOpen, setCreateTypeDialogOpen] =
     useState<boolean>(false);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
@@ -283,14 +297,13 @@ const ProjectDetailPage: React.FC = () => {
             {showDebug ? t("common.hideDebug") : t("common.showDebug")}
           </Button>
           {project && (
-            <>
+            <Box display="flex" gap={1}>
               <Button
                 component={Link}
                 to={`/projects/${projectId}/edit`}
                 variant="outlined"
                 color="primary"
                 startIcon={<EditIcon />}
-                sx={{ mr: 1 }}
               >
                 {t("common.edit")}
               </Button>
@@ -302,7 +315,7 @@ const ProjectDetailPage: React.FC = () => {
               >
                 {t("common.delete")}
               </Button>
-            </>
+            </Box>
           )}
         </Box>
       </Box>
@@ -431,28 +444,67 @@ const ProjectDetailPage: React.FC = () => {
               <Grid container spacing={3}>
                 {buildingTypes.map((type) => (
                   <Grid item xs={12} sm={6} md={4} key={type._id}>
-                    <Paper
-                      component={Link}
-                      to={`/projects/${projectId}/types/${type._id}`}
-                      sx={{
-                        p: 3,
-                        textDecoration: "none",
-                        color: "inherit",
-                        transition: "transform 0.2s, box-shadow 0.2s",
-                        "&:hover": {
-                          transform: "translateY(-4px)",
-                          boxShadow: 3,
-                        },
-                        display: "block",
-                      }}
-                    >
-                      <Typography variant="h6" gutterBottom>
-                        {type.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {t("projects.types.type")}:{" "}
-                        {t(`types.${type.type.toLowerCase()}`)}
-                      </Typography>
+                    <Paper sx={{ p: 3, position: "relative" }}>
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          display: "flex",
+                          gap: 1,
+                          zIndex: 2,
+                        }}
+                      >
+                        <IconButton
+                          component={Link}
+                          to={`/projects/${projectId}/types/${type._id}/edit`}
+                          size="small"
+                          color="primary"
+                          onClick={(e: MouseEvent) => e.stopPropagation()}
+                          sx={{
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            "&:hover": {
+                              backgroundColor: "rgba(255, 255, 255, 1)",
+                            },
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={(e: MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setTypeToDelete(type);
+                            setDeleteTypeDialogOpen(true);
+                          }}
+                          sx={{
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            "&:hover": {
+                              backgroundColor: "rgba(255, 255, 255, 1)",
+                            },
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                      <Box
+                        component={Link}
+                        to={`/projects/${projectId}/types/${type._id}`}
+                        sx={{
+                          textDecoration: "none",
+                          color: "inherit",
+                        }}
+                      >
+                        <Typography variant="h6" gutterBottom>
+                          {type.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {t("projects.types.type")}:{" "}
+                          {buildingTypeLabels[type.type]}
+                        </Typography>
+                      </Box>
                     </Paper>
                   </Grid>
                 ))}
@@ -492,7 +544,7 @@ const ProjectDetailPage: React.FC = () => {
             </DialogContent>
           </Dialog>
 
-          {/* Delete Confirmation Dialog */}
+          {/* Delete Project Confirmation Dialog */}
           <Dialog
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen(false)}
@@ -512,6 +564,53 @@ const ProjectDetailPage: React.FC = () => {
               </Button>
               <Button onClick={handleDeleteProject} color="error">
                 {t("common.delete")}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Delete Type Confirmation Dialog */}
+          <Dialog
+            open={deleteTypeDialogOpen}
+            onClose={() => setDeleteTypeDialogOpen(false)}
+          >
+            <DialogTitle>מחיקת סוג מבנה</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                האם אתה בטוח שברצונך למחוק את סוג המבנה "{typeToDelete?.name}"?
+                פעולה זו אינה ניתנת לביטול ותמחק את כל החללים והאלמנטים
+                המקושרים.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteTypeDialogOpen(false)}>
+                ביטול
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (typeToDelete?._id) {
+                    try {
+                      const response =
+                        await buildingTypeService.deleteBuildingType(
+                          typeToDelete._id
+                        );
+                      if (response.success) {
+                        toast.success("סוג המבנה נמחק בהצלחה");
+                        fetchBuildingTypes();
+                      } else {
+                        toast.error("שגיאה במחיקת סוג המבנה");
+                      }
+                    } catch (err) {
+                      console.error("Error deleting building type:", err);
+                      toast.error("שגיאה במחיקת סוג המבנה");
+                    }
+                    setDeleteTypeDialogOpen(false);
+                    setTypeToDelete(null);
+                  }
+                }}
+                color="error"
+                autoFocus
+              >
+                מחק
               </Button>
             </DialogActions>
           </Dialog>

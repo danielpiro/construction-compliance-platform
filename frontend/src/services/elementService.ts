@@ -1,4 +1,6 @@
+// src/services/elementService.ts
 import api from "./api";
+import { AxiosError } from "axios";
 
 // Define types
 export interface Element {
@@ -9,12 +11,23 @@ export interface Element {
   spaceId: string;
   projectId: string;
   typeId: string;
+  parameters?: Record<string, any>;
 }
 
 export interface ElementFormData {
   name: string;
   type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
   subType?: string;
+  parameters?: Record<string, any>;
+}
+
+export interface ComplianceCheckResult {
+  isCompliant: boolean;
+  details: {
+    checksPassed: string[];
+    checksFailed: string[];
+    recommendations: string[];
+  };
 }
 
 // Get all elements for a space
@@ -107,3 +120,156 @@ export const deleteElement = async (
     throw error;
   }
 };
+
+// Run compliance check for an element
+export const runComplianceCheck = async (
+  projectId: string,
+  typeId: string,
+  spaceId: string,
+  elementId: string
+): Promise<ComplianceCheckResult> => {
+  try {
+    const response = await api.post(
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}/compliance-check`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error running compliance check:", error);
+    throw error;
+  }
+};
+
+// Add parameters to an element
+export const addElementParameters = async (
+  projectId: string,
+  typeId: string,
+  spaceId: string,
+  elementId: string,
+  parameters: Record<string, any>
+): Promise<Element> => {
+  try {
+    const response = await api.post(
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}/parameters`,
+      parameters
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error adding element parameters:", error);
+    throw error;
+  }
+};
+
+// Update parameters of an element
+export const updateElementParameters = async (
+  projectId: string,
+  typeId: string,
+  spaceId: string,
+  elementId: string,
+  parameters: Record<string, any>
+): Promise<Element> => {
+  try {
+    const response = await api.put(
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}/parameters`,
+      parameters
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating element parameters:", error);
+    throw error;
+  }
+};
+
+// Get regulatory standards for an element type
+export const getElementStandards = async (
+  elementType: string
+): Promise<Record<string, any>> => {
+  try {
+    const response = await api.get(`/standards/elements/${elementType}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching element standards:", error);
+    throw error;
+  }
+};
+
+// Get thermal properties for an element type
+export const getElementThermalProperties = async (
+  projectId: string,
+  typeId: string,
+  spaceId: string,
+  elementId: string
+): Promise<Record<string, any>> => {
+  try {
+    const response = await api.get(
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}/thermal-properties`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching element thermal properties:", error);
+    throw error;
+  }
+};
+
+// Calculate U-value for an element
+export const calculateElementUValue = async (
+  projectId: string,
+  typeId: string,
+  spaceId: string,
+  elementId: string,
+  materials: Array<{ type: string; thickness: number }>
+): Promise<{
+  uValue: number;
+  isCompliant: boolean;
+  minimumRequired: number;
+}> => {
+  try {
+    const response = await api.post(
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}/calculate-u-value`,
+      { materials }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error calculating element U-value:", error);
+    throw error;
+  }
+};
+
+// Error handler helper function
+export const handleElementServiceError = (error: unknown): string => {
+  if (error instanceof AxiosError && error.response) {
+    const { status, data } = error.response;
+    switch (status) {
+      case 400:
+        return `Invalid request: ${data.message || "Bad request"}`;
+      case 401:
+        return "Authentication required. Please log in again.";
+      case 403:
+        return "You do not have permission to perform this action.";
+      case 404:
+        return "Element not found.";
+      case 500:
+        return "Server error. Please try again later.";
+      default:
+        return `Error: ${data.message || "Unknown error"}`;
+    }
+  }
+  return error instanceof Error ? error.message : "An unknown error occurred";
+};
+
+// Export all functions in an object for alternate import style
+const elementService = {
+  getElements,
+  getElement,
+  createElement,
+  updateElement,
+  deleteElement,
+  runComplianceCheck,
+  addElementParameters,
+  updateElementParameters,
+  getElementStandards,
+  getElementThermalProperties,
+  calculateElementUValue,
+  handleElementServiceError,
+};
+
+export default elementService;

@@ -1,12 +1,5 @@
-import React, { useState } from "react";
-import {
-  Routes,
-  Route,
-  Navigate,
-  useParams,
-  useNavigate,
-} from "react-router-dom";
-import { Box, Alert } from "@mui/material";
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import MainLayout from "./components/layouts/MainLayout";
 
@@ -29,60 +22,22 @@ import CreateProjectPage from "./pages/projects/CreateProjectPage";
 import EditProjectPage from "./pages/projects/EditProjectPage";
 import ProjectDetailPage from "./pages/projects/ProjectDetailPage";
 import ProjectTypePage from "./pages/projects/ProjectTypePage";
-import SpacesPage from "./pages/spaces/SpacesPage";
-import ElementsPage from "./pages/elements/ElementsPage";
+import SpacesPage from "./pages/projects/SpacesPage";
+import ElementsPage from "./pages/projects/ElementsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { useAuth } from "./hooks/useAuth";
 import ProfilePage from "./pages/projects/ProfilePage";
-import SettingsPage from "./pages/settings/SettingsPage";
-import { SpaceForm, SpaceFormData } from "./components/spaces/SpaceForm";
-import EditSpaceForm from "./components/spaces/EditSpaceForm";
-import spaceService from "./services/spaceService";
+import SettingsPage from "./pages/projects/SettingsPage";
 
 import "./utils/i18n"; // Import your i18n configuration
-
-// Create Space Form Component
-const CreateSpaceForm: React.FC = () => {
-  const { typeId, projectId } = useParams();
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (spaces: SpaceFormData[]) => {
-    try {
-      if (!typeId) throw new Error(t("errors.generic"));
-      setError(null);
-
-      // Create all spaces at once
-      const creationPromises = spaces.map((space) =>
-        spaceService.createSpace(typeId, {
-          name: space.name,
-          type: space.type,
-          elements: space.elements,
-        })
-      );
-
-      await Promise.all(creationPromises);
-
-      // Navigate back to project type page
-      navigate(`/projects/${projectId}/types/${typeId}/spaces`);
-    } catch (error) {
-      console.error("Failed to create space:", error);
-      setError(error instanceof Error ? error.message : t("errors.generic"));
-    }
-  };
-
-  return (
-    <>
-      {error && (
-        <Box sx={{ mb: 2 }}>
-          <Alert severity="error">{error}</Alert>
-        </Box>
-      )}
-      <SpaceForm onSubmit={handleSubmit} />
-    </>
-  );
-};
+import CreateProjectTypePage from "./pages/projects/CreateProjectTypePage";
+import EditProjectTypePage from "./pages/projects/EditProjectTypePage";
+import SpaceDetailsPage from "./pages/projects/SpaceDetailsPage";
+import CreateSpacePage from "./pages/projects/CreateSpacePage";
+import EditSpacePage from "./pages/projects/EditSpacePage";
+import ElementDetailsPage from "./pages/projects/ElementDetailsPage";
+import CreateElementPage from "./pages/projects/CreateElementPage";
+import EditElementPage from "./pages/projects/EditElementPage";
 
 // Root redirect component that checks auth state
 const RootRedirect: React.FC = () => {
@@ -132,15 +87,6 @@ const App: React.FC = () => {
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
         {/* Protected Routes */}
-        {/* Dashboard route temporarily hidden
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        /> */}
         <Route
           path="/profile"
           element={
@@ -192,10 +138,34 @@ const App: React.FC = () => {
           }
         />
         <Route
+          path="/projects/:projectId/types"
+          element={
+            <ProtectedRoute>
+              <ProjectTypePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:projectId/types/create"
+          element={
+            <ProtectedRoute>
+              <CreateProjectTypePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/projects/:projectId/types/:typeId"
           element={
             <ProtectedRoute>
               <ProjectTypePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:projectId/types/:typeId/edit"
+          element={
+            <ProtectedRoute>
+              <EditProjectTypePage />
             </ProtectedRoute>
           }
         />
@@ -208,10 +178,26 @@ const App: React.FC = () => {
           }
         />
         <Route
+          path="/projects/:projectId/types/:typeId/spaces/:spaceId"
+          element={
+            <ProtectedRoute>
+              <SpaceDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/projects/:projectId/types/:typeId/spaces/create"
           element={
             <ProtectedRoute>
-              <CreateSpaceForm />
+              <CreateSpacePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:projectId/types/:typeId/spaces/:spaceId/edit"
+          element={
+            <ProtectedRoute>
+              <EditSpacePage />
             </ProtectedRoute>
           }
         />
@@ -223,20 +209,29 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/projects/:projectId/types/:typeId/spaces/:spaceId/edit"
+          path="/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId"
           element={
             <ProtectedRoute>
-              <EditSpaceForm />
+              <ElementDetailsPage />
             </ProtectedRoute>
           }
         />
-
-        {/* Redirect legacy routes */}
         <Route
-          path="/building-types/:typeId"
-          element={<Navigate to="/projects" />}
+          path="/projects/:projectId/types/:typeId/spaces/:spaceId/elements/create"
+          element={
+            <ProtectedRoute>
+              <CreateElementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId/edit"
+          element={
+            <ProtectedRoute>
+              <EditElementPage />
+            </ProtectedRoute>
+          }
         />
 
         {/* 404 Route */}

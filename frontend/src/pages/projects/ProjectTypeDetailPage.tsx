@@ -4,8 +4,8 @@ import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
-  Grid,
   Button,
+  Grid,
   Breadcrumbs,
   Link,
   CircularProgress,
@@ -16,7 +16,6 @@ import {
   DialogTitle,
   Paper,
   Fab,
-  IconButton,
 } from "@mui/material";
 import {
   Home as HomeIcon,
@@ -47,7 +46,7 @@ interface BuildingType {
 interface Space {
   _id: string;
   name: string;
-  type: "Bedroom" | "Protect Space" | "Wet Room" | "Balcony";
+  type: string;
   buildingType: string;
 }
 
@@ -72,7 +71,7 @@ const spaceTypeLabels: Record<string, string> = {
   Balcony: "מרפסת",
 };
 
-const ProjectTypePage: React.FC = () => {
+const ProjectTypeDetailPage: React.FC = () => {
   const { t } = useTranslation();
   const { typeId, projectId } = useParams<{
     typeId: string;
@@ -83,9 +82,7 @@ const ProjectTypePage: React.FC = () => {
   const [buildingType, setBuildingType] = useState<BuildingType | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [spaces, setSpaces] = useState<Space[]>([]);
-  const [deleteTypeDialogOpen, setDeleteTypeDialogOpen] = useState(false);
-  const [deleteSpaceDialogOpen, setDeleteSpaceDialogOpen] = useState(false);
-  const [spaceToDelete, setSpaceToDelete] = useState<Space | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchBuildingTypeData = async () => {
@@ -121,12 +118,11 @@ const ProjectTypePage: React.FC = () => {
           setSpaces(spacesResponse.data);
         }
       } else {
-        setError("אירעה שגיאה בטעינת פרטי סוג המבנה");
+        setError(t("errors.generic"));
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching building type data:", err);
-      setError("אירעה שגיאה בטעינת פרטי סוג המבנה. אנא נסה שוב מאוחר יותר.");
+      setError(t("errors.generic"));
     } finally {
       setLoading(false);
     }
@@ -142,16 +138,16 @@ const ProjectTypePage: React.FC = () => {
     try {
       const response = await buildingTypeService.deleteBuildingType(typeId);
       if (response.success) {
-        toast.success("סוג המבנה נמחק בהצלחה");
+        toast.success(t("buildingTypes.deleteSuccess"));
         navigate(`/projects/${project._id}`);
       } else {
-        toast.error("שגיאה במחיקת סוג המבנה");
+        toast.error(t("buildingTypes.deleteFailed"));
       }
     } catch (err) {
       console.error("Error deleting building type:", err);
-      toast.error("שגיאה במחיקת סוג המבנה");
+      toast.error(t("buildingTypes.deleteFailed"));
     } finally {
-      setDeleteTypeDialogOpen(false);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -182,7 +178,7 @@ const ProjectTypePage: React.FC = () => {
     return (
       <Box p={3}>
         <Typography color="error" variant="h6">
-          {error || "סוג מבנה לא נמצא"}
+          {error || t("buildingTypes.loadError")}
         </Typography>
         <Button
           component={RouterLink}
@@ -190,7 +186,7 @@ const ProjectTypePage: React.FC = () => {
           variant="contained"
           sx={{ mt: 2 }}
         >
-          חזור לרשימת הפרויקטים
+          {t("buildingTypes.backToProjects")}
         </Button>
       </Box>
     );
@@ -207,35 +203,38 @@ const ProjectTypePage: React.FC = () => {
         alignItems="center"
         mb={3}
       >
-        <Box display="flex" alignItems="center" gap={2}>
-          <IconButton
+        <Typography variant="h4" component="h1">
+          {buildingType.name} - {t("projects.projectType")}
+        </Typography>
+        <Box>
+          <Button
             onClick={() => navigate(`/projects/${actualProjectId}`)}
+            variant="outlined"
             color="primary"
-            sx={{ backgroundColor: "rgba(255, 255, 255, 0.9)" }}
+            startIcon={<ArrowBackIcon />}
+            sx={{ mr: 1 }}
           >
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h4" component="h1">
-            {buildingType.name} - {t("projects.projectType")}
-          </Typography>
-        </Box>
-        <Box display="flex" gap={1}>
-          <IconButton
+            {t("common.back")}
+          </Button>
+          <Button
+            variant="outlined"
             color="primary"
+            startIcon={<EditIcon />}
             onClick={() =>
               navigate(`/projects/${actualProjectId}/types/${typeId}/edit`)
             }
-            sx={{ backgroundColor: "rgba(255, 255, 255, 0.9)" }}
+            sx={{ mr: 1 }}
           >
-            <EditIcon />
-          </IconButton>
-          <IconButton
+            {t("common.edit")}
+          </Button>
+          <Button
+            variant="outlined"
             color="error"
-            onClick={() => setDeleteTypeDialogOpen(true)}
-            sx={{ backgroundColor: "rgba(255, 255, 255, 0.9)" }}
+            startIcon={<DeleteIcon />}
+            onClick={() => setDeleteDialogOpen(true)}
           >
-            <DeleteIcon />
-          </IconButton>
+            {t("common.delete")}
+          </Button>
         </Box>
       </Box>
 
@@ -246,7 +245,7 @@ const ProjectTypePage: React.FC = () => {
             sx={{ ml: 0.5, verticalAlign: "middle" }}
             fontSize="small"
           />
-          ראשי
+          {t("nav.home")}
         </Link>
         <Link
           component={RouterLink}
@@ -254,7 +253,7 @@ const ProjectTypePage: React.FC = () => {
           underline="hover"
           color="inherit"
         >
-          פרויקטים
+          {t("nav.projects")}
         </Link>
         <Link
           component={RouterLink}
@@ -272,7 +271,8 @@ const ProjectTypePage: React.FC = () => {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Typography variant="body1">
-              <strong>סוג:</strong> {buildingTypeLabels[buildingType.type]}
+              <strong>{t("buildingTypes.type")}:</strong>{" "}
+              {t(`buildingTypes.labels.${buildingType.type}`)}
             </Typography>
           </Grid>
         </Grid>
@@ -280,9 +280,14 @@ const ProjectTypePage: React.FC = () => {
 
       {/* Spaces Section */}
       <Box>
-        <Box justifyContent="space-between" alignItems="center" mb={3}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={3}
+        >
           <Typography variant="h5" component="h2">
-            חללי המבנה
+            {t("spaces.title")}
           </Typography>
         </Box>
 
@@ -291,66 +296,34 @@ const ProjectTypePage: React.FC = () => {
             <Grid container spacing={3}>
               {spaces.map((space) => (
                 <Grid item xs={12} sm={6} md={4} key={space._id}>
-                  <Paper sx={{ p: 3, position: "relative" }}>
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        display: "flex",
-                        gap: 1,
-                        zIndex: 2,
-                      }}
-                    >
-                      <IconButton
+                  <Paper sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      {space.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t("buildingTypes.type")}:{" "}
+                      {t(
+                        `spaces.types.${space.type
+                          .toLowerCase()
+                          .replace(/\s+/g, "")}`
+                      )}
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                      <Button
+                        component={RouterLink}
+                        to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}/elements`}
+                        variant="outlined"
+                        fullWidth
+                      >
+                        {t("elements.viewElements")}
+                      </Button>
+                      <Button
                         component={RouterLink}
                         to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}/edit`}
-                        size="small"
-                        color="primary"
-                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        sx={{
-                          backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          "&:hover": {
-                            backgroundColor: "rgba(255, 255, 255, 1)",
-                          },
-                        }}
+                        variant="outlined"
                       >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setSpaceToDelete(space);
-                          setDeleteSpaceDialogOpen(true);
-                        }}
-                        sx={{
-                          backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          "&:hover": {
-                            backgroundColor: "rgba(255, 255, 255, 1)",
-                          },
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                    <Box
-                      component={RouterLink}
-                      to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}/elements`}
-                      sx={{
-                        textDecoration: "none",
-                        color: "inherit",
-                        display: "block",
-                      }}
-                    >
-                      <Typography variant="h6" gutterBottom>
-                        {space.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        סוג: {spaceTypeLabels[space.type]}
-                      </Typography>
+                        {t("common.edit")}
+                      </Button>
                     </Box>
                   </Paper>
                 </Grid>
@@ -359,7 +332,7 @@ const ProjectTypePage: React.FC = () => {
           ) : (
             <Box textAlign="center">
               <Typography variant="body1" paragraph>
-                אין חללים מוגדרים עדיין
+                {t("spaces.noSpaces")}
               </Typography>
               <Button
                 variant="contained"
@@ -367,7 +340,7 @@ const ProjectTypePage: React.FC = () => {
                 startIcon={<AddIcon />}
                 onClick={handleCreateSpace}
               >
-                הוסף חלל חדש
+                {t("spaces.addSpace")}
               </Button>
             </Box>
           )}
@@ -383,66 +356,23 @@ const ProjectTypePage: React.FC = () => {
         <AddIcon />
       </Fab>
 
-      {/* Delete Type Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog
-        open={deleteTypeDialogOpen}
-        onClose={() => setDeleteTypeDialogOpen(false)}
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
       >
-        <DialogTitle>מחיקת סוג מבנה</DialogTitle>
+        <DialogTitle>{t("buildingTypes.confirmDelete")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            האם אתה בטוח שברצונך למחוק את סוג המבנה "{buildingType.name}"? פעולה
-            זו אינה ניתנת לביטול ותמחק את כל החללים והאלמנטים המקושרים.
+            {t("buildingTypes.confirmDelete")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteTypeDialogOpen(false)}>ביטול</Button>
-          <Button onClick={handleDeleteBuildingType} color="error" autoFocus>
-            מחק
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            {t("common.cancel")}
           </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Delete Space Confirmation Dialog */}
-      <Dialog
-        open={deleteSpaceDialogOpen}
-        onClose={() => setDeleteSpaceDialogOpen(false)}
-      >
-        <DialogTitle>מחיקת חלל</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            האם אתה בטוח שברצונך למחוק את החלל "{spaceToDelete?.name}"? פעולה זו
-            אינה ניתנת לביטול ותמחק את כל האלמנטים המקושרים.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteSpaceDialogOpen(false)}>ביטול</Button>
-          <Button
-            onClick={async () => {
-              if (spaceToDelete?._id) {
-                try {
-                  const response = await spaceService.deleteSpace(
-                    spaceToDelete._id
-                  );
-                  if (response.success) {
-                    toast.success("החלל נמחק בהצלחה");
-                    // Refresh the spaces list
-                    fetchBuildingTypeData();
-                  } else {
-                    toast.error("שגיאה במחיקת החלל");
-                  }
-                } catch (err) {
-                  console.error("Error deleting space:", err);
-                  toast.error("שגיאה במחיקת החלל");
-                }
-                setDeleteSpaceDialogOpen(false);
-                setSpaceToDelete(null);
-              }
-            }}
-            color="error"
-            autoFocus
-          >
-            מחק
+          <Button onClick={handleDeleteBuildingType} color="error" autoFocus>
+            {t("common.delete")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -450,4 +380,4 @@ const ProjectTypePage: React.FC = () => {
   );
 };
 
-export default ProjectTypePage;
+export default ProjectTypeDetailPage;
