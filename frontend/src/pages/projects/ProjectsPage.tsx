@@ -45,7 +45,6 @@ const ProjectsPage: React.FC = () => {
   const [showDebug, setShowDebug] = useState(false);
   const projectsPerPage = 12;
 
-  // Helper function to get display version
   const getDisplayVersion = (version: string): string => {
     switch (version) {
       case "version2011":
@@ -66,8 +65,8 @@ const ProjectsPage: React.FC = () => {
     projectId: string,
     projectName: string
   ) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation(); // Stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
 
     if (
       !window.confirm(`האם אתה בטוח שברצונך למחוק את הפרויקט "${projectName}"?`)
@@ -89,18 +88,14 @@ const ProjectsPage: React.FC = () => {
     }
   };
 
-  // Function to fetch projects with detailed debugging
   const fetchProjects = async () => {
-    // Avoid duplicate calls
     if (isLoading) return;
 
-    // Clear previous state
     setIsLoading(true);
     setError(null);
     setDebugInfo(null);
 
     try {
-      // Debugging: Check token
       const token = getToken();
       const debugData = {
         hasToken: !!token,
@@ -111,7 +106,6 @@ const ProjectsPage: React.FC = () => {
       console.log("Starting API call with token status:", !!token);
       console.log("API URL:", debugData.apiUrl);
 
-      // Make the API call with timeout for better error handling
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error("Request timed out after 10 seconds")),
@@ -124,7 +118,6 @@ const ProjectsPage: React.FC = () => {
         limit: projectsPerPage,
       });
 
-      // Race between timeout and actual response
       const response = await Promise.race([responsePromise, timeoutPromise]);
 
       console.log("API Response received:", response);
@@ -147,7 +140,6 @@ const ProjectsPage: React.FC = () => {
         )
       );
 
-      // Process response
       if (
         response &&
         response.success === true &&
@@ -163,16 +155,13 @@ const ProjectsPage: React.FC = () => {
           setTotalPages(response.pagination.pages);
         }
       } else if (response) {
-        // We have a response but it's not what we expected
         setError(`Invalid response format: ${JSON.stringify(response)}`);
       } else {
-        // No valid response
         setError("No valid response received from server");
       }
     } catch (err: any) {
       console.error("Error fetching projects:", err);
 
-      // Capture detailed error info for debugging
       const errorInfo = {
         message: err.message || "Unknown error",
         status: err.response?.status,
@@ -182,7 +171,6 @@ const ProjectsPage: React.FC = () => {
 
       setDebugInfo(JSON.stringify(errorInfo, null, 2));
 
-      // Set user-friendly error message
       if (err.response?.status === 401) {
         setError("Authentication failed. Please log in again.");
       } else if (err.message === "Request timed out after 10 seconds") {
@@ -197,11 +185,10 @@ const ProjectsPage: React.FC = () => {
     }
   };
 
-  // Initial data loading when component mounts
   useEffect(() => {
     fetchProjects();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]); // Only dependency is page
+  }, [page]);
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
@@ -303,22 +290,19 @@ const ProjectsPage: React.FC = () => {
           <Grid container spacing={3}>
             {projects.map((project) => (
               <Grid item key={project._id} xs={12} sm={6} md={4} lg={3}>
-                <Box
-                  component={Link}
-                  to={`/projects/${project._id}`}
+                <Paper
                   sx={{
-                    display: "block",
-                    textDecoration: "none",
-                    color: "inherit",
-                    border: "1px solid #e0e0e0",
-                    borderRadius: 1,
-                    overflow: "hidden",
-                    transition: "transform 0.2s, box-shadow 0.2s",
+                    p: 3,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    transition: "transform 0.2s ease-in-out",
                     "&:hover": {
                       transform: "translateY(-4px)",
                       boxShadow: 3,
                     },
-                    position: "relative", // For delete button positioning
+                    position: "relative",
                   }}
                 >
                   <Box
@@ -326,9 +310,9 @@ const ProjectsPage: React.FC = () => {
                       position: "absolute",
                       top: 8,
                       right: 8,
-                      zIndex: 2,
                       display: "flex",
                       gap: 1,
+                      zIndex: 2,
                     }}
                   >
                     <IconButton
@@ -337,7 +321,6 @@ const ProjectsPage: React.FC = () => {
                       size="small"
                       color="primary"
                       onClick={(e) => e.stopPropagation()}
-                      aria-label="edit project"
                       sx={{
                         backgroundColor: "rgba(255, 255, 255, 0.9)",
                         "&:hover": {
@@ -353,7 +336,6 @@ const ProjectsPage: React.FC = () => {
                       onClick={(e) =>
                         handleDeleteProject(e, project._id, project.name)
                       }
-                      aria-label="delete project"
                       sx={{
                         backgroundColor: "rgba(255, 255, 255, 0.9)",
                         "&:hover": {
@@ -365,58 +347,69 @@ const ProjectsPage: React.FC = () => {
                     </IconButton>
                   </Box>
 
-                  {project.image && (
-                    <Box
-                      sx={{
-                        width: "100%",
-                        height: 160,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}/api/${
-                          project.image
-                        }`}
-                        alt={project.name}
-                        style={{
+                  <Box
+                    component={Link}
+                    to={`/projects/${project._id}`}
+                    sx={{
+                      textDecoration: "none",
+                      color: "inherit",
+                      flexGrow: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    {project.image && (
+                      <Box
+                        sx={{
                           width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
+                          height: 160,
+                          overflow: "hidden",
+                          mb: 2,
                         }}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.onerror = null; // Prevent infinite loop
-                          const fullUrl = `${
-                            import.meta.env.VITE_API_URL
-                          }/api/${project.image}`;
-                          console.error("Failed to load image:", {
-                            url: fullUrl,
-                            image: project.image,
-                            apiUrl: import.meta.env.VITE_API_URL,
-                          });
-                          // Replace with a placeholder div
-                          const parent = target.parentElement;
-                          if (parent) {
-                            target.style.display = "none";
-                            const placeholder = document.createElement("div");
-                            placeholder.style.width = "100%";
-                            placeholder.style.height = "100%";
-                            placeholder.style.backgroundColor = "#f0f0f0";
-                            placeholder.style.display = "flex";
-                            placeholder.style.alignItems = "center";
-                            placeholder.style.justifyContent = "center";
-                            placeholder.textContent =
-                              project.name[0].toUpperCase();
-                            placeholder.style.fontSize = "2rem";
-                            placeholder.style.color = "#666";
-                            parent.appendChild(placeholder);
-                          }
-                        }}
-                      />
-                    </Box>
-                  )}
-                  <Box sx={{ p: 2 }}>
-                    <Typography variant="h6" component="h2" noWrap>
+                      >
+                        <img
+                          src={`${import.meta.env.VITE_API_URL}/api/${
+                            project.image
+                          }`}
+                          alt={project.name}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null;
+                            const fullUrl = `${
+                              import.meta.env.VITE_API_URL
+                            }/api/${project.image}`;
+                            console.error("Failed to load image:", {
+                              url: fullUrl,
+                              image: project.image,
+                              apiUrl: import.meta.env.VITE_API_URL,
+                            });
+                            const parent = target.parentElement;
+                            if (parent) {
+                              target.style.display = "none";
+                              const placeholder = document.createElement("div");
+                              placeholder.style.width = "100%";
+                              placeholder.style.height = "100%";
+                              placeholder.style.backgroundColor = "#f0f0f0";
+                              placeholder.style.display = "flex";
+                              placeholder.style.alignItems = "center";
+                              placeholder.style.justifyContent = "center";
+                              placeholder.textContent =
+                                project.name[0].toUpperCase();
+                              placeholder.style.fontSize = "2rem";
+                              placeholder.style.color = "#666";
+                              parent.appendChild(placeholder);
+                            }
+                          }}
+                        />
+                      </Box>
+                    )}
+
+                    <Typography variant="h6" component="h2" gutterBottom>
                       {project.name}
                     </Typography>
                     <Typography
@@ -443,7 +436,7 @@ const ProjectsPage: React.FC = () => {
                       </Typography>
                     </Box>
                   </Box>
-                </Box>
+                </Paper>
               </Grid>
             ))}
           </Grid>

@@ -23,7 +23,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
-// Define Element interface
 interface Element {
   _id: string;
   name: string;
@@ -33,7 +32,7 @@ interface Element {
 }
 
 const ElementsPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t: translate } = useTranslation();
   const { projectId, typeId, spaceId } = useParams<{
     projectId: string;
     typeId: string;
@@ -49,10 +48,8 @@ const ElementsPage: React.FC = () => {
   const [elementToDelete, setElementToDelete] = useState<Element | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  // Fetch elements (mock data for now)
   useEffect(() => {
     setLoading(true);
-    // This would be replaced with an actual API call
     const mockElements: Element[] = [
       {
         _id: "elem1",
@@ -138,7 +135,7 @@ const ElementsPage: React.FC = () => {
       <Box sx={{ mb: 3 }}>
         <Breadcrumbs aria-label="breadcrumb">
           <Link to="/projects" style={{ textDecoration: "none" }}>
-            {t("nav.projects")}
+            {translate("nav.projects")}
           </Link>
           <Link
             to={`/projects/${projectId}`}
@@ -156,7 +153,7 @@ const ElementsPage: React.FC = () => {
             to={`/projects/${projectId}/types/${typeId}/spaces`}
             style={{ textDecoration: "none" }}
           >
-            {t("spaces.title")}
+            {translate("spaces.title")}
           </Link>
           <Typography color="text.primary">{spaceName}</Typography>
         </Breadcrumbs>
@@ -169,7 +166,7 @@ const ElementsPage: React.FC = () => {
         mb={3}
       >
         <Typography variant="h4" component="h1">
-          {t("elements.title")} - {spaceName}
+          {translate("elements.title")} - {spaceName}
         </Typography>
         <Button
           component={Link}
@@ -178,132 +175,14 @@ const ElementsPage: React.FC = () => {
           color="primary"
           startIcon={<AddIcon />}
         >
-          {t("elements.addElement")}
+          {translate("elements.addElement")}
         </Button>
       </Box>
 
-      <Grid container spacing={3}>
-        {elements.map((element) => (
-          <Grid item key={element._id} xs={12} sm={6} md={4}>
-            <Paper
-              sx={{
-                p: 3,
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                transition: "transform 0.2s ease-in-out",
-                "&:hover": {
-                  transform: "translateY(-4px)",
-                  boxShadow: 3,
-                },
-                position: "relative",
-              }}
-            >
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  display: "flex",
-                  gap: 1,
-                  zIndex: 2,
-                }}
-              >
-                <IconButton
-                  component={Link}
-                  to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${element._id}/edit`}
-                  size="small"
-                  color="primary"
-                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                  sx={{
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 1)",
-                    },
-                  }}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setElementToDelete(element);
-                    setDeleteDialogOpen(true);
-                  }}
-                  sx={{
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 1)",
-                    },
-                  }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Box>
-
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  {element.name}
-                </Typography>
-
-                <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                  <Chip
-                    label={t(`elements.types.${element.type}`)}
-                    color={
-                      getChipColor(element.type) as
-                        | "default"
-                        | "primary"
-                        | "secondary"
-                        | "error"
-                        | "info"
-                        | "success"
-                        | "warning"
-                    }
-                    size="small"
-                  />
-                  {element.subType && (
-                    <Chip
-                      label={t(`elements.subtypes.${element.subType}`)}
-                      variant="outlined"
-                      size="small"
-                    />
-                  )}
-                </Box>
-
-                <Typography variant="body2" color="text.secondary">
-                  {element.type === "wall"
-                    ? t("elements.descriptions.wall")
-                    : element.type === "floor"
-                    ? t("elements.descriptions.floor")
-                    : element.type === "ceiling"
-                    ? t("elements.descriptions.ceiling")
-                    : t("elements.descriptions.thermalBridge")}
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-                <Button
-                  component={Link}
-                  to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${element._id}`}
-                  size="small"
-                  variant="outlined"
-                >
-                  {t("elements.details")}
-                </Button>
-              </Box>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
-      {elements.length === 0 && (
+      {elements.length === 0 ? (
         <Box textAlign="center" py={5}>
           <Typography variant="h6" paragraph>
-            {t("elements.noElements")}
+            {translate("elements.noElements")}
           </Typography>
           <Button
             component={Link}
@@ -312,12 +191,133 @@ const ElementsPage: React.FC = () => {
             color="primary"
             startIcon={<AddIcon />}
           >
-            {t("elements.addElement")}
+            {translate("elements.addElement")}
           </Button>
         </Box>
+      ) : (
+        <Grid container spacing={3}>
+          {elements.map((element) => (
+            <Grid item key={element._id} xs={12} sm={6} md={4}>
+              <Paper
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 3,
+                  },
+                  position: "relative",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    display: "flex",
+                    gap: 1,
+                    zIndex: 2,
+                  }}
+                >
+                  <IconButton
+                    component={Link}
+                    to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${element._id}/edit`}
+                    size="small"
+                    color="primary"
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 1)",
+                      },
+                    }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setElementToDelete(element);
+                      setDeleteDialogOpen(true);
+                    }}
+                    sx={{
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 1)",
+                      },
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" gutterBottom>
+                    {element.name}
+                  </Typography>
+
+                  <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                    <Chip
+                      label={translate(`elements.types.${element.type}`)}
+                      color={
+                        getChipColor(element.type) as
+                          | "default"
+                          | "primary"
+                          | "secondary"
+                          | "error"
+                          | "info"
+                          | "success"
+                          | "warning"
+                      }
+                      size="small"
+                    />
+                    {element.subType && (
+                      <Chip
+                        label={translate(
+                          `elements.subtypes.${element.subType}`
+                        )}
+                        variant="outlined"
+                        size="small"
+                      />
+                    )}
+                  </Box>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {element.type === "wall"
+                      ? translate("elements.descriptions.wall")
+                      : element.type === "floor"
+                      ? translate("elements.descriptions.floor")
+                      : element.type === "ceiling"
+                      ? translate("elements.descriptions.ceiling")
+                      : translate("elements.descriptions.thermalBridge")}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    component={Link}
+                    to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${element._id}`}
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    fullWidth
+                  >
+                    {translate("elements.details")}
+                  </Button>
+                </Box>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
       )}
 
-      {/* Delete Element Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
@@ -335,8 +335,6 @@ const ElementsPage: React.FC = () => {
             onClick={() => {
               if (elementToDelete?._id) {
                 try {
-                  // Here you would call your delete API
-                  // Simulating API call for now
                   setElements(
                     elements.filter((elem) => elem._id !== elementToDelete._id)
                   );

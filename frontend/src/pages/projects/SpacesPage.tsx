@@ -4,9 +4,7 @@ import {
   Typography,
   Button,
   Grid,
-  Card,
-  CardContent,
-  CardActions,
+  Paper,
   IconButton,
   Breadcrumbs,
   CircularProgress,
@@ -97,7 +95,6 @@ const SpacesPage: React.FC = () => {
 
       if (response.success) {
         toast.success(t("spaces.deleteSuccess"));
-        // Remove deleted space from state
         setSpaces(spaces.filter((space) => space._id !== spaceId));
       } else {
         throw new Error(response.message || t("errors.generic"));
@@ -123,7 +120,6 @@ const SpacesPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Breadcrumbs */}
       <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
         <Link to="/projects" style={{ textDecoration: "none" }}>
           {t("nav.projects")}
@@ -148,12 +144,10 @@ const SpacesPage: React.FC = () => {
       </Breadcrumbs>
 
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
       >
         <Typography variant="h4" component="h1">
           {projectName && buildingTypeName
@@ -196,16 +190,63 @@ const SpacesPage: React.FC = () => {
         <Grid container spacing={3}>
           {spaces.map((space) => (
             <Grid item xs={12} sm={6} md={4} key={space._id}>
-              <Card
+              <Paper
                 sx={{
+                  p: 3,
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  transition: "transform 0.2s ease",
-                  "&:hover": { transform: "translateY(-5px)" },
+                  justifyContent: "space-between",
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 3,
+                  },
+                  position: "relative",
                 }}
               >
-                <CardContent sx={{ flexGrow: 1 }}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    display: "flex",
+                    gap: 1,
+                    zIndex: 2,
+                  }}
+                >
+                  <IconButton
+                    component={Link}
+                    to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/edit`}
+                    size="small"
+                    color="primary"
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 1)",
+                      },
+                    }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleDeleteSpace(space._id)}
+                    aria-label={t("common.delete")}
+                    sx={{
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 1)",
+                      },
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+
+                <Box sx={{ flexGrow: 1 }}>
                   <Typography variant="h6" component="h2" gutterBottom>
                     {space.name}
                   </Typography>
@@ -225,39 +266,21 @@ const SpacesPage: React.FC = () => {
                       count: space.elements?.length || 0,
                     })}
                   </Typography>
-                </CardContent>
-                <CardActions
-                  sx={{ justifyContent: "space-between", p: 2, pt: 0 }}
-                >
+                </Box>
+
+                <Box sx={{ mt: 2 }}>
                   <Button
                     component={Link}
                     to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/elements`}
+                    variant="outlined"
                     size="small"
                     color="primary"
+                    fullWidth
                   >
                     {t("elements.viewElements")}
                   </Button>
-                  <Box>
-                    <IconButton
-                      component={Link}
-                      to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/edit`}
-                      size="small"
-                      color="primary"
-                      aria-label={t("common.edit")}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleDeleteSpace(space._id)}
-                      aria-label={t("common.delete")}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </CardActions>
-              </Card>
+                </Box>
+              </Paper>
             </Grid>
           ))}
         </Grid>
