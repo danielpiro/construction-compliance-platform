@@ -39,16 +39,19 @@ const Sidebar: React.FC<SidebarProps> = ({
       text: t("nav.projects"),
       icon: <FolderIcon />,
       path: "/projects",
+      isActive: (pathname: string) => pathname.startsWith("/projects"),
     },
     {
       text: t("nav.profile"),
       icon: <PersonIcon />,
       path: "/profile",
+      isActive: (pathname: string) => pathname.startsWith("/profile"),
     },
     {
       text: t("nav.settings"),
       icon: <SettingsIcon />,
       path: "/settings",
+      isActive: (pathname: string) => pathname.startsWith("/settings"),
     },
   ];
 
@@ -62,7 +65,11 @@ const Sidebar: React.FC<SidebarProps> = ({
             <ListItemButton
               component={Link}
               to={item.path}
-              selected={location.pathname.startsWith(item.path)}
+              selected={
+                item.isActive
+                  ? item.isActive(location.pathname)
+                  : location.pathname === item.path
+              }
               sx={{
                 "&.Mui-selected": {
                   backgroundColor: "primary.light",

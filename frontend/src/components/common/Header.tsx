@@ -81,13 +81,25 @@ const Header: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Scroll to section function
+  // Scroll to section function with error handling and smooth fallback
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-      });
+    try {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({
+          behavior: "smooth",
+        });
+      } else {
+        // If element not found, fallback to scrolling to top
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+    } catch (error) {
+      console.error("Error scrolling to section:", error);
+      // Simple fallback
+      window.scrollTo(0, 0);
     }
     handleMobileMenuClose();
   };

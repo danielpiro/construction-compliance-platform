@@ -89,14 +89,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         sx={{
           flexGrow: 1,
           width: {
-            sm: `calc(100% - ${loading || isLoggedIn ? drawerWidth : 0}px)`,
+            xs: "100%",
+            md: `calc(100% - ${isLoggedIn ? drawerWidth : 0}px)`,
           },
           marginInlineStart: {
-            sm: loading || isLoggedIn ? `${drawerWidth}px` : 0,
+            xs: 0,
+            md: isLoggedIn ? `${drawerWidth}px` : 0,
           },
           display: "flex",
           flexDirection: "column",
-          minHeight: needsFixedFooter ? "calc(100vh - 64px)" : "auto", // Subtract header height
+          minHeight: needsFixedFooter ? "100vh" : "auto",
+          paddingTop: "64px", // Height of the AppBar
         }}
       >
         <Toolbar /> {/* Offset for fixed header */}
