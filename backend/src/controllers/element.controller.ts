@@ -50,7 +50,7 @@ const checkSpaceAccess = async (spaceId: string, userId: string) => {
 };
 
 // @desc    Get all elements for a space
-// @route   GET /api/spaces/:spaceId/elements
+// @route   GET /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements
 // @access  Private
 export const getElements = async (
   req: Request,
@@ -88,7 +88,7 @@ export const getElements = async (
 };
 
 // @desc    Get single element
-// @route   GET /api/elements/:id
+// @route   GET /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId
 // @access  Private
 export const getElement = async (
   req: Request,
@@ -97,7 +97,7 @@ export const getElement = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const elementId = req.params.id;
+    const elementId = req.params.elementId;
 
     // Find element
     const element = await Element.findById(elementId);
@@ -135,7 +135,7 @@ export const getElement = async (
 };
 
 // @desc    Create new element
-// @route   POST /api/spaces/:spaceId/elements
+// @route   POST /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/create
 // @access  Private
 export const createElement = async (
   req: Request,
@@ -183,7 +183,7 @@ export const createElement = async (
 };
 
 // @desc    Update element
-// @route   PUT /api/elements/:id
+// @route   PUT /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId
 // @access  Private
 export const updateElement = async (
   req: Request,
@@ -192,7 +192,7 @@ export const updateElement = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const elementId = req.params.id;
+    const elementId = req.params.elementId;
 
     // Find element
     let element = await Element.findById(elementId);
@@ -244,7 +244,7 @@ export const updateElement = async (
 };
 
 // @desc    Delete element
-// @route   DELETE /api/elements/:id
+// @route   DELETE /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId
 // @access  Private
 export const deleteElement = async (
   req: Request,
@@ -253,7 +253,7 @@ export const deleteElement = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const elementId = req.params.id;
+    const elementId = req.params.elementId;
 
     // Find element
     const element = await Element.findById(elementId);
@@ -302,7 +302,7 @@ export const deleteElement = async (
 };
 
 // @desc    Run compliance check for an element
-// @route   POST /api/elements/:id/compliance-check
+// @route   POST /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId/compliance-check
 // @access  Private
 export const runComplianceCheck = async (
   req: Request,
@@ -311,7 +311,7 @@ export const runComplianceCheck = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const elementId = req.params.id;
+    const elementId = req.params.elementId;
 
     // Find element
     const element = await Element.findById(elementId);

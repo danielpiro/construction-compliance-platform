@@ -111,10 +111,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // Mount API routes
 app.use("/api/auth", authRoutes);
-app.use("/api/projects", projectRoutes);
-app.use("/api/building-types", buildingTypeRoutes);
-app.use("/api/spaces", spaceRoutes);
-app.use("/api/elements", elementRoutes);
+app.use("/api/projects", projectRoutes); // This will handle all nested routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/cities", cityRoutes);

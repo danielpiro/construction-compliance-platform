@@ -16,22 +16,22 @@ interface BuildingTypeData {
 const buildingTypeService = {
   // Get all building types for a project
   getBuildingTypes: async (projectId: string) => {
-    const response = await apiClient.get(
-      `/projects/${projectId}/building-types`
-    );
+    const response = await apiClient.get(`/projects/${projectId}/types`);
     return response.data;
   },
 
   // Get single building type by ID
-  getBuildingType: async (typeId: string) => {
-    const response = await apiClient.get(`/building-types/${typeId}`);
+  getBuildingType: async (projectId: string, typeId: string) => {
+    const response = await apiClient.get(
+      `/projects/${projectId}/types/${typeId}`
+    );
     return response.data;
   },
 
   // Create new building type
   createBuildingType: async (projectId: string, typeData: BuildingTypeData) => {
     const response = await apiClient.post(
-      `/projects/${projectId}/building-types`,
+      `/projects/${projectId}/types/create`,
       typeData
     );
     return response.data;
@@ -39,16 +39,22 @@ const buildingTypeService = {
 
   // Update building type
   updateBuildingType: async (
+    projectId: string,
     typeId: string,
     typeData: Partial<BuildingTypeData>
   ) => {
-    const response = await apiClient.put(`/building-types/${typeId}`, typeData);
+    const response = await apiClient.put(
+      `/projects/${projectId}/types/${typeId}`,
+      typeData
+    );
     return response.data;
   },
 
   // Delete building type
-  deleteBuildingType: async (typeId: string) => {
-    const response = await apiClient.delete(`/building-types/${typeId}`);
+  deleteBuildingType: async (projectId: string, typeId: string) => {
+    const response = await apiClient.delete(
+      `/projects/${projectId}/types/${typeId}`
+    );
     return response.data;
   },
 };

@@ -7,7 +7,7 @@ import Element from "../models/Element";
 import mongoose from "mongoose";
 
 // @desc    Get all building types for a project
-// @route   GET /api/projects/:projectId/building-types
+// @route   GET /api/projects/:projectId/types
 // @access  Private
 export const getBuildingTypes = async (
   req: Request,
@@ -58,7 +58,7 @@ export const getBuildingTypes = async (
 };
 
 // @desc    Get single building type
-// @route   GET /api/building-types/:id
+// @route   GET /api/projects/:projectId/types/:typeId
 // @access  Private
 export const getBuildingType = async (
   req: Request,
@@ -67,7 +67,7 @@ export const getBuildingType = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const buildingTypeId = req.params.id;
+    const buildingTypeId = req.params.typeId;
 
     // Find building type
     const buildingType = await BuildingType.findById(buildingTypeId);
@@ -115,7 +115,7 @@ export const getBuildingType = async (
 };
 
 // @desc    Create new building type
-// @route   POST /api/projects/:projectId/building-types
+// @route   POST /api/projects/:projectId/types/create
 // @access  Private
 export const createBuildingType = async (
   req: Request,
@@ -168,7 +168,7 @@ export const createBuildingType = async (
 };
 
 // @desc    Update building type
-// @route   PUT /api/building-types/:id
+// @route   PUT /api/projects/:projectId/types/:typeId
 // @access  Private
 export const updateBuildingType = async (
   req: Request,
@@ -177,7 +177,7 @@ export const updateBuildingType = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const buildingTypeId = req.params.id;
+    const buildingTypeId = req.params.typeId;
 
     // Find building type
     let buildingType = await BuildingType.findById(buildingTypeId);
@@ -232,7 +232,7 @@ export const updateBuildingType = async (
 };
 
 // @desc    Delete building type
-// @route   DELETE /api/building-types/:id
+// @route   DELETE /api/projects/:projectId/types/:typeId
 // @access  Private
 export const deleteBuildingType = async (
   req: Request,
@@ -241,7 +241,7 @@ export const deleteBuildingType = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const buildingTypeId = req.params.id;
+    const buildingTypeId = req.params.typeId;
 
     const session = await mongoose.startSession();
     session.startTransaction();

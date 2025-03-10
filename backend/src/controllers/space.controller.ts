@@ -50,7 +50,7 @@ const checkBuildingTypeAccess = async (
 };
 
 // @desc    Get all spaces for a building type
-// @route   GET /api/building-types/:buildingTypeId/spaces
+// @route   GET /api/projects/:projectId/types/:typeId/spaces
 // @access  Private
 export const getSpaces = async (
   req: Request,
@@ -59,7 +59,7 @@ export const getSpaces = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const buildingTypeId = req.params.buildingTypeId;
+    const buildingTypeId = req.params.typeId;
 
     // Check access
     const accessCheck = await checkBuildingTypeAccess(buildingTypeId, userId);
@@ -88,7 +88,7 @@ export const getSpaces = async (
 };
 
 // @desc    Get single space
-// @route   GET /api/spaces/:id
+// @route   GET /api/projects/:projectId/types/:typeId/spaces/:spaceId
 // @access  Private
 export const getSpace = async (
   req: Request,
@@ -97,7 +97,7 @@ export const getSpace = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const spaceId = req.params.id;
+    const spaceId = req.params.spaceId;
 
     // Find space and its elements
     const space = await Space.findById(spaceId);
@@ -140,7 +140,7 @@ export const getSpace = async (
 };
 
 // @desc    Create new space
-// @route   POST /api/building-types/:buildingTypeId/spaces
+// @route   POST /api/projects/:projectId/types/:typeId/spaces/create
 // @access  Private
 export const createSpace = async (
   req: Request,
@@ -149,7 +149,7 @@ export const createSpace = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const buildingTypeId = req.params.buildingTypeId;
+    const buildingTypeId = req.params.typeId;
 
     // Check access
     const accessCheck = await checkBuildingTypeAccess(buildingTypeId, userId);
@@ -234,7 +234,7 @@ export const createSpace = async (
 };
 
 // @desc    Update space
-// @route   PUT /api/spaces/:id
+// @route   PUT /api/projects/:projectId/types/:typeId/spaces/:spaceId
 // @access  Private
 export const updateSpace = async (
   req: Request,
@@ -243,7 +243,7 @@ export const updateSpace = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const spaceId = req.params.id;
+    const spaceId = req.params.spaceId;
 
     // Find space
     let space = await Space.findById(spaceId);
@@ -344,7 +344,7 @@ export const updateSpace = async (
 };
 
 // @desc    Delete space
-// @route   DELETE /api/spaces/:id
+// @route   DELETE /api/projects/:projectId/types/:typeId/spaces/:spaceId
 // @access  Private
 export const deleteSpace = async (
   req: Request,
@@ -353,7 +353,7 @@ export const deleteSpace = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const spaceId = req.params.id;
+    const spaceId = req.params.spaceId;
 
     const session = await mongoose.startSession();
     session.startTransaction();
