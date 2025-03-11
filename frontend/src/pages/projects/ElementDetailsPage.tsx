@@ -21,14 +21,13 @@ import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
 import buildingTypeService from "../../services/buildingTypeService";
 import { ElementFormData } from "../../components/elements/ElementForm";
-import {
+import elementService, {
+  Element,
   deleteElement,
   runComplianceCheck,
   ComplianceCheckResult,
@@ -54,7 +53,7 @@ const ElementDetailsPage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [space, setSpace] = useState<Space | null>(null);
-  const [element, setElement] = useState<ElementFormData | null>(null);
+  const [element, setElement] = useState<Element | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [projectName, setProjectName] = useState("");
   const [buildingTypeName, setBuildingTypeName] = useState("");
@@ -71,28 +70,34 @@ const ElementDetailsPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch space details to get element data
+        // Fetch space details
         const spaceResponse = await spaceService.getSpace(
           projectId,
           typeId,
           spaceId
         );
-        if (spaceResponse.success) {
-          setSpace(spaceResponse.data);
+        if (!spaceResponse.success) {
+          throw new Error(spaceResponse.message || t("errors.generic"));
+        }
+        setSpace(spaceResponse.data);
 
-          // Get element by index
-          const elementIndex = parseInt(elementId);
-          if (
-            !isNaN(elementIndex) &&
-            elementIndex >= 0 &&
-            elementIndex < spaceResponse.data.elements.length
-          ) {
-            setElement(spaceResponse.data.elements[elementIndex]);
-          } else {
+        // Fetch element details
+        try {
+          const response = await elementService.getElement(
+            projectId,
+            typeId,
+            spaceId,
+            elementId
+          );
+          if (!response.success || !response.data) {
             throw new Error(t("elements.notFound"));
           }
-        } else {
-          throw new Error(spaceResponse.message || t("errors.generic"));
+          setElement(response.data);
+        } catch (err: Error | unknown) {
+          throw new Error(
+            elementService.handleElementServiceError(err) ||
+              t("elements.notFound")
+          );
         }
 
         // Fetch building type details
@@ -124,10 +129,16 @@ const ElementDetailsPage: React.FC = () => {
     if (!projectId || !typeId || !spaceId || !elementId) return;
 
     try {
-      // Delete the element
-      await deleteElement(projectId, typeId, spaceId, elementId);
-
-      toast.success(t("elements.deleteSuccess"));
+      const response = await deleteElement(
+        projectId,
+        typeId,
+        spaceId,
+        elementId
+      );
+      if (!response.success) {
+        throw new Error(response.message || t("elements.errors.deleteFailed"));
+      }
+      toast.success(response.message || t("elements.deleteSuccess"));
       navigate(`/projects/${projectId}/types/${typeId}/spaces/${spaceId}`);
     } catch (error) {
       console.error("Error deleting element:", error);
@@ -144,13 +155,18 @@ const ElementDetailsPage: React.FC = () => {
       setCheckingCompliance(true);
 
       // Run compliance check
-      const result = await runComplianceCheck(
+      const response = await runComplianceCheck(
         projectId,
         typeId,
         spaceId,
         elementId
       );
-      setComplianceResult(result);
+      if (!response.success || !response.data) {
+        throw new Error(
+          response.message || t("elements.errors.complianceCheckFailed")
+        );
+      }
+      setComplianceResult(response.data);
 
       toast.success(t("elements.complianceCheckSuccess"));
     } catch (error) {
@@ -286,23 +302,6 @@ const ElementDetailsPage: React.FC = () => {
           >
             {t("common.back")}
           </Button>
-          <Button
-            component={RouterLink}
-            to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}/edit`}
-            startIcon={<EditIcon />}
-            variant="outlined"
-            color="primary"
-          >
-            {t("common.edit")}
-          </Button>
-          <Button
-            startIcon={<DeleteIcon />}
-            variant="outlined"
-            color="error"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            {t("common.delete")}
-          </Button>
         </Box>
       </Box>
 
@@ -316,7 +315,7 @@ const ElementDetailsPage: React.FC = () => {
               </strong>{" "}
               <Chip
                 label={t(
-                  `elements.types.${element.type
+                  `elements.types.${(element.type || "")
                     .toLowerCase()
                     .replace(/\s+/g, "")}`
                 )}
@@ -332,7 +331,7 @@ const ElementDetailsPage: React.FC = () => {
                 <strong>{t("elements.subtypes.type")}:</strong>{" "}
                 <Chip
                   label={t(
-                    `elements.subtypes.${element.subType
+                    `elements.subtypes.${(element.subType || "")
                       .toLowerCase()
                       .replace(/\s+/g, "")}`
                   )}
@@ -350,7 +349,7 @@ const ElementDetailsPage: React.FC = () => {
             </Typography>
             <Typography variant="body1">
               {t(
-                `elements.descriptions.${element.type
+                `elements.descriptions.${(element.type || "")
                   .toLowerCase()
                   .replace(/\s+/g, "")}`
               )}

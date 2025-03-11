@@ -36,12 +36,16 @@ export const getElements = async (
   projectId: string,
   typeId: string,
   spaceId: string
-): Promise<Element[]> => {
+): Promise<{ success: boolean; data: Element[]; message?: string }> => {
   try {
     const response = await api.get(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements`
     );
-    return response.data;
+    return response.data as {
+      success: boolean;
+      data: Element[];
+      message?: string;
+    };
   } catch (error) {
     console.error("Error fetching elements:", error);
     throw error;
@@ -54,12 +58,16 @@ export const getElement = async (
   typeId: string,
   spaceId: string,
   elementId: string
-): Promise<Element> => {
+): Promise<{ success: boolean; data: Element; message?: string }> => {
   try {
     const response = await api.get(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}`
     );
-    return response.data;
+    return response.data as {
+      success: boolean;
+      data: Element;
+      message?: string;
+    };
   } catch (error) {
     console.error("Error fetching element:", error);
     throw error;
@@ -72,13 +80,17 @@ export const createElement = async (
   typeId: string,
   spaceId: string,
   elementData: ElementFormData
-): Promise<Element> => {
+): Promise<{ success: boolean; data: Element; message?: string }> => {
   try {
     const response = await api.post(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`,
       elementData
     );
-    return response.data;
+    return response.data as {
+      success: boolean;
+      data: Element;
+      message?: string;
+    };
   } catch (error) {
     console.error("Error creating element:", error);
     throw error;
@@ -92,13 +104,17 @@ export const updateElement = async (
   spaceId: string,
   elementId: string,
   elementData: ElementFormData
-): Promise<Element> => {
+): Promise<{ success: boolean; data: Element; message?: string }> => {
   try {
     const response = await api.put(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}`,
       elementData
     );
-    return response.data;
+    return response.data as {
+      success: boolean;
+      data: Element;
+      message?: string;
+    };
   } catch (error) {
     console.error("Error updating element:", error);
     throw error;
@@ -111,11 +127,12 @@ export const deleteElement = async (
   typeId: string,
   spaceId: string,
   elementId: string
-): Promise<void> => {
+): Promise<{ success: boolean; message?: string }> => {
   try {
-    await api.delete(
+    const response = await api.delete(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}`
     );
+    return response.data as { success: boolean; message?: string };
   } catch (error) {
     console.error("Error deleting element:", error);
     throw error;
@@ -128,12 +145,20 @@ export const runComplianceCheck = async (
   typeId: string,
   spaceId: string,
   elementId: string
-): Promise<ComplianceCheckResult> => {
+): Promise<{
+  success: boolean;
+  data: ComplianceCheckResult;
+  message?: string;
+}> => {
   try {
     const response = await api.post(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}/compliance-check`
     );
-    return response.data;
+    return response.data as {
+      success: boolean;
+      data: ComplianceCheckResult;
+      message?: string;
+    };
   } catch (error) {
     console.error("Error running compliance check:", error);
     throw error;
