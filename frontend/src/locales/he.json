@@ -196,15 +196,20 @@
       "wall": "קיר",
       "ceiling": "תקרה",
       "floor": "רצפה",
-      "thermalBridge": "גשר תרמי"
+      "Wall": "קיר",
+      "type": "סוג",
+      "thermalbridge": "גשר תרמי"
     },
     "subtypes": {
-      "outsideWall": "קיר חיצוני",
-      "isolationWall": "קיר בידוד",
+      "outsidewall": "קיר חיצוני",
+      "isolationwall": "קיר בידוד",
       "upperOpenSpace": "חלל פתוח עליון",
       "upperCloseRoom": "חדר סגור עליון",
       "upperRoof": "גג עליון",
-      "underRoof": "תחת גג"
+      "underRoof": "תחת גג",
+      "Wall": "קיר",
+      "Outside Wall": "קיר חיצוני",
+      "type": "סוג"
     },
     "descriptions": {
       "wall": "אלמנט קיר המשמש כגבול החלל",
@@ -212,7 +217,9 @@
       "ceiling": "אלמנט תקרה המכסה את החלל מלמעלה",
       "thermalBridge": "אזור בעל מוליכות תרמית גבוהה"
     },
-    "details": "פרטי אלמנט"
+    "details": "פרטי אלמנט",
+    "createSuccess": "האלמנט נוצר בהצלחה",
+    "deleteSuccess": "האלמנט נמחק בהצלחה"
   },
   "buildingTypes": {
     "title": "סוגי מבנים",

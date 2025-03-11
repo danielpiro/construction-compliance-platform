@@ -23,6 +23,7 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
 } from "@mui/icons-material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { toast } from "react-toastify";
 import buildingTypeService from "../../services/buildingTypeService";
 import spaceService from "../../services/spaceService";
@@ -228,15 +229,24 @@ const ProjectTypePage: React.FC = () => {
         <Typography variant="h4" component="h1">
           {buildingType.name}
         </Typography>
-        <Button
-          component={RouterLink}
-          to={`/projects/${actualProjectId}/types/${typeId}/spaces/create`}
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-        >
-          {t("spaces.addSpace")}
-        </Button>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Button
+            onClick={() => navigate(`/projects/${actualProjectId}`)}
+            variant="outlined"
+            startIcon={<ArrowForwardIcon />}
+          >
+            {t("common.back")}
+          </Button>
+          <Button
+            component={RouterLink}
+            to={`/projects/${actualProjectId}/types/${typeId}/spaces/create`}
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+          >
+            {t("spaces.addSpace")}
+          </Button>
+        </Box>
       </Box>
 
       <Paper
@@ -246,45 +256,6 @@ const ProjectTypePage: React.FC = () => {
           position: "relative",
         }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            display: "flex",
-            gap: 1,
-            zIndex: 2,
-          }}
-        >
-          <IconButton
-            component={RouterLink}
-            to={`/projects/${actualProjectId}/types/${typeId}/edit`}
-            size="small"
-            color="primary"
-            sx={{
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 1)",
-              },
-            }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => setDeleteTypeDialogOpen(true)}
-            sx={{
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 1)",
-              },
-            }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Typography variant="body1">

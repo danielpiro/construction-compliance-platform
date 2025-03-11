@@ -20,7 +20,6 @@ import { useTranslation } from "react-i18next";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import BugReportIcon from "@mui/icons-material/BugReport";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import api from "../../services/api";
 import { toast } from "react-toastify";
@@ -120,13 +119,10 @@ const ProjectDetailPage: React.FC = () => {
   const [typeToDelete, setTypeToDelete] = useState<BuildingType | null>(null);
   const [createTypeDialogOpen, setCreateTypeDialogOpen] =
     useState<boolean>(false);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
-  const [showDebug, setShowDebug] = useState<boolean>(false);
 
   const fetchProjectData = async () => {
     setLoading(true);
     setError(null);
-    setDebugInfo(null);
 
     try {
       // Debugging: Check token and project ID
@@ -146,27 +142,6 @@ const ProjectDetailPage: React.FC = () => {
       const response = await api.get(`/projects/${projectId}`);
       console.log("API Response received:", response?.data);
 
-      // Include detailed response info in debug data
-      const responseDebugInfo = {
-        status: response?.status,
-        statusText: response?.statusText,
-        hasData: !!response?.data,
-        dataSuccess: response?.data?.success,
-        dataStructure: response?.data ? Object.keys(response.data) : [],
-      };
-
-      setDebugInfo(
-        JSON.stringify(
-          {
-            debugData,
-            response: responseDebugInfo,
-            responseData: response?.data,
-          },
-          null,
-          2
-        )
-      );
-
       // Process response
       if (response?.data?.success && response?.data?.data) {
         setProject(response.data.data);
@@ -176,17 +151,6 @@ const ProjectDetailPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Error fetching project data:", err);
-
-      // Capture detailed error info for debugging
-      const errorInfo = {
-        message: err.message || "Unknown error",
-        status: err.response?.status,
-        statusText: err.response?.statusText,
-        data: err.response?.data,
-        stack: err.stack,
-      };
-
-      setDebugInfo(JSON.stringify(errorInfo, null, 2));
 
       // Handle 403 Forbidden error specifically
       if (err.response?.status === 403) {
@@ -258,10 +222,6 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
-  const toggleDebugInfo = () => {
-    setShowDebug(!showDebug);
-  };
-
   if (loading) {
     return (
       <Box
@@ -286,53 +246,15 @@ const ProjectDetailPage: React.FC = () => {
         <Typography variant="h4" component="h1">
           {project?.name || t("projects.project")}
         </Typography>
-        <Box>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={toggleDebugInfo}
-            startIcon={<BugReportIcon />}
-            sx={{ mr: 1 }}
-          >
-            {showDebug ? t("common.hideDebug") : t("common.showDebug")}
-          </Button>
-          {project && (
-            <Box display="flex" gap={1}>
-              <Button
-                component={Link}
-                to={`/projects/${projectId}/edit`}
-                variant="outlined"
-                color="primary"
-                startIcon={<EditIcon />}
-              >
-                {t("common.edit")}
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<DeleteIcon />}
-                onClick={() => setDeleteDialogOpen(true)}
-              >
-                {t("common.delete")}
-              </Button>
-            </Box>
-          )}
-        </Box>
-      </Box>
-
-      {showDebug && debugInfo && (
-        <Paper
-          elevation={3}
-          sx={{ p: 2, mb: 3, bgcolor: "#f5f5f5", overflowX: "auto" }}
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => setCreateTypeDialogOpen(true)}
         >
-          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-            Debug Information:
-          </Typography>
-          <pre style={{ whiteSpace: "pre-wrap", fontSize: "0.8rem" }}>
-            {debugInfo}
-          </pre>
-        </Paper>
-      )}
+          {t("projects.types.add")}
+        </Button>
+      </Box>
 
       {error ? (
         <Box p={3}>
@@ -430,14 +352,6 @@ const ProjectDetailPage: React.FC = () => {
               <Typography variant="h5" component="h2">
                 {t("projects.buildingTypes")}
               </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-                onClick={() => setCreateTypeDialogOpen(true)}
-              >
-                {t("projects.types.add")}
-              </Button>
             </Box>
 
             {buildingTypes.length > 0 ? (

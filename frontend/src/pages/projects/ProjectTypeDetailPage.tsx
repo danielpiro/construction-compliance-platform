@@ -19,10 +19,8 @@ import {
 } from "@mui/material";
 import {
   Home as HomeIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
   Add as AddIcon,
-  ArrowBack as ArrowBackIcon,
+  ArrowForward as ArrowForwardIcon,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import buildingTypeService from "../../services/buildingTypeService";
@@ -199,34 +197,13 @@ const ProjectTypeDetailPage: React.FC = () => {
         <Typography variant="h4" component="h1">
           {buildingType.name} - {t("projects.projectType")}
         </Typography>
-        <Box>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Button
             onClick={() => navigate(`/projects/${actualProjectId}`)}
             variant="outlined"
-            color="primary"
-            startIcon={<ArrowBackIcon />}
-            sx={{ mr: 1 }}
+            startIcon={<ArrowForwardIcon />}
           >
             {t("common.back")}
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<EditIcon />}
-            onClick={() =>
-              navigate(`/projects/${actualProjectId}/types/${typeId}/edit`)
-            }
-            sx={{ mr: 1 }}
-          >
-            {t("common.edit")}
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteIcon />}
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            {t("common.delete")}
           </Button>
         </Box>
       </Box>

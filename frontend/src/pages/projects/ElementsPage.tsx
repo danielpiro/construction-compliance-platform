@@ -21,13 +21,16 @@ import { useTranslation } from "react-i18next";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { toast } from "react-toastify";
+import spaceService from "../../services/spaceService";
+import projectService from "../../services/projectService";
+import buildingTypeService from "../../services/buildingTypeService";
+import elementService from "../../services/elementService";
 
-interface Element {
-  _id: string;
-  name: string;
-  type: "wall" | "ceiling" | "floor" | "thermalBridge";
-  subType?: string;
+import { ElementData } from "../../services/spaceService";
+
+interface Element extends ElementData {
   spaceId: string;
 }
 
@@ -49,60 +52,64 @@ const ElementsPage: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    const mockElements: Element[] = [
-      {
-        _id: "elem1",
-        name: "קיר צפוני",
-        type: "wall",
-        subType: "outsideWall",
-        spaceId: spaceId || "",
-      },
-      {
-        _id: "elem2",
-        name: "קיר מזרחי",
-        type: "wall",
-        subType: "isolationWall",
-        spaceId: spaceId || "",
-      },
-      {
-        _id: "elem3",
-        name: "רצפה ראשית",
-        type: "floor",
-        subType: "upperOpenSpace",
-        spaceId: spaceId || "",
-      },
-      {
-        _id: "elem4",
-        name: "תקרה",
-        type: "ceiling",
-        subType: "upperRoof",
-        spaceId: spaceId || "",
-      },
-      {
-        _id: "elem5",
-        name: "מסגרת חלון",
-        type: "thermalBridge",
-        spaceId: spaceId || "",
-      },
-    ];
+    const fetchData = async () => {
+      if (!projectId || !typeId || !spaceId) return;
 
-    setElements(mockElements);
-    setProjectName("פרויקט לדוגמה");
-    setTypeName("מגורים");
-    setSpaceName("חדר שינה");
-    setLoading(false);
-  }, [spaceId]);
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch space details to get space name and related info
+        const spaceResponse = await spaceService.getSpace(
+          projectId,
+          typeId,
+          spaceId
+        );
+        if (spaceResponse.success) {
+          setSpaceName(spaceResponse.data.name);
+          if (spaceResponse.data.elements) {
+            setElements(
+              spaceResponse.data.elements.map((element) => ({
+                ...element,
+                spaceId: spaceId,
+              }))
+            );
+          }
+        }
+
+        // Fetch building type details
+        const typeResponse = await buildingTypeService.getBuildingType(
+          projectId,
+          typeId
+        );
+        if (typeResponse.success) {
+          setTypeName(typeResponse.data.name);
+        }
+
+        // Fetch project details
+        const projectResponse = await projectService.getProject(projectId);
+        if (projectResponse.success) {
+          setProjectName(projectResponse.data.name);
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(translate("errors.generic"));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [spaceId, projectId, typeId, translate]);
 
   const getChipColor = (type: string) => {
     switch (type) {
-      case "wall":
+      case "Wall":
         return "primary";
-      case "ceiling":
+      case "Ceiling":
         return "secondary";
-      case "floor":
+      case "Floor":
         return "success";
-      case "thermalBridge":
+      case "Thermal Bridge":
         return "warning";
       default:
         return "default";
@@ -168,15 +175,25 @@ const ElementsPage: React.FC = () => {
         <Typography variant="h4" component="h1">
           {translate("elements.title")} - {spaceName}
         </Typography>
-        <Button
-          component={Link}
-          to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`}
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-        >
-          {translate("elements.addElement")}
-        </Button>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Button
+            component={Link}
+            to={`/projects/${projectId}/types/${typeId}/spaces`}
+            variant="outlined"
+            startIcon={<ArrowForwardIcon />}
+          >
+            {translate("common.back")}
+          </Button>
+          <Button
+            component={Link}
+            to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`}
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+          >
+            {translate("elements.addElement")}
+          </Button>
+        </Box>
       </Box>
 
       {elements.length === 0 ? (
@@ -213,28 +230,13 @@ const ElementsPage: React.FC = () => {
                   position: "relative",
                 }}
               >
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    display: "flex",
-                    gap: 1,
-                    zIndex: 2,
-                  }}
-                >
+                <Box display="flex" justifyContent="flex-end" mb={2}>
                   <IconButton
                     component={Link}
                     to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${element._id}/edit`}
                     size="small"
                     color="primary"
                     onClick={(e) => e.stopPropagation()}
-                    sx={{
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 1)",
-                      },
-                    }}
                   >
                     <EditIcon fontSize="small" />
                   </IconButton>
@@ -246,12 +248,6 @@ const ElementsPage: React.FC = () => {
                       e.stopPropagation();
                       setElementToDelete(element);
                       setDeleteDialogOpen(true);
-                    }}
-                    sx={{
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 1)",
-                      },
                     }}
                   >
                     <DeleteIcon fontSize="small" />
@@ -290,11 +286,11 @@ const ElementsPage: React.FC = () => {
                   </Box>
 
                   <Typography variant="body2" color="text.secondary">
-                    {element.type === "wall"
+                    {element.type === "Wall"
                       ? translate("elements.descriptions.wall")
-                      : element.type === "floor"
+                      : element.type === "Floor"
                       ? translate("elements.descriptions.floor")
-                      : element.type === "ceiling"
+                      : element.type === "Ceiling"
                       ? translate("elements.descriptions.ceiling")
                       : translate("elements.descriptions.thermalBridge")}
                   </Typography>
@@ -332,13 +328,19 @@ const ElementsPage: React.FC = () => {
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>ביטול</Button>
           <Button
-            onClick={() => {
+            onClick={async () => {
               if (elementToDelete?._id) {
                 try {
+                  await elementService.deleteElement(
+                    projectId!,
+                    typeId!,
+                    spaceId!,
+                    elementToDelete._id
+                  );
                   setElements(
                     elements.filter((elem) => elem._id !== elementToDelete._id)
                   );
-                  toast.success("האלמנט נמחק בהצלחה");
+                  toast.success(translate("elements.deleteSuccess"));
                 } catch (err) {
                   console.error("Error deleting element:", err);
                   setError("שגיאה במחיקת האלמנט");

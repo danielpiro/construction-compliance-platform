@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import spaceService from "../../services/spaceService";
 import { toast } from "react-toastify";
 
@@ -155,15 +156,25 @@ const SpacesPage: React.FC = () => {
             ? `${projectName} - ${buildingTypeName} - ${t("spaces.title")}`
             : t("spaces.title")}
         </Typography>
-        <Button
-          component={Link}
-          to={`/projects/${projectId}/types/${typeId}/spaces/create`}
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-        >
-          {t("spaces.addSpace")}
-        </Button>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Button
+            component={Link}
+            to={`/projects/${projectId}/types/${typeId}`}
+            variant="outlined"
+            startIcon={<ArrowForwardIcon />}
+          >
+            {t("common.back")}
+          </Button>
+          <Button
+            component={Link}
+            to={`/projects/${projectId}/types/${typeId}/spaces/create`}
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+          >
+            {t("spaces.addSpace")}
+          </Button>
+        </Box>
       </Box>
 
       {error && (

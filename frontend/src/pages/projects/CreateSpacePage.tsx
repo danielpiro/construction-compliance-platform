@@ -8,9 +8,11 @@ import {
   Breadcrumbs,
   Link,
   CircularProgress,
+  Button,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { SpaceForm, SpaceFormData } from "../../components/spaces/SpaceForm";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
@@ -158,9 +160,30 @@ const CreateSpacePage: React.FC = () => {
           <Typography color="text.primary">{t("spaces.addSpace")}</Typography>
         </Breadcrumbs>
 
-        <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
-          {t("spaces.addSpace")}
-        </Typography>
+        {/* Header with back button */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography variant="h4" component="h1">
+            {t("spaces.addSpace")}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <Button
+              onClick={() =>
+                navigate(`/projects/${projectId}/types/${typeId}/spaces`)
+              }
+              variant="outlined"
+              startIcon={<ArrowForwardIcon />}
+            >
+              {t("common.back")}
+            </Button>
+          </Box>
+        </Box>
 
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>

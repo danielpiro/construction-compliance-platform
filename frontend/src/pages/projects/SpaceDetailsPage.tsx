@@ -19,7 +19,7 @@ import {
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -59,9 +59,10 @@ const SpaceDetailsPage: React.FC = () => {
           spaceId
         );
         if (spaceResponse.success) {
+          const spaceData = spaceResponse.data;
           const spaceWithElements = {
-            ...spaceResponse.data,
-            elements: spaceResponse.data.elements || [],
+            ...spaceData,
+            elements: spaceData.elements || [],
           };
           setSpace(spaceWithElements);
         } else {
@@ -154,7 +155,7 @@ const SpaceDetailsPage: React.FC = () => {
           onClick={() =>
             navigate(`/projects/${projectId}/types/${typeId}/spaces`)
           }
-          startIcon={<ArrowBackIcon />}
+          startIcon={<ArrowForwardIcon />}
           variant="contained"
           sx={{ mt: 2 }}
         >
@@ -219,14 +220,13 @@ const SpaceDetailsPage: React.FC = () => {
         <Typography variant="h4" component="h1">
           {space.name}
         </Typography>
-        <Box>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Button
             onClick={() =>
               navigate(`/projects/${projectId}/types/${typeId}/spaces`)
             }
-            startIcon={<ArrowBackIcon />}
+            startIcon={<ArrowForwardIcon />}
             variant="outlined"
-            sx={{ mr: 1 }}
           >
             {t("common.back")}
           </Button>
@@ -236,7 +236,6 @@ const SpaceDetailsPage: React.FC = () => {
             startIcon={<EditIcon />}
             variant="outlined"
             color="primary"
-            sx={{ mr: 1 }}
           >
             {t("common.edit")}
           </Button>
@@ -303,8 +302,12 @@ const SpaceDetailsPage: React.FC = () => {
             {space.elements.map((element, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Paper
-                  component={RouterLink}
-                  to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${index}`}
+                  component={element._id ? RouterLink : "div"}
+                  to={
+                    element._id
+                      ? `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${element._id}`
+                      : undefined
+                  }
                   sx={{
                     p: 3,
                     height: "100%",

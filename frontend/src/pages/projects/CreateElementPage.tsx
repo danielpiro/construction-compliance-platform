@@ -9,8 +9,10 @@ import {
   Link,
   CircularProgress,
   Paper,
+  Button,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
   ElementForm,
   ElementFormData,
@@ -184,9 +186,32 @@ const CreateElementPage: React.FC = () => {
           </Typography>
         </Breadcrumbs>
 
-        <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
-          {t("elements.addElement")}
-        </Typography>
+        {/* Header with back button */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography variant="h4" component="h1">
+            {t("elements.addElement")}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <Button
+              onClick={() =>
+                navigate(
+                  `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements`
+                )
+              }
+              variant="outlined"
+              startIcon={<ArrowForwardIcon />}
+            >
+              {t("common.back")}
+            </Button>
+          </Box>
+        </Box>
 
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>

@@ -2,6 +2,7 @@
 import apiClient from "./api";
 
 export interface ElementData {
+  _id?: string;
   name: string;
   type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
   subType?:

@@ -75,7 +75,7 @@ export const createElement = async (
 ): Promise<Element> => {
   try {
     const response = await api.post(
-      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements`,
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`,
       elementData
     );
     return response.data;

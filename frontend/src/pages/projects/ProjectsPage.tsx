@@ -14,7 +14,6 @@ import {
 import { Link } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import BugReportIcon from "@mui/icons-material/BugReport";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { toast } from "react-toastify";
@@ -22,6 +21,7 @@ import { toast } from "react-toastify";
 import projectService from "../../services/projectService";
 import { getToken } from "../../utils/tokenStorage";
 import { areaToHebrew } from "../../utils/areaMapping";
+import { t } from "i18next";
 
 interface Project {
   _id: string;
@@ -41,8 +41,6 @@ const ProjectsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
-  const [showDebug, setShowDebug] = useState(false);
   const projectsPerPage = 12;
 
   const getDisplayVersion = (version: string): string => {
@@ -93,7 +91,6 @@ const ProjectsPage: React.FC = () => {
 
     setIsLoading(true);
     setError(null);
-    setDebugInfo(null);
 
     try {
       const token = getToken();
@@ -120,26 +117,6 @@ const ProjectsPage: React.FC = () => {
 
       const response = await Promise.race([responsePromise, timeoutPromise]);
 
-      console.log("API Response received:", response);
-      setDebugInfo(
-        JSON.stringify(
-          {
-            debugData,
-            responseStructure: {
-              success: response?.success,
-              hasData: !!response?.data,
-              dataIsArray: Array.isArray(response?.data),
-              dataLength: Array.isArray(response?.data)
-                ? response.data.length
-                : "N/A",
-              hasPagination: !!response?.pagination,
-            },
-          },
-          null,
-          2
-        )
-      );
-
       if (
         response &&
         response.success === true &&
@@ -161,15 +138,6 @@ const ProjectsPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Error fetching projects:", err);
-
-      const errorInfo = {
-        message: err.message || "Unknown error",
-        status: err.response?.status,
-        statusText: err.response?.statusText,
-        data: err.response?.data,
-      };
-
-      setDebugInfo(JSON.stringify(errorInfo, null, 2));
 
       if (err.response?.status === 401) {
         setError("Authentication failed. Please log in again.");
@@ -199,10 +167,6 @@ const ProjectsPage: React.FC = () => {
     }
   };
 
-  const toggleDebugInfo = () => {
-    setShowDebug(!showDebug);
-  };
-
   return (
     <Box sx={{ p: 3 }}>
       <Box
@@ -216,39 +180,16 @@ const ProjectsPage: React.FC = () => {
         </Typography>
         <Box>
           <Button
-            variant="outlined"
-            color="primary"
-            onClick={toggleDebugInfo}
-            startIcon={<BugReportIcon />}
-            sx={{ mr: 1 }}
-          >
-            {showDebug ? "הסתר מידע לדיבוג" : "הצג מידע לדיבוג"}
-          </Button>
-          <Button
             component={Link}
             to="/projects/create"
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
           >
-            פרויקט חדש
+            {t("projects.createProject")}
           </Button>
         </Box>
       </Box>
-
-      {showDebug && debugInfo && (
-        <Paper
-          elevation={3}
-          sx={{ p: 2, mb: 3, bgcolor: "#f5f5f5", overflowX: "auto" }}
-        >
-          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-            Debug Information:
-          </Typography>
-          <pre style={{ whiteSpace: "pre-wrap", fontSize: "0.8rem" }}>
-            {debugInfo}
-          </pre>
-        </Paper>
-      )}
 
       {isLoading ? (
         <Box display="flex" justifyContent="center" alignItems="center" py={5}>
