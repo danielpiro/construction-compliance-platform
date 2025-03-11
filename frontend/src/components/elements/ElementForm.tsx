@@ -108,7 +108,7 @@ export const ElementForm: React.FC<ElementFormProps> = ({
             >
               {elementTypes.map((type) => (
                 <MenuItem key={type} value={type}>
-                  {t(`elements.types.${type.toLowerCase().replace(" ", "")}`)}
+                  {t(`elements.types.${type}`)}
                 </MenuItem>
               ))}
             </Select>
@@ -129,11 +129,7 @@ export const ElementForm: React.FC<ElementFormProps> = ({
               >
                 {subTypes[formData.type].map((subType) => (
                   <MenuItem key={subType} value={subType}>
-                    {t(
-                      `elements.subtypes.${subType
-                        .toLowerCase()
-                        .replace(" ", "")}`
-                    )}
+                    {t(`elements.subtypes.${subType}`)}
                   </MenuItem>
                 ))}
               </Select>

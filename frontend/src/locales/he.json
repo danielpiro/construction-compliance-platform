@@ -205,8 +205,11 @@
       "ceiling": "תקרה",
       "floor": "רצפה",
       "Wall": "קיר",
+      "Ceiling": "תקרה",
+      "Floor": "רצפה",
       "type": "סוג",
-      "thermalbridge": "גשר תרמי"
+      "thermalbridge": "גשר תרמי",
+      "Thermal Bridge": "גשר תרמי"
     },
     "subtypes": {
       "outsidewall": "קיר חיצוני",
@@ -217,9 +220,15 @@
       "underRoof": "תחת גג",
       "Wall": "קיר",
       "Outside Wall": "קיר חיצוני",
-      "type": "סוג"
+      "type": "סוג",
+      "Isolation Wall": "קיר בידוד",
+      "Upper Open Space": "חלל פתוח עליון",
+      "Upper Close Room": "חדר סגור עליון",
+      "Upper Roof": "גג עליון",
+      "Under Roof": "תחת גג"
     },
     "descriptions": {
+      "title": "תיאור",
       "wall": "אלמנט קיר המשמש כגבול החלל",
       "floor": "אלמנט רצפה המגדיר את בסיס החלל",
       "ceiling": "אלמנט תקרה המכסה את החלל מלמעלה",
@@ -227,7 +236,26 @@
     },
     "details": "פרטי אלמנט",
     "createSuccess": "האלמנט נוצר בהצלחה",
-    "deleteSuccess": "האלמנט נמחק בהצלחה"
+    "deleteSuccess": "האלמנט נמחק בהצלחה",
+    "confirmDelete": "האם אתה בטוח שברצונך למחוק אלמנט זה?",
+    "compliance": {
+      "title": "בדיקת תאימות",
+      "description": "בדוק את תאימות האלמנט לתקנות הבנייה",
+      "runCheck": "הפעל בדיקת תאימות",
+      "results": "תוצאות בדיקה",
+      "compliant": "האלמנט עומד בתקנים",
+      "nonCompliant": "האלמנט אינו עומד בתקנים",
+      "checksPassed": "בדיקות שעברו בהצלחה",
+      "checksFailed": "בדיקות שנכשלו",
+      "recommendations": "המלצות"
+    },
+    "errors": {
+      "fetchFailed": "טעינת האלמנט נכשלה",
+      "deleteFailed": "מחיקת האלמנט נכשלה",
+      "complianceCheckFailed": "בדיקת התאימות נכשלה"
+    },
+    "notFound": "האלמנט לא נמצא",
+    "complianceCheckSuccess": "בדיקת התאימות הושלמה בהצלחה"
   },
   "buildingTypes": {
     "title": "סוגי מבנים",
