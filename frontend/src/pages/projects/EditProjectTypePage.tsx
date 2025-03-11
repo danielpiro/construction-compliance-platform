@@ -77,7 +77,10 @@ const EditProjectTypePage: React.FC = () => {
         }
 
         // Fetch building type details
-        const typeResponse = await buildingTypeService.getBuildingType(typeId);
+        const typeResponse = await buildingTypeService.getBuildingType(
+          projectId,
+          typeId
+        );
         if (typeResponse.success && typeResponse.data) {
           setFormData({
             name: typeResponse.data.name,
@@ -131,7 +134,9 @@ const EditProjectTypePage: React.FC = () => {
     }
 
     try {
+      if (!projectId) throw new Error(t("errors.missingParameters"));
       const response = await buildingTypeService.updateBuildingType(
+        projectId,
         typeId,
         formData
       );

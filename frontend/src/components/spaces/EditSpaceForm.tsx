@@ -15,15 +15,20 @@ const EditSpaceForm: React.FC = () => {
   useEffect(() => {
     const fetchSpace = async () => {
       try {
-        if (!spaceId) throw new Error(t("errors.generic"));
-        const response = await spaceService.getSpace(spaceId);
+        if (!spaceId || !projectId || !typeId)
+          throw new Error(t("errors.generic"));
+        const response = await spaceService.getSpace(
+          projectId,
+          typeId,
+          spaceId
+        );
         if (!response.success) {
           throw new Error(response.message || t("errors.generic"));
         }
         setInitialData({
           name: response.data.name,
           type: response.data.type,
-          elements: response.elements || [],
+          elements: response.data.elements || [],
         });
       } catch (error) {
         console.error("Failed to fetch space:", error);
@@ -32,7 +37,7 @@ const EditSpaceForm: React.FC = () => {
     };
 
     fetchSpace();
-  }, [spaceId, t]);
+  }, [spaceId, projectId, typeId, t]);
 
   const handleSubmit = async (spaces: SpaceFormData[]) => {
     try {
@@ -42,11 +47,16 @@ const EditSpaceForm: React.FC = () => {
 
       // Update space with first form data (since we're editing a single space)
       const space = spaces[0];
-      const response = await spaceService.updateSpace(spaceId, {
-        name: space.name,
-        type: space.type,
-        elements: space.elements,
-      });
+      const response = await spaceService.updateSpace(
+        projectId,
+        typeId,
+        spaceId,
+        {
+          name: space.name,
+          type: space.type,
+          elements: space.elements,
+        }
+      );
 
       if (!response.success) {
         throw new Error(response.message || t("errors.generic"));

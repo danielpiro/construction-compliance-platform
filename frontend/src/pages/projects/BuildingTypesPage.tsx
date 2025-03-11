@@ -86,7 +86,11 @@ const BuildingTypesPage: React.FC = () => {
     }
 
     try {
-      const response = await buildingTypeService.deleteBuildingType(typeId);
+      if (!projectId) throw new Error(t("errors.missingProjectId"));
+      const response = await buildingTypeService.deleteBuildingType(
+        projectId,
+        typeId
+      );
       if (response.success) {
         toast.success(t("buildingTypes.deleteSuccess"));
         setBuildingTypes(buildingTypes.filter((type) => type._id !== typeId));
