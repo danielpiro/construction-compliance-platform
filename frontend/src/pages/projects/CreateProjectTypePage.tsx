@@ -16,7 +16,6 @@ const CreateProjectTypePage: React.FC = () => {
   const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
   const [projectName, setProjectName] = useState<string>("");
 
   // Fetch project name when component mounts
@@ -78,12 +77,6 @@ const CreateProjectTypePage: React.FC = () => {
         <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
           {t("buildingTypes.createNew")}
         </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
 
         {projectId ? (
           <BuildingTypeForm
