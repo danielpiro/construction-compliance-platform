@@ -587,10 +587,11 @@ const ProjectDetailPage: React.FC = () => {
               </Button>
               <Button
                 onClick={async () => {
-                  if (typeToDelete?._id) {
+                  if (typeToDelete?._id && projectId) {
                     try {
                       const response =
                         await buildingTypeService.deleteBuildingType(
+                          projectId,
                           typeToDelete._id
                         );
                       if (response.success) {

@@ -9,7 +9,6 @@ import {
   Link,
   CircularProgress,
   Alert,
-  Divider,
   Chip,
   Dialog,
   DialogActions,
@@ -62,7 +61,11 @@ const SpaceDetailsPage: React.FC = () => {
         setError(null);
 
         // Fetch space details
-        const spaceResponse = await spaceService.getSpace(spaceId);
+        const spaceResponse = await spaceService.getSpace(
+          projectId,
+          typeId,
+          spaceId
+        );
         if (spaceResponse.success) {
           setSpace(spaceResponse.data);
         } else {
@@ -70,7 +73,10 @@ const SpaceDetailsPage: React.FC = () => {
         }
 
         // Fetch building type details
-        const typeResponse = await buildingTypeService.getBuildingType(typeId);
+        const typeResponse = await buildingTypeService.getBuildingType(
+          projectId,
+          typeId
+        );
         if (typeResponse.success) {
           setBuildingTypeName(typeResponse.data.name);
         }
@@ -92,10 +98,14 @@ const SpaceDetailsPage: React.FC = () => {
   }, [spaceId, typeId, projectId, t]);
 
   const handleDeleteSpace = async () => {
-    if (!spaceId) return;
+    if (!spaceId || !projectId || !typeId) return;
 
     try {
-      const response = await spaceService.deleteSpace(spaceId);
+      const response = await spaceService.deleteSpace(
+        projectId,
+        typeId,
+        spaceId
+      );
       if (response.success) {
         toast.success(t("spaces.deleteSuccess"));
         navigate(`/projects/${projectId}/types/${typeId}/spaces`);
@@ -324,7 +334,14 @@ const SpaceDetailsPage: React.FC = () => {
                           .toLowerCase()
                           .replace(/\s+/g, "")}`
                       )}
-                      color={getChipColor(element.type) as any}
+                      color={
+                        getChipColor(element.type) as
+                          | "primary"
+                          | "secondary"
+                          | "success"
+                          | "warning"
+                          | "default"
+                      }
                       size="small"
                     />
                     {element.subType && (

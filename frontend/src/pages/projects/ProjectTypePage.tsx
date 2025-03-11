@@ -70,7 +70,7 @@ const spaceTypeLabels: Record<string, string> = {
 };
 
 const ProjectTypePage: React.FC = () => {
-  const { t: translate } = useTranslation();
+  const { t } = useTranslation();
   const { typeId, projectId } = useParams<{
     typeId: string;
     projectId: string;
@@ -86,17 +86,20 @@ const ProjectTypePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchBuildingTypeData = async () => {
-    if (!typeId) return;
+    if (!typeId || !projectId) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const typeResponse = await buildingTypeService.getBuildingType(typeId);
+      const actualProjectId = projectId;
+      const typeResponse = await buildingTypeService.getBuildingType(
+        actualProjectId,
+        typeId
+      );
       if (typeResponse.success) {
         setBuildingType(typeResponse.data);
 
-        const actualProjectId = projectId || typeResponse.data.project;
         const projectResponse = await projectService.getProject(
           actualProjectId
         );
@@ -108,16 +111,16 @@ const ProjectTypePage: React.FC = () => {
           });
         }
 
-        const spacesResponse = await spaceService.getSpaces(typeId);
+        const spacesResponse = await spaceService.getSpaces(projectId, typeId);
         if (spacesResponse.success) {
           setSpaces(spacesResponse.data);
         }
       } else {
-        setError("אירעה שגיאה בטעינת פרטי סוג המבנה");
+        setError(t("buildingTypes.loadError"));
       }
     } catch (err: unknown) {
       console.error("Error fetching building type data:", err);
-      setError("אירעה שגיאה בטעינת פרטי סוג המבנה. אנא נסה שוב מאוחר יותר.");
+      setError(t("errors.generic"));
     } finally {
       setLoading(false);
     }
@@ -128,19 +131,22 @@ const ProjectTypePage: React.FC = () => {
   }, [typeId, projectId]);
 
   const handleDeleteBuildingType = async () => {
-    if (!typeId || !project) return;
+    if (!typeId || !project || !projectId) return;
 
     try {
-      const response = await buildingTypeService.deleteBuildingType(typeId);
+      const response = await buildingTypeService.deleteBuildingType(
+        projectId,
+        typeId
+      );
       if (response.success) {
-        toast.success("סוג המבנה נמחק בהצלחה");
+        toast.success(t("buildingTypes.deleteSuccess"));
         navigate(`/projects/${project._id}`);
       } else {
-        toast.error("שגיאה במחיקת סוג המבנה");
+        toast.error(t("buildingTypes.deleteFailed"));
       }
     } catch (err) {
       console.error("Error deleting building type:", err);
-      toast.error("שגיאה במחיקת סוג המבנה");
+      toast.error(t("buildingTypes.deleteFailed"));
     } finally {
       setDeleteTypeDialogOpen(false);
     }
@@ -165,7 +171,7 @@ const ProjectTypePage: React.FC = () => {
     return (
       <Box p={3}>
         <Typography color="error" variant="h6">
-          {error || "סוג מבנה לא נמצא"}
+          {error || t("buildingTypes.notFound")}
         </Typography>
         <Button
           component={RouterLink}
@@ -173,7 +179,7 @@ const ProjectTypePage: React.FC = () => {
           variant="contained"
           sx={{ mt: 2 }}
         >
-          חזור לרשימת הפרויקטים
+          {t("projects.backToList")}
         </Button>
       </Box>
     );
@@ -189,7 +195,7 @@ const ProjectTypePage: React.FC = () => {
             sx={{ ml: 0.5, verticalAlign: "middle" }}
             fontSize="small"
           />
-          ראשי
+          {t("nav.home")}
         </Link>
         <Link
           component={RouterLink}
@@ -197,7 +203,7 @@ const ProjectTypePage: React.FC = () => {
           underline="hover"
           color="inherit"
         >
-          פרויקטים
+          {t("nav.projects")}
         </Link>
         <Link
           component={RouterLink}
@@ -226,7 +232,7 @@ const ProjectTypePage: React.FC = () => {
           color="primary"
           startIcon={<AddIcon />}
         >
-          הוסף חלל חדש
+          {t("spaces.addSpace")}
         </Button>
       </Box>
 
@@ -287,14 +293,14 @@ const ProjectTypePage: React.FC = () => {
 
       <Box mb={3}>
         <Typography variant="h5" component="h2">
-          חללי המבנה
+          {t("spaces.title")}
         </Typography>
       </Box>
 
       {spaces.length === 0 ? (
         <Box textAlign="center" py={5}>
           <Typography variant="body1" paragraph>
-            אין חללים מוגדרים עדיין
+            {t("spaces.noSpaces")}
           </Typography>
           <Button
             component={RouterLink}
@@ -303,7 +309,7 @@ const ProjectTypePage: React.FC = () => {
             color="primary"
             startIcon={<AddIcon />}
           >
-            הוסף חלל חדש
+            {t("spaces.addSpace")}
           </Button>
         </Box>
       ) : (
@@ -398,17 +404,18 @@ const ProjectTypePage: React.FC = () => {
         open={deleteTypeDialogOpen}
         onClose={() => setDeleteTypeDialogOpen(false)}
       >
-        <DialogTitle>מחיקת סוג מבנה</DialogTitle>
+        <DialogTitle>{t("buildingTypes.delete.title")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            האם אתה בטוח שברצונך למחוק את סוג המבנה "{buildingType.name}"? פעולה
-            זו אינה ניתנת לביטול ותמחק את כל החללים והאלמנטים המקושרים.
+            {t("buildingTypes.delete.confirm", { name: buildingType.name })}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteTypeDialogOpen(false)}>ביטול</Button>
+          <Button onClick={() => setDeleteTypeDialogOpen(false)}>
+            {t("common.cancel")}
+          </Button>
           <Button onClick={handleDeleteBuildingType} color="error" autoFocus>
-            מחק
+            {t("common.delete")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -417,31 +424,34 @@ const ProjectTypePage: React.FC = () => {
         open={deleteSpaceDialogOpen}
         onClose={() => setDeleteSpaceDialogOpen(false)}
       >
-        <DialogTitle>מחיקת חלל</DialogTitle>
+        <DialogTitle>{t("spaces.delete.title")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            האם אתה בטוח שברצונך למחוק את החלל "{spaceToDelete?.name}"? פעולה זו
-            אינה ניתנת לביטול ותמחק את כל האלמנטים המקושרים.
+            {t("spaces.delete.confirm", { name: spaceToDelete?.name })}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteSpaceDialogOpen(false)}>ביטול</Button>
+          <Button onClick={() => setDeleteSpaceDialogOpen(false)}>
+            {t("common.cancel")}
+          </Button>
           <Button
             onClick={async () => {
-              if (spaceToDelete?._id) {
+              if (spaceToDelete?._id && projectId && typeId) {
                 try {
                   const response = await spaceService.deleteSpace(
+                    projectId,
+                    typeId,
                     spaceToDelete._id
                   );
                   if (response.success) {
-                    toast.success("החלל נמחק בהצלחה");
+                    toast.success(t("spaces.deleteSuccess"));
                     fetchBuildingTypeData();
                   } else {
-                    toast.error("שגיאה במחיקת החלל");
+                    toast.error(t("spaces.errors.deleteFailed"));
                   }
                 } catch (err) {
                   console.error("Error deleting space:", err);
-                  toast.error("שגיאה במחיקת החלל");
+                  toast.error(t("spaces.errors.deleteFailed"));
                 }
                 setDeleteSpaceDialogOpen(false);
                 setSpaceToDelete(null);
@@ -450,7 +460,7 @@ const ProjectTypePage: React.FC = () => {
             color="error"
             autoFocus
           >
-            מחק
+            {t("common.delete")}
           </Button>
         </DialogActions>
       </Dialog>

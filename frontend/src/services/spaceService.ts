@@ -34,16 +34,18 @@ interface SpaceResponse {
 // Space service
 const spaceService = {
   // Get all spaces for a building type
-  getSpaces: async (buildingTypeId: string) => {
+  getSpaces: async (projectId: string, typeId: string) => {
     const response = await apiClient.get(
-      `/building-types/${buildingTypeId}/spaces`
+      `/projects/${projectId}/types/${typeId}/spaces`
     );
     return response.data;
   },
 
   // Get single space by ID
-  getSpace: async (spaceId: string) => {
-    const response = await apiClient.get(`/spaces/${spaceId}`);
+  getSpace: async (projectId: string, typeId: string, spaceId: string) => {
+    const response = await apiClient.get(
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}`
+    );
     return {
       success: true,
       data: response.data.data,
@@ -54,19 +56,28 @@ const spaceService = {
 
   // Create new space
   createSpace: async (
-    buildingTypeId: string,
+    projectId: string,
+    typeId: string,
     spaceData: SpaceData
   ): Promise<SpaceResponse> => {
     const response = await apiClient.post(
-      `/building-types/${buildingTypeId}/spaces`,
+      `/projects/${projectId}/types/${typeId}/spaces/create`,
       spaceData
     );
     return response.data.data;
   },
 
   // Update space
-  updateSpace: async (spaceId: string, spaceData: Partial<SpaceData>) => {
-    const response = await apiClient.put(`/spaces/${spaceId}`, spaceData);
+  updateSpace: async (
+    projectId: string,
+    typeId: string,
+    spaceId: string,
+    spaceData: Partial<SpaceData>
+  ) => {
+    const response = await apiClient.put(
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}`,
+      spaceData
+    );
     return {
       success: true,
       data: response.data.data,
@@ -75,8 +86,10 @@ const spaceService = {
   },
 
   // Delete space
-  deleteSpace: async (spaceId: string) => {
-    const response = await apiClient.delete(`/spaces/${spaceId}`);
+  deleteSpace: async (projectId: string, typeId: string, spaceId: string) => {
+    const response = await apiClient.delete(
+      `/projects/${projectId}/types/${typeId}/spaces/${spaceId}`
+    );
     return response.data;
   },
 };
