@@ -18,27 +18,15 @@ import { useTranslation } from "react-i18next";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 
-export interface ElementData {
-  name: string;
-  type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
-  subType?:
-    | "Outside Wall"
-    | "Isolation Wall"
-    | "Upper Open Space"
-    | "Upper Close Room"
-    | "Upper Roof"
-    | "Under Roof";
-}
+import { ElementData, SpaceData } from "../../services/spaceService";
 
-export interface SpaceFormData {
-  name: string;
-  type: "Bedroom" | "Protect Space" | "Wet Room" | "Balcony";
+export interface SpaceFormData extends SpaceData {
   elements: ElementData[];
 }
 
 interface SpaceFormProps {
   onSubmit: (data: SpaceFormData[]) => void;
-  initialData?: SpaceFormData;
+  initialData?: SpaceData;
 }
 
 const ELEMENT_TYPES = ["Wall", "Ceiling", "Floor", "Thermal Bridge"] as const;
@@ -63,7 +51,9 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
   };
 
   const [spaces, setSpaces] = useState<SpaceFormData[]>(
-    initialData ? [initialData] : [{ ...emptySpace }]
+    initialData
+      ? [{ ...initialData, elements: initialData.elements || [] }]
+      : [{ ...emptySpace }]
   );
 
   const handleAddSpace = () => {
@@ -131,7 +121,7 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
       newSpaces[spaceIndex] = {
         ...newSpaces[spaceIndex],
         elements: newSpaces[spaceIndex].elements.filter(
-          (_, i) => i !== elementIndex
+          (_: ElementData, i: number) => i !== elementIndex
         ),
       };
       return newSpaces;
@@ -330,7 +320,9 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
                                 </Select>
                               </FormControl>
 
-                              {SUBTYPE_MAP[element.type]?.length > 0 && (
+                              {SUBTYPE_MAP[
+                                element.type as keyof typeof SUBTYPE_MAP
+                              ]?.length > 0 && (
                                 <FormControl required fullWidth>
                                   <InputLabel>
                                     {t("elements.subtypes.type")}
@@ -347,17 +339,17 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
                                       )
                                     }
                                   >
-                                    {SUBTYPE_MAP[element.type].map(
-                                      (subType) => (
-                                        <MenuItem key={subType} value={subType}>
-                                          {t(
-                                            `elements.subtypes.${subType
-                                              .toLowerCase()
-                                              .replace(" ", "")}`
-                                          )}
-                                        </MenuItem>
-                                      )
-                                    )}
+                                    {SUBTYPE_MAP[
+                                      element.type as keyof typeof SUBTYPE_MAP
+                                    ].map((subType) => (
+                                      <MenuItem key={subType} value={subType}>
+                                        {t(
+                                          `elements.subtypes.${subType
+                                            .toLowerCase()
+                                            .replace(" ", "")}`
+                                        )}
+                                      </MenuItem>
+                                    ))}
                                   </Select>
                                 </FormControl>
                               )}

@@ -26,15 +26,7 @@ import AddIcon from "@mui/icons-material/Add";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
 import buildingTypeService from "../../services/buildingTypeService";
-import { ElementData } from "../../components/spaces/SpaceForm";
-
-interface Space {
-  _id: string;
-  name: string;
-  type: "Bedroom" | "Protect Space" | "Wet Room" | "Balcony";
-  buildingType: string;
-  elements: ElementData[];
-}
+import { Space } from "../../services/spaceService";
 
 const SpaceDetailsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -67,7 +59,11 @@ const SpaceDetailsPage: React.FC = () => {
           spaceId
         );
         if (spaceResponse.success) {
-          setSpace(spaceResponse.data);
+          const spaceWithElements = {
+            ...spaceResponse.data,
+            elements: spaceResponse.data.elements || [],
+          };
+          setSpace(spaceWithElements);
         } else {
           throw new Error(spaceResponse.message || t("errors.generic"));
         }

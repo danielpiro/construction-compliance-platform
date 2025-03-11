@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import {
@@ -41,12 +41,7 @@ interface BuildingType {
   project: string;
 }
 
-interface Space {
-  _id: string;
-  name: string;
-  type: "Bedroom" | "Protect Space" | "Wet Room" | "Balcony";
-  buildingType: string;
-}
+import { Space } from "../../services/spaceService";
 
 interface Project {
   _id: string;
@@ -85,7 +80,7 @@ const ProjectTypePage: React.FC = () => {
   const [spaceToDelete, setSpaceToDelete] = useState<Space | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchBuildingTypeData = async () => {
+  const fetchBuildingTypeData = useCallback(async () => {
     if (!typeId || !projectId) return;
 
     setLoading(true);
@@ -112,8 +107,16 @@ const ProjectTypePage: React.FC = () => {
         }
 
         const spacesResponse = await spaceService.getSpaces(projectId, typeId);
-        if (spacesResponse.success) {
-          setSpaces(spacesResponse.data);
+        if (spacesResponse.success && Array.isArray(spacesResponse.data)) {
+          setSpaces(
+            spacesResponse.data.map((space) => ({
+              ...space,
+              elements: space.elements || [],
+            }))
+          );
+        } else {
+          console.error("Invalid spaces response:", spacesResponse);
+          setError(t("spaces.errors.fetchFailed"));
         }
       } else {
         setError(t("buildingTypes.loadError"));
@@ -124,11 +127,11 @@ const ProjectTypePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [typeId, projectId, t]);
 
   useEffect(() => {
     fetchBuildingTypeData();
-  }, [typeId, projectId]);
+  }, [fetchBuildingTypeData]);
 
   const handleDeleteBuildingType = async () => {
     if (!typeId || !project || !projectId) return;

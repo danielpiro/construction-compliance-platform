@@ -10,6 +10,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 import { SpaceForm, SpaceFormData } from "../../components/spaces/SpaceForm";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
@@ -43,7 +44,10 @@ const CreateSpacePage: React.FC = () => {
         }
 
         // Fetch building type details
-        const typeResponse = await buildingTypeService.getBuildingType(typeId);
+        const typeResponse = await buildingTypeService.getBuildingType(
+          projectId,
+          typeId
+        );
         if (typeResponse.success && typeResponse.data) {
           setBuildingTypeName(typeResponse.data.name);
         }
@@ -60,22 +64,27 @@ const CreateSpacePage: React.FC = () => {
 
   const handleSubmit = async (spaces: SpaceFormData[]) => {
     try {
-      if (!typeId) throw new Error(t("errors.generic"));
+      if (!projectId || !typeId) throw new Error(t("errors.missingParameters"));
       setError(null);
 
       // Create all spaces at once
-      const creationPromises = spaces.map((space) =>
-        spaceService.createSpace(typeId, {
+      const creationPromises = spaces.map((space) => {
+        return spaceService.createSpace(projectId!, typeId!, {
           name: space.name,
           type: space.type,
           elements: space.elements,
-        })
-      );
+        });
+      });
 
-      await Promise.all(creationPromises);
+      const results = await Promise.all(creationPromises);
+      const allSuccessful = results.every((result) => result.success);
 
-      // Navigate back to spaces page
-      navigate(`/projects/${projectId}/types/${typeId}/spaces`);
+      if (allSuccessful) {
+        toast.success(t("spaces.createSuccess"));
+        navigate(`/projects/${projectId}/types/${typeId}`, { replace: true });
+      } else {
+        throw new Error(t("spaces.errors.createFailed"));
+      }
     } catch (error) {
       console.error("Failed to create space:", error);
       setError(error instanceof Error ? error.message : t("errors.generic"));

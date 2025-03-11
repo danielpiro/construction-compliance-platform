@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 // Helper function to check user access to building type
 const checkBuildingTypeAccess = async (
   buildingTypeId: string,
+  projectId: string,
   userId: string
 ) => {
   // Find building type
@@ -17,13 +18,21 @@ const checkBuildingTypeAccess = async (
     return { access: false, message: "Building type not found" };
   }
 
-  // Check project access
-  const project = await Project.findById(buildingType.project);
+  // Check project matches and exists
+  const project = await Project.findById(projectId);
   if (!project) {
     return { access: false, message: "Project not found" };
   }
 
-  // Check if user has access to the project
+  // Verify building type belongs to the project
+  if (buildingType.project.toString() !== projectId) {
+    return {
+      access: false,
+      message: "Building type does not belong to this project",
+    };
+  }
+
+  // Check user access
   const isOwner = project.owner.toString() === userId;
   const isShared = project.sharedWith.some((s) => s.user.toString() === userId);
 
@@ -44,8 +53,6 @@ const checkBuildingTypeAccess = async (
   return {
     access: true,
     writeAccess: hasWriteAccess,
-    project,
-    buildingType,
   };
 };
 
@@ -62,7 +69,11 @@ export const getSpaces = async (
     const buildingTypeId = req.params.typeId;
 
     // Check access
-    const accessCheck = await checkBuildingTypeAccess(buildingTypeId, userId);
+    const accessCheck = await checkBuildingTypeAccess(
+      buildingTypeId,
+      req.params.projectId,
+      userId
+    );
     if (!accessCheck.access) {
       return res.status(403).json({
         success: false,
@@ -71,12 +82,12 @@ export const getSpaces = async (
     }
 
     // Get spaces
-    const spaces = await Space.find({ buildingType: buildingTypeId });
+    const spaces = await Space.find({ buildingType: buildingTypeId }).lean();
 
     res.status(200).json({
       success: true,
-      count: spaces.length,
       data: spaces,
+      message: "Spaces retrieved successfully",
     });
   } catch (error) {
     console.error(error);
@@ -111,6 +122,7 @@ export const getSpace = async (
     // Check access
     const accessCheck = await checkBuildingTypeAccess(
       space.buildingType.toString(),
+      req.params.projectId,
       userId
     );
     if (!accessCheck.access) {
@@ -152,7 +164,11 @@ export const createSpace = async (
     const buildingTypeId = req.params.typeId;
 
     // Check access
-    const accessCheck = await checkBuildingTypeAccess(buildingTypeId, userId);
+    const accessCheck = await checkBuildingTypeAccess(
+      buildingTypeId,
+      req.params.projectId,
+      userId
+    );
     if (!accessCheck.access) {
       return res.status(403).json({
         success: false,
@@ -184,40 +200,26 @@ export const createSpace = async (
         { session }
       );
 
+      let elements = [];
       // Create elements if provided
       if (req.body.elements && Array.isArray(req.body.elements)) {
-        const elements = await Element.create(
+        elements = await Element.create(
           req.body.elements.map((element: any) => ({
             ...element,
             space: space[0]._id,
           })),
           { session }
         );
-
-        // Commit transaction
-        await session.commitTransaction();
-        session.endSession();
-
-        res.status(201).json({
-          success: true,
-          data: {
-            space: space[0],
-            elements,
-          },
-        });
-      } else {
-        // Commit transaction even if no elements
-        await session.commitTransaction();
-        session.endSession();
-
-        res.status(201).json({
-          success: true,
-          data: {
-            space: space[0],
-            elements: [],
-          },
-        });
       }
+
+      // Commit transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(201).json({
+        success: true,
+        data: space[0],
+      });
     } catch (error) {
       // Abort transaction on error
       await session.abortTransaction();
@@ -258,6 +260,7 @@ export const updateSpace = async (
     // Check access
     const accessCheck = await checkBuildingTypeAccess(
       space.buildingType.toString(),
+      req.params.projectId,
       userId
     );
     if (!accessCheck.access) {
@@ -372,6 +375,7 @@ export const deleteSpace = async (
       // Check access
       const accessCheck = await checkBuildingTypeAccess(
         space.buildingType.toString(),
+        req.params.projectId,
         userId
       );
       if (!accessCheck.access) {

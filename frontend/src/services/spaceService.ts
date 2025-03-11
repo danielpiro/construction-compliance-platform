@@ -1,7 +1,7 @@
 // src/services/spaceService.ts
 import apiClient from "./api";
 
-interface ElementData {
+export interface ElementData {
   name: string;
   type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
   subType?:
@@ -13,28 +13,38 @@ interface ElementData {
     | "Under Roof";
 }
 
-interface SpaceData {
+export interface Space {
+  _id: string;
+  name: string;
+  type: "Bedroom" | "Protect Space" | "Wet Room" | "Balcony";
+  buildingType: string;
+  elements: ElementData[];
+}
+
+export interface SpaceData {
   name: string;
   type: "Bedroom" | "Protect Space" | "Wet Room" | "Balcony";
   elements?: ElementData[];
 }
 
-interface SpaceResponse {
-  space: {
-    _id: string;
-    name: string;
-    type: string;
-    buildingType: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  elements: Array<ElementData & { _id: string; space: string }>;
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
+export interface SpaceResponse extends Space {
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Space service
 const spaceService = {
   // Get all spaces for a building type
-  getSpaces: async (projectId: string, typeId: string) => {
+  getSpaces: async (
+    projectId: string,
+    typeId: string
+  ): Promise<ApiResponse<SpaceResponse[]>> => {
     const response = await apiClient.get(
       `/projects/${projectId}/types/${typeId}/spaces`
     );
@@ -42,16 +52,15 @@ const spaceService = {
   },
 
   // Get single space by ID
-  getSpace: async (projectId: string, typeId: string, spaceId: string) => {
+  getSpace: async (
+    projectId: string,
+    typeId: string,
+    spaceId: string
+  ): Promise<ApiResponse<SpaceResponse>> => {
     const response = await apiClient.get(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}`
     );
-    return {
-      success: true,
-      data: response.data.data,
-      elements: response.data.data.elements || [],
-      message: response.data.message,
-    };
+    return response.data;
   },
 
   // Create new space
@@ -59,12 +68,12 @@ const spaceService = {
     projectId: string,
     typeId: string,
     spaceData: SpaceData
-  ): Promise<SpaceResponse> => {
+  ): Promise<ApiResponse<SpaceResponse>> => {
     const response = await apiClient.post(
       `/projects/${projectId}/types/${typeId}/spaces/create`,
       spaceData
     );
-    return response.data.data;
+    return response.data;
   },
 
   // Update space
@@ -73,7 +82,7 @@ const spaceService = {
     typeId: string,
     spaceId: string,
     spaceData: Partial<SpaceData>
-  ) => {
+  ): Promise<ApiResponse<SpaceResponse>> => {
     const response = await apiClient.put(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}`,
       spaceData
@@ -86,7 +95,11 @@ const spaceService = {
   },
 
   // Delete space
-  deleteSpace: async (projectId: string, typeId: string, spaceId: string) => {
+  deleteSpace: async (
+    projectId: string,
+    typeId: string,
+    spaceId: string
+  ): Promise<ApiResponse<void>> => {
     const response = await apiClient.delete(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}`
     );
