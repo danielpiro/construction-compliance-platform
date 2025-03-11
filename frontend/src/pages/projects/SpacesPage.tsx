@@ -283,7 +283,7 @@ const SpacesPage: React.FC = () => {
                 <Box sx={{ mt: 2 }}>
                   <Button
                     component={Link}
-                    to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}/elements`}
+                    to={`/projects/${projectId}/types/${typeId}/spaces/${space._id}`}
                     variant="outlined"
                     size="small"
                     color="primary"

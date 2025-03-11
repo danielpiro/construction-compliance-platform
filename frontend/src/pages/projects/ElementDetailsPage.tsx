@@ -245,7 +245,7 @@ const ElementDetailsPage: React.FC = () => {
         )}
         <Link
           component={RouterLink}
-          to={`/projects/${projectId}/types/${typeId}/spaces`}
+          to={`/projects/${projectId}/types/${typeId}`}
           color="inherit"
           underline="hover"
         >

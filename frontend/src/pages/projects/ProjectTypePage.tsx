@@ -352,7 +352,7 @@ const ProjectTypePage: React.FC = () => {
 
                 <Box
                   component={RouterLink}
-                  to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}/elements`}
+                  to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}`}
                   sx={{
                     textDecoration: "none",
                     color: "inherit",

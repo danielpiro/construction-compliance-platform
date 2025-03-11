@@ -22,8 +22,6 @@ import CreateProjectPage from "./pages/projects/CreateProjectPage";
 import EditProjectPage from "./pages/projects/EditProjectPage";
 import ProjectDetailPage from "./pages/projects/ProjectDetailPage";
 import ProjectTypePage from "./pages/projects/ProjectTypePage";
-import SpacesPage from "./pages/projects/SpacesPage";
-import ElementsPage from "./pages/projects/ElementsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { useAuth } from "./hooks/useAuth";
 import ProfilePage from "./pages/projects/ProfilePage";
@@ -163,14 +161,6 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/projects/:projectId/types/:typeId/spaces"
-          element={
-            <ProtectedRoute>
-              <SpacesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/projects/:projectId/types/:typeId/spaces/:spaceId"
           element={
             <ProtectedRoute>
@@ -191,14 +181,6 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <EditSpacePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/projects/:projectId/types/:typeId/spaces/:spaceId/elements"
-          element={
-            <ProtectedRoute>
-              <ElementsPage />
             </ProtectedRoute>
           }
         />

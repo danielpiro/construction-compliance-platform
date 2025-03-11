@@ -63,7 +63,7 @@ const EditSpaceForm: React.FC = () => {
       }
 
       // Navigate back to spaces page
-      navigate(`/projects/${projectId}/types/${typeId}/spaces`);
+      navigate(`/projects/${projectId}/types/${typeId}`);
     } catch (error) {
       console.error("Failed to update space:", error);
       setError(error instanceof Error ? error.message : t("errors.generic"));

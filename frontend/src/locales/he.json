@@ -192,6 +192,14 @@
     "count": "{{count}} אלמנטים",
     "viewElements": "צפה באלמנטים",
     "noElements": "אין עדיין אלמנטים. הוסף אלמנט כדי להתחיל.",
+    "form": {
+      "title": "הוסף אלמנט",
+      "name": "שם אלמנט",
+      "namePlaceholder": "הכנס שם אלמנט",
+      "type": "סוג אלמנט",
+      "subType": "תת סוג",
+      "submit": "הוסף אלמנט"
+    },
     "types": {
       "wall": "קיר",
       "ceiling": "תקרה",

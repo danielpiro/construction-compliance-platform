@@ -157,7 +157,7 @@ const ElementsPage: React.FC = () => {
             {typeName}
           </Link>
           <Link
-            to={`/projects/${projectId}/types/${typeId}/spaces`}
+            to={`/projects/${projectId}/types/${typeId}`}
             style={{ textDecoration: "none" }}
           >
             {translate("spaces.title")}
@@ -178,7 +178,7 @@ const ElementsPage: React.FC = () => {
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Button
             component={Link}
-            to={`/projects/${projectId}/types/${typeId}/spaces`}
+            to={`/projects/${projectId}/types/${typeId}`}
             variant="outlined"
             startIcon={<ArrowForwardIcon />}
           >

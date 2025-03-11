@@ -186,10 +186,10 @@ const EditElementPage: React.FC = () => {
           )}
           <Link
             color="inherit"
-            href={`/projects/${projectId}/types/${typeId}/spaces`}
+            href={`/projects/${projectId}/types/${typeId}`}
             onClick={(e) => {
               e.preventDefault();
-              navigate(`/projects/${projectId}/types/${typeId}/spaces`);
+              navigate(`/projects/${projectId}/types/${typeId}`);
             }}
           >
             {t("spaces.title")}

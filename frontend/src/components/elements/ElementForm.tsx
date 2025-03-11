@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Button,
@@ -49,6 +50,7 @@ export const ElementForm: React.FC<ElementFormProps> = ({
   onSubmit,
   initialData,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<ElementFormData>(
     initialData || {
       name: "",
@@ -81,22 +83,22 @@ export const ElementForm: React.FC<ElementFormProps> = ({
     <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
       <Container maxWidth="sm">
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Typography variant="h6">Add Element</Typography>
+          <Typography variant="h6">{t("elements.form.title")}</Typography>
 
           <TextField
             required
-            label="Element Name"
+            label={t("elements.form.name")}
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Enter element name"
+            placeholder={t("elements.form.namePlaceholder")}
             fullWidth
           />
 
           <FormControl required fullWidth>
-            <InputLabel>Element Type</InputLabel>
+            <InputLabel>{t("elements.form.type")}</InputLabel>
             <Select
               value={formData.type}
-              label="Element Type"
+              label={t("elements.form.type")}
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -106,7 +108,7 @@ export const ElementForm: React.FC<ElementFormProps> = ({
             >
               {elementTypes.map((type) => (
                 <MenuItem key={type} value={type}>
-                  {type}
+                  {t(`elements.types.${type.toLowerCase().replace(" ", "")}`)}
                 </MenuItem>
               ))}
             </Select>
@@ -114,10 +116,10 @@ export const ElementForm: React.FC<ElementFormProps> = ({
 
           {formData.type !== "Thermal Bridge" && (
             <FormControl required fullWidth>
-              <InputLabel>Sub Type</InputLabel>
+              <InputLabel>{t("elements.form.subType")}</InputLabel>
               <Select
                 value={formData.subType}
-                label="Sub Type"
+                label={t("elements.form.subType")}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -127,7 +129,11 @@ export const ElementForm: React.FC<ElementFormProps> = ({
               >
                 {subTypes[formData.type].map((subType) => (
                   <MenuItem key={subType} value={subType}>
-                    {subType}
+                    {t(
+                      `elements.subtypes.${subType
+                        .toLowerCase()
+                        .replace(" ", "")}`
+                    )}
                   </MenuItem>
                 ))}
               </Select>
@@ -135,7 +141,7 @@ export const ElementForm: React.FC<ElementFormProps> = ({
           )}
 
           <Button type="submit" variant="contained" color="primary" fullWidth>
-            Add Element
+            {t("elements.form.submit")}
           </Button>
         </Box>
       </Container>

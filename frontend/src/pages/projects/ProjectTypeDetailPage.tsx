@@ -281,7 +281,7 @@ const ProjectTypeDetailPage: React.FC = () => {
                     <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
                       <Button
                         component={RouterLink}
-                        to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}/elements`}
+                        to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}`}
                         variant="outlined"
                         fullWidth
                       >

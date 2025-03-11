@@ -105,7 +105,7 @@ const SpaceDetailsPage: React.FC = () => {
       );
       if (response.success) {
         toast.success(t("spaces.deleteSuccess"));
-        navigate(`/projects/${projectId}/types/${typeId}/spaces`);
+        navigate(`/projects/${projectId}/types/${typeId}`);
       } else {
         throw new Error(response.message || t("errors.generic"));
       }
@@ -152,9 +152,7 @@ const SpaceDetailsPage: React.FC = () => {
           {error || t("spaces.errors.fetchFailed")}
         </Alert>
         <Button
-          onClick={() =>
-            navigate(`/projects/${projectId}/types/${typeId}/spaces`)
-          }
+          onClick={() => navigate(`/projects/${projectId}/types/${typeId}`)}
           startIcon={<ArrowForwardIcon />}
           variant="contained"
           sx={{ mt: 2 }}
@@ -199,7 +197,7 @@ const SpaceDetailsPage: React.FC = () => {
         )}
         <Link
           component={RouterLink}
-          to={`/projects/${projectId}/types/${typeId}/spaces`}
+          to={`/projects/${projectId}/types/${typeId}`}
           color="inherit"
           underline="hover"
         >
@@ -222,9 +220,7 @@ const SpaceDetailsPage: React.FC = () => {
         </Typography>
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Button
-            onClick={() =>
-              navigate(`/projects/${projectId}/types/${typeId}/spaces`)
-            }
+            onClick={() => navigate(`/projects/${projectId}/types/${typeId}`)}
             startIcon={<ArrowForwardIcon />}
             variant="outlined"
           >
@@ -232,20 +228,12 @@ const SpaceDetailsPage: React.FC = () => {
           </Button>
           <Button
             component={RouterLink}
-            to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/edit`}
-            startIcon={<EditIcon />}
-            variant="outlined"
+            to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`}
+            startIcon={<AddIcon />}
+            variant="contained"
             color="primary"
           >
-            {t("common.edit")}
-          </Button>
-          <Button
-            startIcon={<DeleteIcon />}
-            variant="outlined"
-            color="error"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            {t("common.delete")}
+            {t("elements.addElement")}
           </Button>
         </Box>
       </Box>
@@ -286,15 +274,6 @@ const SpaceDetailsPage: React.FC = () => {
           <Typography variant="h5" component="h2">
             {t("elements.title")}
           </Typography>
-          <Button
-            component={RouterLink}
-            to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`}
-            startIcon={<AddIcon />}
-            variant="contained"
-            color="primary"
-          >
-            {t("elements.addElement")}
-          </Button>
         </Box>
 
         {space.elements && space.elements.length > 0 ? (
