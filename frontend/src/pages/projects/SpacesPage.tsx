@@ -18,27 +18,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import spaceService from "../../services/spaceService";
 import { toast } from "react-toastify";
 
-interface Element {
-  _id: string;
-  name: string;
-  type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
-  subType?:
-    | "Outside Wall"
-    | "Isolation Wall"
-    | "Upper Open Space"
-    | "Upper Close Room"
-    | "Upper Roof"
-    | "Under Roof";
-  parameters: Record<string, string | number | boolean | null>;
-}
-
-interface Space {
-  _id: string;
-  name: string;
-  type: string;
-  buildingType: string;
-  elements: Element[];
-}
+import projectService from "../../services/projectService";
+import buildingTypeService from "../../services/buildingTypeService";
+import { SpaceResponse } from "../../services/spaceService";
 
 const SpacesPage: React.FC = () => {
   const { t } = useTranslation();
@@ -47,7 +29,7 @@ const SpacesPage: React.FC = () => {
     typeId: string;
   }>();
 
-  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [spaces, setSpaces] = useState<SpaceResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [projectName, setProjectName] = useState("");
@@ -59,20 +41,35 @@ const SpacesPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await spaceService.getSpaces(typeId);
 
-        if (response.success) {
-          setSpaces(response.data);
-
-          if (response.projectName) {
-            setProjectName(response.projectName);
+        // Get project name
+        if (projectId) {
+          const projectResponse = await projectService.getProject(projectId);
+          if (projectResponse.success) {
+            setProjectName(projectResponse.data.name);
           }
+        }
 
-          if (response.buildingTypeName) {
-            setBuildingTypeName(response.buildingTypeName);
+        // Get building type name
+        if (projectId && typeId) {
+          const typeResponse = await buildingTypeService.getBuildingType(
+            projectId,
+            typeId
+          );
+          if (typeResponse.success) {
+            setBuildingTypeName(typeResponse.data.name);
           }
+        }
+
+        // Get spaces
+        const spacesResponse = await spaceService.getSpaces(
+          projectId!,
+          typeId!
+        );
+        if (spacesResponse.success) {
+          setSpaces(spacesResponse.data);
         } else {
-          throw new Error(response.message || t("errors.generic"));
+          throw new Error(spacesResponse.message || t("errors.generic"));
         }
       } catch (error) {
         console.error("Failed to fetch spaces:", error);
@@ -83,7 +80,7 @@ const SpacesPage: React.FC = () => {
     };
 
     fetchSpaces();
-  }, [typeId, t]);
+  }, [typeId, projectId, t]);
 
   const handleDeleteSpace = async (spaceId: string) => {
     if (!window.confirm(t("spaces.confirmDelete"))) {
@@ -91,7 +88,11 @@ const SpacesPage: React.FC = () => {
     }
 
     try {
-      const response = await spaceService.deleteSpace(spaceId);
+      const response = await spaceService.deleteSpace(
+        projectId!,
+        typeId!,
+        spaceId
+      );
 
       if (response.success) {
         toast.success(t("spaces.deleteSuccess"));

@@ -54,13 +54,20 @@ const EditElementPage: React.FC = () => {
         }
 
         // Fetch building type details
-        const typeResponse = await buildingTypeService.getBuildingType(typeId);
+        const typeResponse = await buildingTypeService.getBuildingType(
+          projectId,
+          typeId
+        );
         if (typeResponse.success && typeResponse.data) {
           setBuildingTypeName(typeResponse.data.name);
         }
 
         // Fetch space details
-        const spaceResponse = await spaceService.getSpace(spaceId);
+        const spaceResponse = await spaceService.getSpace(
+          projectId,
+          typeId,
+          spaceId
+        );
         if (spaceResponse.success && spaceResponse.data) {
           setSpaceName(spaceResponse.data.name);
 

@@ -47,13 +47,20 @@ const EditSpacePage: React.FC = () => {
         }
 
         // Fetch building type details
-        const typeResponse = await buildingTypeService.getBuildingType(typeId);
+        const typeResponse = await buildingTypeService.getBuildingType(
+          projectId,
+          typeId
+        );
         if (typeResponse.success && typeResponse.data) {
           setBuildingTypeName(typeResponse.data.name);
         }
 
         // Fetch space details
-        const spaceResponse = await spaceService.getSpace(spaceId);
+        const spaceResponse = await spaceService.getSpace(
+          projectId,
+          typeId,
+          spaceId
+        );
         if (spaceResponse.success && spaceResponse.data) {
           setSpaceName(spaceResponse.data.name);
           setInitialData({
@@ -84,11 +91,16 @@ const EditSpacePage: React.FC = () => {
 
       // Update space with first form data (since we're editing a single space)
       const space = spaces[0];
-      const response = await spaceService.updateSpace(spaceId, {
-        name: space.name,
-        type: space.type,
-        elements: space.elements,
-      });
+      const response = await spaceService.updateSpace(
+        projectId,
+        typeId,
+        spaceId,
+        {
+          name: space.name,
+          type: space.type,
+          elements: space.elements,
+        }
+      );
 
       if (!response.success) {
         throw new Error(response.message || t("errors.generic"));

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import {
@@ -55,22 +55,6 @@ interface Project {
   name: string;
 }
 
-const buildingTypeLabels: Record<string, string> = {
-  Residential: "מגורים",
-  Schools: "בתי ספר",
-  Offices: "משרדים",
-  Hotels: "מלונות",
-  Commercials: "מסחר",
-  "Public Gathering": "התקהלות ציבורית",
-};
-
-const spaceTypeLabels: Record<string, string> = {
-  Bedroom: "חדר שינה / אירוח",
-  "Protect Space": "מרחב מוגן",
-  "Wet Room": "חדר רטוב",
-  Balcony: "מרפסת",
-};
-
 const ProjectTypeDetailPage: React.FC = () => {
   const { t } = useTranslation();
   const { typeId, projectId } = useParams<{
@@ -85,7 +69,7 @@ const ProjectTypeDetailPage: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchBuildingTypeData = async () => {
+  const fetchBuildingTypeData = useCallback(async () => {
     if (!typeId) return;
 
     setLoading(true);
@@ -93,7 +77,10 @@ const ProjectTypeDetailPage: React.FC = () => {
 
     try {
       // Fetch building type details first to get project info
-      const typeResponse = await buildingTypeService.getBuildingType(typeId);
+      const typeResponse = await buildingTypeService.getBuildingType(
+        projectId || typeId, // if projectId is not in URL, use typeId which contains project info
+        typeId
+      );
       if (typeResponse.success) {
         setBuildingType(typeResponse.data);
 
@@ -113,7 +100,10 @@ const ProjectTypeDetailPage: React.FC = () => {
         }
 
         // Fetch spaces
-        const spacesResponse = await spaceService.getSpaces(typeId);
+        const spacesResponse = await spaceService.getSpaces(
+          actualProjectId,
+          typeId
+        );
         if (spacesResponse.success) {
           setSpaces(spacesResponse.data);
         }
@@ -126,17 +116,20 @@ const ProjectTypeDetailPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [typeId, projectId, t]);
 
   useEffect(() => {
     fetchBuildingTypeData();
-  }, [typeId, projectId]);
+  }, [fetchBuildingTypeData]);
 
   const handleDeleteBuildingType = async () => {
     if (!typeId || !project) return;
 
     try {
-      const response = await buildingTypeService.deleteBuildingType(typeId);
+      const response = await buildingTypeService.deleteBuildingType(
+        projectId || project._id,
+        typeId
+      );
       if (response.success) {
         toast.success(t("buildingTypes.deleteSuccess"));
         navigate(`/projects/${project._id}`);

@@ -31,6 +31,7 @@ import { ElementFormData } from "../../components/elements/ElementForm";
 import {
   deleteElement,
   runComplianceCheck,
+  ComplianceCheckResult,
 } from "../../services/elementService";
 
 interface Space {
@@ -59,7 +60,8 @@ const ElementDetailsPage: React.FC = () => {
   const [buildingTypeName, setBuildingTypeName] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [checkingCompliance, setCheckingCompliance] = useState(false);
-  const [complianceResult, setComplianceResult] = useState<any>(null);
+  const [complianceResult, setComplianceResult] =
+    useState<ComplianceCheckResult | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,7 +72,11 @@ const ElementDetailsPage: React.FC = () => {
         setError(null);
 
         // Fetch space details to get element data
-        const spaceResponse = await spaceService.getSpace(spaceId);
+        const spaceResponse = await spaceService.getSpace(
+          projectId,
+          typeId,
+          spaceId
+        );
         if (spaceResponse.success) {
           setSpace(spaceResponse.data);
 
@@ -90,7 +96,10 @@ const ElementDetailsPage: React.FC = () => {
         }
 
         // Fetch building type details
-        const typeResponse = await buildingTypeService.getBuildingType(typeId);
+        const typeResponse = await buildingTypeService.getBuildingType(
+          projectId,
+          typeId
+        );
         if (typeResponse.success) {
           setBuildingTypeName(typeResponse.data.name);
         }
@@ -152,7 +161,9 @@ const ElementDetailsPage: React.FC = () => {
     }
   };
 
-  const getChipColor = (type: string) => {
+  const getChipColor = (
+    type: string
+  ): "primary" | "secondary" | "success" | "warning" | "default" => {
     switch (type.toLowerCase()) {
       case "wall":
         return "primary";
@@ -311,7 +322,7 @@ const ElementDetailsPage: React.FC = () => {
                     .toLowerCase()
                     .replace(/\s+/g, "")}`
                 )}
-                color={getChipColor(element.type) as any}
+                color={getChipColor(element.type)}
                 size="small"
               />
             </Typography>

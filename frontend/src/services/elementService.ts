@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/services/elementService.ts
 import api from "./api";
 import { AxiosError } from "axios";
