@@ -27,6 +27,7 @@ import buildingTypeService from "../../services/buildingTypeService";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
 import CreateBuildingTypeModal from "../../components/projects/CreateBuildingTypeModal";
+import EditBuildingTypeModal from "../../components/projects/EditBuildingTypeModal";
 
 // Types
 interface BuildingType {
@@ -68,6 +69,7 @@ const ProjectTypeDetailPage: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const fetchBuildingTypeData = useCallback(async () => {
     if (!typeId) return;
@@ -200,21 +202,30 @@ const ProjectTypeDetailPage: React.FC = () => {
           {buildingType.name} - {t("projects.projectType")}
         </Typography>
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <Button
-            onClick={() => navigate(`/projects/${actualProjectId}`)}
-            variant="outlined"
-            startIcon={<ArrowForwardIcon />}
-          >
-            {t("common.back")}
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateModalOpen(true)}
-          >
-            {t("buildingTypes.createNew")}
-          </Button>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Button
+              onClick={() => navigate(`/projects/${actualProjectId}`)}
+              variant="outlined"
+              startIcon={<ArrowForwardIcon />}
+            >
+              {t("common.back")}
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setEditModalOpen(true)}
+            >
+              {t("common.edit")}
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={() => setCreateModalOpen(true)}
+            >
+              {t("buildingTypes.createNew")}
+            </Button>
+          </Box>
         </Box>
       </Box>
 
@@ -362,6 +373,18 @@ const ProjectTypeDetailPage: React.FC = () => {
         onClose={() => setCreateModalOpen(false)}
         onSuccess={fetchBuildingTypeData}
         projectId={actualProjectId}
+      />
+
+      <EditBuildingTypeModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSuccess={() => {
+          setEditModalOpen(false);
+          fetchBuildingTypeData();
+        }}
+        projectId={actualProjectId}
+        typeId={typeId!}
+        initialData={buildingType}
       />
     </Box>
   );

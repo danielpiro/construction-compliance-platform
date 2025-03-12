@@ -26,6 +26,7 @@ import projectService from "../../services/projectService";
 import buildingTypeService from "../../services/buildingTypeService";
 import { Space } from "../../services/spaceService";
 import CreateElementModal from "../../components/elements/CreateElementModal";
+import EditSpaceModal from "../../components/spaces/EditSpaceModal";
 
 const SpaceDetailsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -43,6 +44,7 @@ const SpaceDetailsPage: React.FC = () => {
   const [buildingTypeName, setBuildingTypeName] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [createElementModalOpen, setCreateElementModalOpen] = useState(false);
+  const [editSpaceModalOpen, setEditSpaceModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -219,21 +221,29 @@ const SpaceDetailsPage: React.FC = () => {
           {space.name}
         </Typography>
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <Button
-            onClick={() => navigate(`/projects/${projectId}/types/${typeId}`)}
-            startIcon={<ArrowForwardIcon />}
-            variant="outlined"
-          >
-            {t("common.back")}
-          </Button>
-          <Button
-            startIcon={<AddIcon />}
-            variant="contained"
-            color="primary"
-            onClick={() => setCreateElementModalOpen(true)}
-          >
-            {t("elements.addElement")}
-          </Button>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Button
+              onClick={() => navigate(`/projects/${projectId}/types/${typeId}`)}
+              startIcon={<ArrowForwardIcon />}
+              variant="outlined"
+            >
+              {t("common.back")}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setEditSpaceModalOpen(true)}
+            >
+              {t("common.edit")}
+            </Button>
+            <Button
+              startIcon={<AddIcon />}
+              variant="contained"
+              color="primary"
+              onClick={() => setCreateElementModalOpen(true)}
+            >
+              {t("elements.addElement")}
+            </Button>
+          </Box>
         </Box>
       </Box>
 
@@ -405,6 +415,30 @@ const SpaceDetailsPage: React.FC = () => {
         projectId={projectId!}
         typeId={typeId!}
         spaceId={spaceId!}
+      />
+
+      <EditSpaceModal
+        open={editSpaceModalOpen}
+        onClose={() => setEditSpaceModalOpen(false)}
+        onSuccess={async () => {
+          setEditSpaceModalOpen(false);
+          const spaceResponse = await spaceService.getSpace(
+            projectId!,
+            typeId!,
+            spaceId!
+          );
+          if (spaceResponse.success) {
+            const spaceData = spaceResponse.data;
+            setSpace({
+              ...spaceData,
+              elements: spaceData.elements || [],
+            });
+          }
+        }}
+        projectId={projectId!}
+        typeId={typeId!}
+        spaceId={spaceId!}
+        initialData={space}
       />
     </Box>
   );

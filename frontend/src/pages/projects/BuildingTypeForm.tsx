@@ -34,6 +34,12 @@ const BUILDING_TYPES = [
 interface BuildingTypeFormProps {
   projectId: string;
   onSuccess?: () => void;
+  initialData?: {
+    name: string;
+    type: BuildingType;
+  };
+  isEditing?: boolean;
+  typeId?: string;
 }
 
 interface FormData {
@@ -44,13 +50,18 @@ interface FormData {
 const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
   projectId,
   onSuccess,
+  initialData,
+  isEditing = false,
+  typeId,
 }) => {
   const { t } = useTranslation();
 
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    type: "Residential",
-  });
+  const [formData, setFormData] = useState<FormData>(
+    initialData || {
+      name: "",
+      type: "Residential",
+    }
+  );
 
   const [errors, setErrors] = useState({
     name: "",
@@ -91,21 +102,39 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
     }
 
     try {
-      const response = await buildingTypeService.createBuildingType(
-        projectId,
-        formData
-      );
+      const response =
+        isEditing && typeId
+          ? await buildingTypeService.updateBuildingType(
+              projectId,
+              typeId,
+              formData
+            )
+          : await buildingTypeService.createBuildingType(projectId, formData);
       if (response.success) {
-        toast.success(t("buildingTypes.createSuccess"));
+        toast.success(
+          t(
+            isEditing
+              ? "buildingTypes.updateSuccess"
+              : "buildingTypes.createSuccess"
+          )
+        );
         if (onSuccess) {
           onSuccess();
         }
       } else {
-        toast.error(t("buildingTypes.createError"));
+        toast.error(
+          t(
+            isEditing
+              ? "buildingTypes.updateError"
+              : "buildingTypes.createError"
+          )
+        );
       }
     } catch (error) {
       console.error("Error creating building type:", error);
-      toast.error(t("buildingTypes.createError"));
+      toast.error(
+        t(isEditing ? "buildingTypes.updateError" : "buildingTypes.createError")
+      );
     }
   };
 
@@ -113,7 +142,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
     <Paper elevation={3} sx={{ p: 3 }}>
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <Typography variant="h5" gutterBottom>
-          {t("buildingTypes.createNew")}
+          {t(isEditing ? "buildingTypes.edit" : "buildingTypes.createNew")}
         </Typography>
 
         <Grid container spacing={3}>
@@ -165,7 +194,7 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
               fullWidth
               size="large"
             >
-              {t("buildingTypes.create")}
+              {t(isEditing ? "buildingTypes.update" : "buildingTypes.create")}
             </Button>
           </Grid>
         </Grid>

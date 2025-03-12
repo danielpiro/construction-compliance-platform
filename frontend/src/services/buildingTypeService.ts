@@ -1,7 +1,7 @@
 // src/services/buildingTypeService.ts
 import apiClient from "./api";
 
-interface BuildingTypeData {
+export interface BuildingTypeData {
   name: string;
   type:
     | "Residential"

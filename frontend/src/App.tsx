@@ -27,12 +27,8 @@ import ProfilePage from "./pages/projects/ProfilePage";
 import SettingsPage from "./pages/projects/SettingsPage";
 
 import "./utils/i18n"; // Import your i18n configuration
-import EditProjectTypePage from "./pages/projects/EditProjectTypePage";
 import SpaceDetailsPage from "./pages/projects/SpaceDetailsPage";
-import EditSpacePage from "./pages/projects/EditSpacePage";
 import ElementDetailsPage from "./pages/projects/ElementDetailsPage";
-import EditElementPage from "./pages/projects/EditElementPage";
-
 // Root redirect component that checks auth state
 const RootRedirect: React.FC = () => {
   const { isLoggedIn, loading } = useAuth();
@@ -125,14 +121,6 @@ const App: React.FC = () => {
         />
         {/* Project Type Routes - Order matters for proper matching */}
         <Route
-          path="/projects/:projectId/types/:typeId/edit"
-          element={
-            <ProtectedRoute>
-              <EditProjectTypePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/projects/:projectId/types/:typeId"
           element={
             <ProtectedRoute>
@@ -149,26 +137,10 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/projects/:projectId/types/:typeId/spaces/:spaceId/edit"
-          element={
-            <ProtectedRoute>
-              <EditSpacePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId"
           element={
             <ProtectedRoute>
               <ElementDetailsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId/edit"
-          element={
-            <ProtectedRoute>
-              <EditElementPage />
             </ProtectedRoute>
           }
         />

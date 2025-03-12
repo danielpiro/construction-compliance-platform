@@ -27,6 +27,7 @@ import { getToken, removeToken } from "../../utils/tokenStorage";
 import { areaToHebrew } from "../../utils/areaMapping";
 import buildingTypeService from "../../services/buildingTypeService";
 import CreateBuildingTypeModal from "../../components/projects/CreateBuildingTypeModal";
+import EditBuildingTypeModal from "../../components/projects/EditBuildingTypeModal";
 
 // Project interface
 interface Project {
@@ -105,6 +106,8 @@ const ProjectDetailPage: React.FC = () => {
   const [typeToDelete, setTypeToDelete] = useState<BuildingType | null>(null);
   const [createTypeDialogOpen, setCreateTypeDialogOpen] =
     useState<boolean>(false);
+  const [editTypeDialogOpen, setEditTypeDialogOpen] = useState<boolean>(false);
+  const [typeToEdit, setTypeToEdit] = useState<BuildingType | null>(null);
 
   const fetchProjectData = async () => {
     setLoading(true);
@@ -337,11 +340,14 @@ const ProjectDetailPage: React.FC = () => {
                         }}
                       >
                         <IconButton
-                          component={Link}
-                          to={`/projects/${projectId}/types/${type._id}/edit`}
                           size="small"
                           color="primary"
-                          onClick={(e: MouseEvent) => e.stopPropagation()}
+                          onClick={(e: MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setTypeToEdit(type);
+                            setEditTypeDialogOpen(true);
+                          }}
                           sx={{
                             backgroundColor: "rgba(255, 255, 255, 0.9)",
                             "&:hover": {
@@ -437,6 +443,22 @@ const ProjectDetailPage: React.FC = () => {
               </Button>
             </DialogActions>
           </Dialog>
+
+          <EditBuildingTypeModal
+            open={editTypeDialogOpen}
+            onClose={() => {
+              setEditTypeDialogOpen(false);
+              setTypeToEdit(null);
+            }}
+            onSuccess={() => {
+              setEditTypeDialogOpen(false);
+              setTypeToEdit(null);
+              fetchBuildingTypes();
+            }}
+            projectId={projectId!}
+            typeId={typeToEdit?._id || ""}
+            initialData={typeToEdit || undefined}
+          />
 
           {/* Delete Type Confirmation Dialog */}
           <Dialog

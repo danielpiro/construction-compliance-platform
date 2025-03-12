@@ -31,6 +31,7 @@ import elementService, {
   runComplianceCheck,
   ComplianceCheckResult,
 } from "../../services/elementService";
+import EditElementModal from "../../components/elements/EditElementModal";
 
 import { SpaceResponse as ServiceSpaceResponse } from "../../services/spaceService";
 import LayersSection from "../../components/elements/LayersSection";
@@ -57,6 +58,7 @@ const ElementDetailsPage: React.FC = () => {
   const [projectName, setProjectName] = useState("");
   const [buildingTypeName, setBuildingTypeName] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [checkingCompliance, setCheckingCompliance] = useState(false);
   const [complianceResult, setComplianceResult] =
     useState<ComplianceCheckResult | null>(null);
@@ -300,17 +302,22 @@ const ElementDetailsPage: React.FC = () => {
           {element.name}
         </Typography>
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <Button
-            onClick={() =>
-              navigate(
-                `/projects/${projectId}/types/${typeId}/spaces/${spaceId}`
-              )
-            }
-            startIcon={<ArrowForwardIcon />}
-            variant="outlined"
-          >
-            {t("common.back")}
-          </Button>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Button
+              onClick={() =>
+                navigate(
+                  `/projects/${projectId}/types/${typeId}/spaces/${spaceId}`
+                )
+              }
+              startIcon={<ArrowForwardIcon />}
+              variant="outlined"
+            >
+              {t("common.back")}
+            </Button>
+            <Button variant="contained" onClick={() => setEditModalOpen(true)}>
+              {t("common.edit")}
+            </Button>
+          </Box>
         </Box>
       </Box>
 
@@ -532,6 +539,31 @@ const ElementDetailsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <EditElementModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSuccess={() => {
+          setEditModalOpen(false);
+          // Refresh element data
+          elementService
+            .getElement(projectId!, typeId!, spaceId!, elementId!)
+            .then((response) => {
+              if (response.success) {
+                setElement(response.data);
+              }
+            })
+            .catch((err) => {
+              console.error("Error refreshing element:", err);
+              toast.error(t("elements.errors.fetchFailed"));
+            });
+        }}
+        projectId={projectId!}
+        typeId={typeId!}
+        spaceId={spaceId!}
+        elementId={elementId!}
+        initialData={element}
+      />
     </Box>
   );
 };

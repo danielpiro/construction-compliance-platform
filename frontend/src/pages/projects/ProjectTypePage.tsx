@@ -29,6 +29,7 @@ import buildingTypeService from "../../services/buildingTypeService";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
 import CreateSpaceModal from "../../components/spaces/CreateSpaceModal";
+import EditSpaceModal from "../../components/spaces/EditSpaceModal";
 
 interface BuildingType {
   _id: string;
@@ -82,6 +83,8 @@ const ProjectTypePage: React.FC = () => {
   const [spaceToDelete, setSpaceToDelete] = useState<Space | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false);
+  const [editSpaceModalOpen, setEditSpaceModalOpen] = useState(false);
+  const [spaceToEdit, setSpaceToEdit] = useState<Space | null>(null);
 
   const fetchBuildingTypeData = useCallback(async () => {
     if (!typeId || !projectId) return;
@@ -316,11 +319,13 @@ const ProjectTypePage: React.FC = () => {
                   }}
                 >
                   <IconButton
-                    component={RouterLink}
-                    to={`/projects/${actualProjectId}/types/${typeId}/spaces/${space._id}/edit`}
                     size="small"
                     color="primary"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSpaceToEdit(space);
+                      setEditSpaceModalOpen(true);
+                    }}
                     sx={{
                       backgroundColor: "rgba(255, 255, 255, 0.9)",
                       "&:hover": {
@@ -445,6 +450,23 @@ const ProjectTypePage: React.FC = () => {
         onSuccess={fetchBuildingTypeData}
         projectId={projectId!}
         typeId={typeId!}
+      />
+
+      <EditSpaceModal
+        open={editSpaceModalOpen}
+        onClose={() => {
+          setEditSpaceModalOpen(false);
+          setSpaceToEdit(null);
+        }}
+        onSuccess={() => {
+          setEditSpaceModalOpen(false);
+          setSpaceToEdit(null);
+          fetchBuildingTypeData();
+        }}
+        projectId={projectId!}
+        typeId={typeId!}
+        spaceId={spaceToEdit?._id || ""}
+        initialData={spaceToEdit || undefined}
       />
     </Box>
   );
