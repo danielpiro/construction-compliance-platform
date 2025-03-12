@@ -135,6 +135,8 @@
   },
   "projects": {
     "title": "הפרויקטים שלי",
+    "createNew": "צור פרויקט חדש",
+    "createSuccess": "הפרויקט נוצר בהצלחה",
     "newProject": "פרויקט חדש",
     "buildingTypes": "סוגי בניינים",
     "projectType": "סוג פרויקט",

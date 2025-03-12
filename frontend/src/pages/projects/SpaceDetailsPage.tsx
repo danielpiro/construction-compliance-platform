@@ -25,6 +25,7 @@ import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
 import buildingTypeService from "../../services/buildingTypeService";
 import { Space } from "../../services/spaceService";
+import CreateElementModal from "../../components/elements/CreateElementModal";
 
 const SpaceDetailsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -41,6 +42,7 @@ const SpaceDetailsPage: React.FC = () => {
   const [projectName, setProjectName] = useState("");
   const [buildingTypeName, setBuildingTypeName] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [createElementModalOpen, setCreateElementModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -225,11 +227,10 @@ const SpaceDetailsPage: React.FC = () => {
             {t("common.back")}
           </Button>
           <Button
-            component={RouterLink}
-            to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`}
             startIcon={<AddIcon />}
             variant="contained"
             color="primary"
+            onClick={() => setCreateElementModalOpen(true)}
           >
             {t("elements.addElement")}
           </Button>
@@ -350,11 +351,10 @@ const SpaceDetailsPage: React.FC = () => {
               {t("elements.noElements")}
             </Typography>
             <Button
-              component={RouterLink}
-              to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`}
               startIcon={<AddIcon />}
               variant="contained"
               color="primary"
+              onClick={() => setCreateElementModalOpen(true)}
             >
               {t("elements.addElement")}
             </Button>
@@ -380,6 +380,32 @@ const SpaceDetailsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <CreateElementModal
+        open={createElementModalOpen}
+        onClose={() => setCreateElementModalOpen(false)}
+        onSuccess={() => {
+          // Refresh space details to get updated elements
+          const fetchData = async () => {
+            const spaceResponse = await spaceService.getSpace(
+              projectId!,
+              typeId!,
+              spaceId!
+            );
+            if (spaceResponse.success) {
+              const spaceData = spaceResponse.data;
+              setSpace({
+                ...spaceData,
+                elements: spaceData.elements || [],
+              });
+            }
+          };
+          fetchData();
+        }}
+        projectId={projectId!}
+        typeId={typeId!}
+        spaceId={spaceId!}
+      />
     </Box>
   );
 };

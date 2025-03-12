@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
+import CreateProjectModal from "../../components/projects/CreateProjectModal";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -41,6 +42,7 @@ const ProjectsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const projectsPerPage = 12;
 
   const getDisplayVersion = (version: string): string => {
@@ -180,11 +182,10 @@ const ProjectsPage: React.FC = () => {
         </Typography>
         <Box>
           <Button
-            component={Link}
-            to="/projects/create"
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
           >
             {t("projects.createProject")}
           </Button>
@@ -216,11 +217,10 @@ const ProjectsPage: React.FC = () => {
             אין לך פרויקטים עדיין
           </Typography>
           <Button
-            component={Link}
-            to="/projects/create"
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
             sx={{ mt: 2 }}
           >
             צור את הפרויקט הראשון שלך
@@ -394,6 +394,11 @@ const ProjectsPage: React.FC = () => {
           )}
         </>
       )}
+      <CreateProjectModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSuccess={() => fetchProjects()}
+      />
     </Box>
   );
 };

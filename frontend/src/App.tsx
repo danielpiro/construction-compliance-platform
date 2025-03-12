@@ -18,7 +18,6 @@ import PricingPage from "./pages/PricingPage";
 
 // Protected Pages
 import ProjectsPage from "./pages/projects/ProjectsPage";
-import CreateProjectPage from "./pages/projects/CreateProjectPage";
 import EditProjectPage from "./pages/projects/EditProjectPage";
 import ProjectDetailPage from "./pages/projects/ProjectDetailPage";
 import ProjectTypePage from "./pages/projects/ProjectTypePage";
@@ -28,13 +27,10 @@ import ProfilePage from "./pages/projects/ProfilePage";
 import SettingsPage from "./pages/projects/SettingsPage";
 
 import "./utils/i18n"; // Import your i18n configuration
-import CreateProjectTypePage from "./pages/projects/CreateProjectTypePage";
 import EditProjectTypePage from "./pages/projects/EditProjectTypePage";
 import SpaceDetailsPage from "./pages/projects/SpaceDetailsPage";
-import CreateSpacePage from "./pages/projects/CreateSpacePage";
 import EditSpacePage from "./pages/projects/EditSpacePage";
 import ElementDetailsPage from "./pages/projects/ElementDetailsPage";
-import CreateElementPage from "./pages/projects/CreateElementPage";
 import EditElementPage from "./pages/projects/EditElementPage";
 
 // Root redirect component that checks auth state
@@ -112,14 +108,6 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/projects/create"
-          element={
-            <ProtectedRoute>
-              <CreateProjectPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/projects/:projectId"
           element={
             <ProtectedRoute>
@@ -136,14 +124,6 @@ const App: React.FC = () => {
           }
         />
         {/* Project Type Routes - Order matters for proper matching */}
-        <Route
-          path="/projects/:projectId/types/create"
-          element={
-            <ProtectedRoute>
-              <CreateProjectTypePage />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="/projects/:projectId/types/:typeId/edit"
           element={
@@ -169,14 +149,6 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/projects/:projectId/types/:typeId/spaces/create"
-          element={
-            <ProtectedRoute>
-              <CreateSpacePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/projects/:projectId/types/:typeId/spaces/:spaceId/edit"
           element={
             <ProtectedRoute>
@@ -189,14 +161,6 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ElementDetailsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/projects/:projectId/types/:typeId/spaces/:spaceId/elements/create"
-          element={
-            <ProtectedRoute>
-              <CreateElementPage />
             </ProtectedRoute>
           }
         />

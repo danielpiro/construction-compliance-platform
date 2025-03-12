@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
+import CreateSpaceModal from "../../components/spaces/CreateSpaceModal";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import AddIcon from "@mui/icons-material/Add";
@@ -31,6 +32,7 @@ const SpacesPage: React.FC = () => {
   }>();
 
   const [spaces, setSpaces] = useState<SpaceResponse[]>([]);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [projectName, setProjectName] = useState("");
@@ -166,11 +168,10 @@ const SpacesPage: React.FC = () => {
             {t("common.back")}
           </Button>
           <Button
-            component={Link}
-            to={`/projects/${projectId}/types/${typeId}/spaces/create`}
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
           >
             {t("spaces.addSpace")}
           </Button>
@@ -189,11 +190,10 @@ const SpacesPage: React.FC = () => {
             {t("spaces.noSpaces")}
           </Typography>
           <Button
-            component={Link}
-            to={`/projects/${projectId}/types/${typeId}/spaces/create`}
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
           >
             {t("spaces.addSpace")}
           </Button>
@@ -297,6 +297,21 @@ const SpacesPage: React.FC = () => {
           ))}
         </Grid>
       )}
+      <CreateSpaceModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSuccess={() => {
+          const fetchSpaces = async () => {
+            const response = await spaceService.getSpaces(projectId!, typeId!);
+            if (response.success) {
+              setSpaces(response.data);
+            }
+          };
+          fetchSpaces();
+        }}
+        projectId={projectId!}
+        typeId={typeId!}
+      />
     </Box>
   );
 };

@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 import buildingTypeService from "../../services/buildingTypeService";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
+import CreateBuildingTypeModal from "../../components/projects/CreateBuildingTypeModal";
 
 // Types
 interface BuildingType {
@@ -66,6 +67,7 @@ const ProjectTypeDetailPage: React.FC = () => {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const fetchBuildingTypeData = useCallback(async () => {
     if (!typeId) return;
@@ -204,6 +206,14 @@ const ProjectTypeDetailPage: React.FC = () => {
             startIcon={<ArrowForwardIcon />}
           >
             {t("common.back")}
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
+          >
+            {t("buildingTypes.createNew")}
           </Button>
         </Box>
       </Box>
@@ -346,6 +356,13 @@ const ProjectTypeDetailPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <CreateBuildingTypeModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSuccess={fetchBuildingTypeData}
+        projectId={actualProjectId}
+      />
     </Box>
   );
 };

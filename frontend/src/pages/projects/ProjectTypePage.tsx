@@ -28,6 +28,7 @@ import { toast } from "react-toastify";
 import buildingTypeService from "../../services/buildingTypeService";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
+import CreateSpaceModal from "../../components/spaces/CreateSpaceModal";
 
 interface BuildingType {
   _id: string;
@@ -80,6 +81,7 @@ const ProjectTypePage: React.FC = () => {
   const [deleteSpaceDialogOpen, setDeleteSpaceDialogOpen] = useState(false);
   const [spaceToDelete, setSpaceToDelete] = useState<Space | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false);
 
   const fetchBuildingTypeData = useCallback(async () => {
     if (!typeId || !projectId) return;
@@ -238,11 +240,10 @@ const ProjectTypePage: React.FC = () => {
             {t("common.back")}
           </Button>
           <Button
-            component={RouterLink}
-            to={`/projects/${actualProjectId}/types/${typeId}/spaces/create`}
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
+            onClick={() => setCreateSpaceModalOpen(true)}
           >
             {t("spaces.addSpace")}
           </Button>
@@ -277,11 +278,10 @@ const ProjectTypePage: React.FC = () => {
             {t("spaces.noSpaces")}
           </Typography>
           <Button
-            component={RouterLink}
-            to={`/projects/${actualProjectId}/types/${typeId}/spaces/create`}
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
+            onClick={() => setCreateSpaceModalOpen(true)}
           >
             {t("spaces.addSpace")}
           </Button>
@@ -438,6 +438,14 @@ const ProjectTypePage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <CreateSpaceModal
+        open={createSpaceModalOpen}
+        onClose={() => setCreateSpaceModalOpen(false)}
+        onSuccess={fetchBuildingTypeData}
+        projectId={projectId!}
+        typeId={typeId!}
+      />
     </Box>
   );
 };

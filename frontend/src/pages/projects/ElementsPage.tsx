@@ -23,6 +23,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { toast } from "react-toastify";
+import CreateElementModal from "../../components/elements/CreateElementModal";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
 import buildingTypeService from "../../services/buildingTypeService";
@@ -50,6 +51,7 @@ const ElementsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [elementToDelete, setElementToDelete] = useState<Element | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -185,11 +187,10 @@ const ElementsPage: React.FC = () => {
             {translate("common.back")}
           </Button>
           <Button
-            component={Link}
-            to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`}
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
           >
             {translate("elements.addElement")}
           </Button>
@@ -202,11 +203,10 @@ const ElementsPage: React.FC = () => {
             {translate("elements.noElements")}
           </Typography>
           <Button
-            component={Link}
-            to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/create`}
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
           >
             {translate("elements.addElement")}
           </Button>
@@ -357,6 +357,33 @@ const ElementsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <CreateElementModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSuccess={async () => {
+          try {
+            const spaceResponse = await spaceService.getSpace(
+              projectId!,
+              typeId!,
+              spaceId!
+            );
+            if (spaceResponse.success) {
+              setElements(
+                spaceResponse.data.elements.map((element) => ({
+                  ...element,
+                  spaceId: spaceId!,
+                }))
+              );
+            }
+          } catch (err) {
+            console.error("Error refreshing elements:", err);
+          }
+        }}
+        projectId={projectId!}
+        typeId={typeId!}
+        spaceId={spaceId!}
+      />
     </Box>
   );
 };

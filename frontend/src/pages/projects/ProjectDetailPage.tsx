@@ -26,7 +26,7 @@ import { toast } from "react-toastify";
 import { getToken, removeToken } from "../../utils/tokenStorage";
 import { areaToHebrew } from "../../utils/areaMapping";
 import buildingTypeService from "../../services/buildingTypeService";
-import BuildingTypeForm from "./BuildingTypeForm";
+import CreateBuildingTypeModal from "../../components/projects/CreateBuildingTypeModal";
 
 // Project interface
 interface Project {
@@ -407,22 +407,12 @@ const ProjectDetailPage: React.FC = () => {
             )}
           </Box>
 
-          {/* Create Type Dialog */}
-          <Dialog
+          <CreateBuildingTypeModal
             open={createTypeDialogOpen}
             onClose={() => setCreateTypeDialogOpen(false)}
-            maxWidth="sm"
-            fullWidth
-          >
-            <DialogContent>
-              {projectId && (
-                <BuildingTypeForm
-                  projectId={projectId}
-                  onSuccess={handleTypeCreated}
-                />
-              )}
-            </DialogContent>
-          </Dialog>
+            onSuccess={handleTypeCreated}
+            projectId={projectId!}
+          />
 
           {/* Delete Project Confirmation Dialog */}
           <Dialog
