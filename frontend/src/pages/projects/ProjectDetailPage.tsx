@@ -90,20 +90,6 @@ const formatDate = (date: string) => {
   }
 };
 
-// Get the full image URL
-const getImageUrl = (imagePath: string) => {
-  try {
-    // Remove /api from the base URL since uploads are served at root
-    const baseUrl = (
-      import.meta.env.VITE_API_URL || "http://localhost:5000"
-    ).replace(/\/api$/, "");
-    return `${baseUrl}${imagePath}`;
-  } catch (error) {
-    console.error("Error getting image URL:", error);
-    return ""; // Return empty string if there's an error
-  }
-};
-
 const ProjectDetailPage: React.FC = () => {
   const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
@@ -319,25 +305,6 @@ const ProjectDetailPage: React.FC = () => {
                   {formatDate(project.creationDate)}
                 </Typography>
               </Grid>
-              {project.image && (
-                <Grid item xs={12} md={6}>
-                  <Box
-                    component="img"
-                    src={project.image ? getImageUrl(project.image) : ""}
-                    alt={project.name}
-                    sx={{
-                      maxWidth: "100%",
-                      height: "auto",
-                      maxHeight: "200px",
-                      objectFit: "contain",
-                    }}
-                    onError={(e) => {
-                      console.error("Error loading image", e);
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                </Grid>
-              )}
             </Grid>
           </Paper>
 

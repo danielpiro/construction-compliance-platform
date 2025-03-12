@@ -309,7 +309,7 @@ const ProjectsPage: React.FC = () => {
                         }}
                       >
                         <img
-                          src={`${import.meta.env.VITE_API_URL}/api/${
+                          src={`${import.meta.env.VITE_API_URL}/${
                             project.image
                           }`}
                           alt={project.name}
@@ -321,9 +321,9 @@ const ProjectsPage: React.FC = () => {
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.onerror = null;
-                            const fullUrl = `${
-                              import.meta.env.VITE_API_URL
-                            }/api/${project.image}`;
+                            const fullUrl = `${import.meta.env.VITE_API_URL}/${
+                              project.image
+                            }`;
                             console.error("Failed to load image:", {
                               url: fullUrl,
                               image: project.image,
