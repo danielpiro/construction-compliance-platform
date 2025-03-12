@@ -18,7 +18,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { toast } from "react-toastify";
-
+import EditProjectModal from "../../components/projects/EditProjectModal";
 import projectService from "../../services/projectService";
 import { getToken } from "../../utils/tokenStorage";
 import { areaToHebrew } from "../../utils/areaMapping";
@@ -43,6 +43,10 @@ const ProjectsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null
+  );
   const projectsPerPage = 12;
 
   const getDisplayVersion = (version: string): string => {
@@ -257,11 +261,13 @@ const ProjectsPage: React.FC = () => {
                     }}
                   >
                     <IconButton
-                      component={Link}
-                      to={`/projects/${project._id}/edit`}
                       size="small"
                       color="primary"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProjectId(project._id);
+                        setEditModalOpen(true);
+                      }}
                       sx={{
                         backgroundColor: "rgba(255, 255, 255, 0.9)",
                         "&:hover": {
@@ -399,6 +405,21 @@ const ProjectsPage: React.FC = () => {
         onClose={() => setCreateModalOpen(false)}
         onSuccess={() => fetchProjects()}
       />
+      {selectedProjectId && (
+        <EditProjectModal
+          open={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false);
+            setSelectedProjectId(null);
+          }}
+          onSuccess={() => {
+            fetchProjects();
+            setEditModalOpen(false);
+            setSelectedProjectId(null);
+          }}
+          projectId={selectedProjectId}
+        />
+      )}
     </Box>
   );
 };
