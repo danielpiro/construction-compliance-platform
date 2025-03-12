@@ -29,15 +29,6 @@ interface SpaceFormProps {
   initialData?: SpaceData;
 }
 
-const ELEMENT_TYPES = ["Wall", "Ceiling", "Floor", "Thermal Bridge"] as const;
-
-const SUBTYPE_MAP = {
-  Wall: ["Outside Wall", "Isolation Wall"],
-  Floor: ["Upper Open Space", "Upper Close Room"],
-  Ceiling: ["Upper Open Space", "Upper Close Room", "Upper Roof", "Under Roof"],
-  "Thermal Bridge": [],
-} as const;
-
 export const SpaceForm: React.FC<SpaceFormProps> = ({
   onSubmit,
   initialData,
@@ -79,55 +70,6 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
     });
   };
 
-  const handleAddElement = (spaceIndex: number) => {
-    setSpaces((prev) => {
-      const newSpaces = [...prev];
-      newSpaces[spaceIndex] = {
-        ...newSpaces[spaceIndex],
-        elements: [
-          ...newSpaces[spaceIndex].elements,
-          {
-            name: "",
-            type: "Wall",
-          },
-        ],
-      };
-      return newSpaces;
-    });
-  };
-
-  const handleElementChange = (
-    spaceIndex: number,
-    elementIndex: number,
-    field: keyof ElementData,
-    value: string
-  ) => {
-    setSpaces((prev) => {
-      const newSpaces = [...prev];
-      const elements = [...newSpaces[spaceIndex].elements];
-      elements[elementIndex] = {
-        ...elements[elementIndex],
-        [field]: value,
-        ...(field === "type" && { subType: undefined }),
-      };
-      newSpaces[spaceIndex] = { ...newSpaces[spaceIndex], elements };
-      return newSpaces;
-    });
-  };
-
-  const handleRemoveElement = (spaceIndex: number, elementIndex: number) => {
-    setSpaces((prev) => {
-      const newSpaces = [...prev];
-      newSpaces[spaceIndex] = {
-        ...newSpaces[spaceIndex],
-        elements: newSpaces[spaceIndex].elements.filter(
-          (_: ElementData, i: number) => i !== elementIndex
-        ),
-      };
-      return newSpaces;
-    });
-  };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (spaces.some((space) => !space.name || !space.type)) {
@@ -141,9 +83,6 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
       <Container maxWidth="md">
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <Box sx={{ mb: 3 }}>
-            <Typography variant="h5">
-              {initialData ? t("spaces.editSpace") : t("spaces.addSpace")}
-            </Typography>
             {!initialData && (
               <Button
                 startIcon={<AddIcon />}
@@ -219,156 +158,6 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
                       )}
                     </Select>
                   </FormControl>
-
-                  {/* Elements Section */}
-                  <Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 2,
-                      }}
-                    >
-                      <Typography variant="h6">
-                        {t("elements.title")}
-                      </Typography>
-                      <Button
-                        startIcon={<AddIcon />}
-                        onClick={() => handleAddElement(spaceIndex)}
-                        variant="outlined"
-                      >
-                        {t("elements.addElement")}
-                      </Button>
-                    </Box>
-
-                    <Stack spacing={2}>
-                      {space.elements.map((element, elementIndex) => (
-                        <Card
-                          key={elementIndex}
-                          variant="outlined"
-                          sx={{ backgroundColor: "background.paper" }}
-                        >
-                          <CardContent>
-                            <Stack spacing={2}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <Typography variant="subtitle1">
-                                  {t("elements.element", {
-                                    number: elementIndex + 1,
-                                  })}
-                                </Typography>
-                                <IconButton
-                                  onClick={() =>
-                                    handleRemoveElement(
-                                      spaceIndex,
-                                      elementIndex
-                                    )
-                                  }
-                                  color="error"
-                                  size="small"
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Box>
-
-                              <TextField
-                                required
-                                label={t("projects.form.name")}
-                                value={element.name}
-                                onChange={(e) =>
-                                  handleElementChange(
-                                    spaceIndex,
-                                    elementIndex,
-                                    "name",
-                                    e.target.value
-                                  )
-                                }
-                                fullWidth
-                              />
-
-                              <FormControl required fullWidth>
-                                <InputLabel>
-                                  {t("elements.types.type")}
-                                </InputLabel>
-                                <Select
-                                  value={element.type}
-                                  label={t("elements.types.type")}
-                                  onChange={(e) =>
-                                    handleElementChange(
-                                      spaceIndex,
-                                      elementIndex,
-                                      "type",
-                                      e.target.value
-                                    )
-                                  }
-                                >
-                                  {ELEMENT_TYPES.map((type) => (
-                                    <MenuItem key={type} value={type}>
-                                      {t(
-                                        `elements.types.${type
-                                          .toLowerCase()
-                                          .replace(" ", "")}`
-                                      )}
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
-
-                              {SUBTYPE_MAP[
-                                element.type as keyof typeof SUBTYPE_MAP
-                              ]?.length > 0 && (
-                                <FormControl required fullWidth>
-                                  <InputLabel>
-                                    {t("elements.subtypes.type")}
-                                  </InputLabel>
-                                  <Select
-                                    value={element.subType || ""}
-                                    label={t("elements.subtypes.type")}
-                                    onChange={(e) =>
-                                      handleElementChange(
-                                        spaceIndex,
-                                        elementIndex,
-                                        "subType",
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    {SUBTYPE_MAP[
-                                      element.type as keyof typeof SUBTYPE_MAP
-                                    ].map((subType) => (
-                                      <MenuItem key={subType} value={subType}>
-                                        {t(
-                                          `elements.subtypes.${subType
-                                            .toLowerCase()
-                                            .replace(" ", "")}`
-                                        )}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              )}
-                            </Stack>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </Stack>
-
-                    {space.elements.length === 0 && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        align="center"
-                      >
-                        {t("elements.noElements")}
-                      </Typography>
-                    )}
-                  </Box>
                 </Stack>
               </CardContent>
             </Card>

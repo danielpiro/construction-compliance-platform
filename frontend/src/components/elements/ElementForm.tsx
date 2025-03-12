@@ -15,7 +15,6 @@ import {
   CardContent,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
 import { Layer } from "../../services/elementService";
 
 type ElementType = "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
@@ -85,22 +84,6 @@ export const ElementForm: React.FC<ElementFormProps> = ({
       return;
     }
     onSubmit(formData);
-  };
-
-  const addLayer = () => {
-    setFormData({
-      ...formData,
-      layers: [
-        ...formData.layers,
-        {
-          id: crypto.randomUUID(),
-          substance: "",
-          maker: "",
-          product: "",
-          thickness: 0,
-        },
-      ],
-    });
   };
 
   const updateLayer = (
@@ -180,10 +163,6 @@ export const ElementForm: React.FC<ElementFormProps> = ({
             </FormControl>
           )}
 
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            {t("elements.form.layers")}
-          </Typography>
-
           {formData.layers.map((layer, index) => (
             <Card key={index} sx={{ mt: 2 }}>
               <CardContent>
@@ -245,16 +224,6 @@ export const ElementForm: React.FC<ElementFormProps> = ({
               </CardContent>
             </Card>
           ))}
-
-          <Button
-            startIcon={<AddIcon />}
-            onClick={addLayer}
-            variant="outlined"
-            sx={{ mt: 2 }}
-            fullWidth
-          >
-            {t("elements.form.addLayer")}
-          </Button>
 
           <Button
             type="submit"

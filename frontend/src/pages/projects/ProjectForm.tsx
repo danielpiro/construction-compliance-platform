@@ -4,7 +4,6 @@ import {
   Button,
   Grid,
   Box,
-  Typography,
   Autocomplete,
   Paper,
 } from "@mui/material";
@@ -274,10 +273,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   return (
     <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
       <Box component="form" onSubmit={handleSubmit} noValidate>
-        <Typography variant="h5" component="h2" gutterBottom>
-          {isEditing ? "עריכת פרויקט" : "יצירת פרויקט חדש"}
-        </Typography>
-
         <Grid container spacing={3}>
           {/* Project Name */}
           <Grid item xs={12} md={6}>

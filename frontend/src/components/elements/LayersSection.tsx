@@ -635,6 +635,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
         <Stack spacing={3} sx={{ mt: 2 }}>
           <Autocomplete
             options={[...new Set(layersData.map((layer) => layer.substance))]}
+            getOptionLabel={(option) => t(`${option}`)}
             value={layerDialog.data.substance}
             onChange={(_, newValue) => {
               const substance = newValue || "";
@@ -663,6 +664,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
           <Autocomplete
             options={availableMakers}
             value={layerDialog.data.maker}
+            getOptionLabel={(option) => t(`${option}`)}
             disabled={!layerDialog.data.substance}
             onChange={(_, newValue) => {
               const maker = newValue || "";
@@ -692,6 +694,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
           />
           <Autocomplete
             options={availableProducts}
+            getOptionLabel={(option) => t(`${option}`)}
             value={layerDialog.data.product}
             disabled={!layerDialog.data.maker}
             onChange={(_, newValue) => {
@@ -789,9 +792,6 @@ const LayersSection: React.FC<LayersSectionProps> = ({
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h5" component="h2" gutterBottom>
-        {t("elements.layers.title")}
-      </Typography>
       <Box sx={{ mb: 2 }}>
         <Button
           variant="contained"
@@ -913,7 +913,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                         {t("elements.layer.substance")}
                                       </Typography>
                                       <Typography variant="body1">
-                                        {layer.substance}
+                                        {t(layer.substance)}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -924,7 +924,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                         {t("elements.layer.maker")}
                                       </Typography>
                                       <Typography variant="body1">
-                                        {layer.maker}
+                                        {t(layer.maker)}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -935,7 +935,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                         {t("elements.layer.product")}
                                       </Typography>
                                       <Typography variant="body1">
-                                        {layer.product}
+                                        {t(layer.product)}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -946,7 +946,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                         {t("elements.layer.thickness")}
                                       </Typography>
                                       <Typography variant="body1">
-                                        {layer.thickness} cm
+                                        {layer.thickness} ס"מ
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -967,7 +967,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                         variant="body2"
                                         color="text.secondary"
                                       >
-                                        {t("elements.layer.mass")}
+                                        {t("elements.layers.mass")}
                                       </Typography>
                                       <Typography variant="body1">
                                         {layer.mass}

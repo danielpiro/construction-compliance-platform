@@ -238,7 +238,7 @@ const ProjectDetailPage: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={() => setCreateTypeDialogOpen(true)}
         >
-          {t("projects.types.add")}
+          {t("projects.types.addNewType")}
         </Button>
       </Box>
 
@@ -414,7 +414,6 @@ const ProjectDetailPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>{t("projects.types.createNew")}</DialogTitle>
             <DialogContent>
               {projectId && (
                 <BuildingTypeForm

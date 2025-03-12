@@ -1,4 +1,42 @@
 {
+  "Concrete": "בטון",
+  "Regular Concrete": "בטון רגיל",
+  "Thermal Insulation": "טיח תרמי",
+  "T'I": "ת\"י",
+  "Tambur": "טמבור",
+  "Betkal": "בטקל",
+  "Light Concrete": "בטון קל",
+  "Light Concrete 1200": "בטון קל 1200",
+  "Tit": "טיט",
+  "Itung": "איטונג",
+  "Pomis gold 22": "פומיס זהב 22",
+  "Pomis gold 25": "פומיס זהב 25",
+  "Isolation Board": "לוח בידוד",
+  "Board Polish 200": "לוח פוליש 200",
+  "Board Polish Extra": "לוח פוליש אקסטרה",
+  "Board Polish Premium": "לוח פוליש פרמיום",
+  "Internal Insulation": "טיח פנים",
+  "Melagol": "מלגול",
+  "Pomglass": "פומגלס",
+  "Solarglass": "סולרגלס",
+  "Kal Product Isolation": "קל מוצרי בידוד",
+  "Firetop": "פיירטופ",
+  "Misterfix": "מיסטרפיקס",
+  "Rock": "אבן",
+  "Granite": "גרניט",
+  "Marble": "שיש",
+  "Gear Rock": "אבן גיר",
+  "Fiximo 640": "פיקסימו 640",
+  "Polybid": "פוליביד",
+  "Block Ravid": "בלוק רביד",
+  "Block Itung": "בלוק איטונג",
+  "Block": "בלוק",
+  "Pomis dor 5 - 25": "פומיס דור 5 - 25",
+  "Pomis dor 5 - 30": "פומיס דור 5 - 30",
+  "Pomis dor 5 - 22": "פומיס דור 5 - 22",
+  "Thermodan": "תרמודן",
+  "Melet Chemanty": "מלט צמנטי",
+  "Thermofix": "תרמופיקס",
   "common": {
     "loading": "טוען...",
     "loadingMessage": "טוען... אנא המתן",
@@ -137,7 +175,8 @@
       "name": "שם סוג",
       "add": "הוסף סוג",
       "noTypesYet": "אין עדיין סוגי פרויקט",
-      "createNew": "צור סוג חדש"
+      "createNew": "צור סוג חדש",
+      "addNewType": "הוסף סוג פרויקט חדש"
     }
   },
   "types": {
@@ -199,7 +238,8 @@
       "projects": "פרויקטים",
       "types": "סוגים",
       "spaces": "חללים",
-      "elements": "אלמנטים"
+      "elements": "אלמנטים",
+      "title": "הקשר אלמנט"
     },
     "form": {
       "title": "הוסף אלמנט",
@@ -239,6 +279,7 @@
       "Under Roof": "תחת גג"
     },
     "layers": {
+      "mass": "מסה",
       "title": "שכבות",
       "name": "שם שכבה",
       "list": "שכבות",
@@ -260,12 +301,79 @@
         "wood": "עץ",
         "glass": "זכוכית",
         "metal": "מתכת"
+      },
+      "substanceTypes": {
+        "Thermal Insulation": "בידוד תרמי",
+        "Concrete": "בטון",
+        "Betkal": "בטקל",
+        "Tit": "טיט",
+        "Block": "בלוק",
+        "Isolation Board": "לוח בידוד",
+        "Internal Insulation": "בידוד פנימי",
+        "Rock": "אבן"
+      },
+      "makers": {
+        "T'I": "ט.אי",
+        "Tambur": "טמבור",
+        "Thermofix": "תרמופיקס",
+        "Regular Concrete": "בטון רגיל",
+        "Light Concrete": "בטון קל",
+        "Thermodan": "תרמודן",
+        "Itung": "איטונג",
+        "Block Ravid": "בלוק רביד",
+        "Polybid": "פוליביד",
+        "Melagol": "מלגול",
+        "Kal Product Isolation": "קל מוצרי בידוד",
+        "Misterfix": "מיסטרפיקס",
+        "Granite": "גרניט",
+        "Marble": "שיש",
+        "Gear Rock": "אבן גיר"
+      },
+      "products": {
+        "200": "200",
+        "300": "300",
+        "400": "400",
+        "86": "86",
+        "750": "750",
+        "760": "760",
+        "Regular Concrete": "בטון רגיל",
+        "Light Concrete 1200": "בטון קל 1200",
+        "Melet Chemanty": "מלט צמנטי",
+        "Pomis dor 5 - 22": "פומיס דור 5 - 22",
+        "Pomis dor 5 - 30": "פומיס דור 5 - 30",
+        "Pomis dor 5 - 25": "פומיס דור 5 - 25",
+        "Block Itung": "בלוק איטונג",
+        "Pomis gold 22": "פומיס זהב 22",
+        "Pomis gold 25": "פומיס זהב 25",
+        "Board Polish 200": "לוח פוליש 200",
+        "Board Polish Extra": "לוח פוליש אקסטרה",
+        "Board Polish Premium": "לוח פוליש פרמיום",
+        "Pomglass": "פומגלס",
+        "Solarglass": "סולרגלס",
+        "Firetop": "פיירטופ",
+        "Fiximo 640": "פיקסימו 640",
+        "Granite": "גרניט",
+        "Marble": "שיש",
+        "Gear Rock": "אבן גיר"
+      },
+      "units": {
+        "thickness": "ס\"מ",
+        "thermalConductivity": "W/mk",
+        "density": "ק\"ג/מ\"ק",
+        "specificHeat": "J/kg·K"
+      },
+      "helpers": {
+        "thickness": "טווח: {{min}}-{{max}} ס\"מ",
+        "thermalConductivity": "מוליכות תרמית של החומר",
+        "density": "צפיפות החומר",
+        "specificHeat": "חום סגולי של החומר"
       }
     },
     "layer": {
       "title": "שכבה",
       "reorderSuccess": "השכבות סודרו מחדש בהצלחה",
       "deleteSuccess": "השכבה נמחקה בהצלחה",
+      "deleteFailed": "מחיקת השכבה נכשלה",
       "description": "תיאור השכבה",
       "updateSuccess": "השכבה עודכנה בהצלחה",
       "editTitle": "ערוך שכבה",
@@ -278,6 +386,7 @@
       "substance": "חומר",
       "addTitle": "הוסף שכבה חדשה",
       "addSuccess": "השכבה נוספה בהצלחה",
+      "saveFailed": "שמירת השכבה נכשלה",
       "invalidData": "נתונים לא תקינים",
       "maker": "יצרן",
       "product": "מוצר",
@@ -286,6 +395,12 @@
       "thermalResistance": "התנגדות תרמית",
       "density": "צפיפות",
       "specificHeat": "חום סגולי",
+      "reorderFailed": "סידור מחדש של השכבות נכשל",
+      "errors": {
+        "invalidSelection": "בחירת שכבה לא תקינה",
+        "thicknessRequired": "חובה להזין עובי",
+        "thicknessRange": "עובי השכבה חייב להיות בטווח המותר"
+      },
       "layerType": {
         "insulation": "בידוד",
         "concrete": "בטון",
@@ -299,9 +414,13 @@
       "wall": "אלמנט קיר המשמש כגבול החלל",
       "floor": "אלמנט רצפה המגדיר את בסיס החלל",
       "ceiling": "אלמנט תקרה המכסה את החלל מלמעלה",
-      "thermalBridge": "אזור בעל מוליכות תרמית גבוהה"
+      "thermalBridge": "אזור בעל מוליכות תרמית גבוהה",
+      "context": {
+        "title": "הקשר"
+      }
     },
     "details": "פרטי אלמנט",
+    "name": "שם אלמנט",
     "createSuccess": "האלמנט נוצר בהצלחה",
     "deleteSuccess": "האלמנט נמחק בהצלחה",
     "confirmDelete": "האם אתה בטוח שברצונך למחוק אלמנט זה?",
@@ -325,6 +444,8 @@
     "complianceCheckSuccess": "בדיקת התאימות הושלמה בהצלחה"
   },
   "buildingTypes": {
+    "edit": "ערוך סוג מבנה",
+    "updateSuccess": "סוג המבנה עודכן בהצלחה",
     "title": "סוגי מבנים",
     "create": "צור סוג מבנה חדש",
     "noTypes": "אין סוגי מבנים מוגדרים עדיין",
@@ -342,6 +463,9 @@
     "delete": {
       "title": "מחיקת סוג מבנה",
       "confirm": "האם אתה בטוח שברצונך למחוק את סוג המבנה \"{name}\"? פעולה זו אינה ניתנת לביטול ותמחק את כל החללים והאלמנטים המקושרים."
+    },
+    "context": {
+      "title": "הקשר פרויקט"
     },
     "labels": {
       "Residential": "מגורים",
