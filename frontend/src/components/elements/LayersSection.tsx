@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -74,6 +74,7 @@ interface LayerDialogState {
 }
 
 const initialLayerState: Layer = {
+  id: crypto.randomUUID(),
   substance: "",
   maker: "",
   product: "",
@@ -99,6 +100,21 @@ const LayersSection: React.FC<LayersSectionProps> = ({
   element,
   onElementUpdate,
 }) => {
+  // Ensure all layers have IDs
+  useEffect(() => {
+    const layersWithIds = element.layers.map((layer) => ({
+      ...layer,
+      id: layer.id || crypto.randomUUID(),
+    }));
+
+    if (JSON.stringify(layersWithIds) !== JSON.stringify(element.layers)) {
+      onElementUpdate({
+        ...element,
+        layers: layersWithIds,
+      });
+    }
+  }, [element, onElementUpdate]);
+
   const { t } = useTranslation();
   const [layerDialog, setLayerDialog] = useState<LayerDialogState>({
     open: false,
@@ -184,9 +200,15 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       const updatedLayers = [...currentLayers];
 
       if (layerDialog.mode === "edit" && layerDialog.editIndex !== undefined) {
-        updatedLayers[layerDialog.editIndex] = layerDialog.data;
+        updatedLayers[layerDialog.editIndex] = {
+          ...layerDialog.data,
+          id: currentLayers[layerDialog.editIndex].id,
+        };
       } else {
-        updatedLayers.push(layerDialog.data);
+        updatedLayers.push({
+          ...layerDialog.data,
+          id: crypto.randomUUID(),
+        });
       }
 
       const response = await elementService.updateElement(
@@ -222,27 +244,29 @@ const LayersSection: React.FC<LayersSectionProps> = ({
   const onDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
-    // Calculate absolute indices with pagination
-    const sourceIndex =
-      (currentPage - 1) * ITEMS_PER_PAGE + result.source.index;
+    const { source, destination } = result;
+    const allLayers = [...element.layers];
+
+    // Calculate indices considering pagination
+    const sourceIndex = (currentPage - 1) * ITEMS_PER_PAGE + source.index;
     const destinationIndex =
-      (currentPage - 1) * ITEMS_PER_PAGE + result.destination.index;
+      (currentPage - 1) * ITEMS_PER_PAGE + destination.index;
 
     // Don't proceed if the position hasn't changed
     if (sourceIndex === destinationIndex) return;
 
     try {
-      const updatedLayers = [...element.layers];
-      // Move the layer to the new position
-      const [movedLayer] = updatedLayers.splice(sourceIndex, 1);
-      updatedLayers.splice(destinationIndex, 0, movedLayer);
+      // Optimistically update the UI
+      const [movedLayer] = allLayers.splice(sourceIndex, 1);
+      allLayers.splice(destinationIndex, 0, movedLayer);
 
-      // Ensure we stay on the current page after reordering
-      const newPageForItem = Math.floor(destinationIndex / ITEMS_PER_PAGE) + 1;
-      if (newPageForItem !== currentPage) {
-        setCurrentPage(newPageForItem);
-      }
+      // Update local state immediately for smooth UX
+      onElementUpdate({
+        ...element,
+        layers: allLayers,
+      });
 
+      // Send update to backend
       const response = await elementService.updateElement(
         projectId,
         typeId,
@@ -250,15 +274,25 @@ const LayersSection: React.FC<LayersSectionProps> = ({
         elementId,
         {
           ...element,
-          layers: updatedLayers,
+          layers: allLayers,
         }
       );
 
       if (!response.success) {
+        // Revert local state if API call fails
+        onElementUpdate({
+          ...element,
+          layers: element.layers, // Revert to original state
+        });
         throw new Error(response.message || t("elements.errors.updateFailed"));
       }
 
-      onElementUpdate(response.data);
+      // Update the page if the item was moved to a different page
+      const newPageForItem = Math.floor(destinationIndex / ITEMS_PER_PAGE) + 1;
+      if (newPageForItem !== currentPage) {
+        setCurrentPage(newPageForItem);
+      }
+
       toast.success(t("elements.layer.reorderSuccess"));
     } catch (error) {
       console.error("Error reordering layers:", error);
@@ -429,8 +463,8 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                     const absoluteIndex = startIndex + index;
                     return (
                       <Draggable
-                        key={`${absoluteIndex}-${layer.substance}`}
-                        draggableId={`${absoluteIndex}-${layer.substance}-${layer.thickness}`}
+                        key={layer.id}
+                        draggableId={layer.id}
                         index={index}
                       >
                         {(draggableProvided, snapshot) => (

@@ -16,15 +16,9 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import { Layer } from "../../services/elementService";
 
 type ElementType = "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
-
-interface Layer {
-  substance: string;
-  maker: string;
-  product: string;
-  thickness: number;
-}
 
 interface SubTypes {
   Wall: ["Outside Wall", "Isolation Wall"];
@@ -99,6 +93,7 @@ export const ElementForm: React.FC<ElementFormProps> = ({
       layers: [
         ...formData.layers,
         {
+          id: crypto.randomUUID(),
           substance: "",
           maker: "",
           product: "",
