@@ -152,6 +152,8 @@
     "title": "חללים",
     "addSpace": "הוסף חלל",
     "editSpace": "ערוך חלל",
+    "createSpace": "צור חלל",
+    "createSuccess": "החלל נוצר בהצלחה",
     "paths": {
       "edit": "ערוך חלל",
       "projects": "פרויקטים",
@@ -192,13 +194,22 @@
     "count": "{{count}} אלמנטים",
     "viewElements": "צפה באלמנטים",
     "noElements": "אין עדיין אלמנטים. הוסף אלמנט כדי להתחיל.",
+    "context": {
+      "edit": "ערוך אלמנט",
+      "projects": "פרויקטים",
+      "types": "סוגים",
+      "spaces": "חללים",
+      "elements": "אלמנטים"
+    },
     "form": {
       "title": "הוסף אלמנט",
       "name": "שם אלמנט",
       "namePlaceholder": "הכנס שם אלמנט",
       "type": "סוג אלמנט",
       "subType": "תת סוג",
-      "submit": "הוסף אלמנט"
+      "submit": "הוסף אלמנט",
+      "layers": "שכבות",
+      "addLayer": "הוסף שכבה"
     },
     "types": {
       "wall": "קיר",
@@ -226,6 +237,62 @@
       "Upper Close Room": "חדר סגור עליון",
       "Upper Roof": "גג עליון",
       "Under Roof": "תחת גג"
+    },
+    "layers": {
+      "title": "שכבות",
+      "name": "שם שכבה",
+      "list": "שכבות",
+      "layer": "שכבה",
+      "add": "הוסף שכבה",
+      "empty": "אין שכבות נוספות",
+      "addTitle": "הוסף שכבה חדשה",
+      "substence": "חומר",
+      "maker": "יצרן",
+      "product": "מוצר",
+      "thickness": "עובי",
+      "thermalConductivity": "מוליכות תרמית",
+      "thermalResistance": "התנגדות תרמית",
+      "density": "צפיפות",
+      "specificHeat": "חום סגולי",
+      "layerType": {
+        "insulation": "בידוד",
+        "concrete": "בטון",
+        "wood": "עץ",
+        "glass": "זכוכית",
+        "metal": "מתכת"
+      }
+    },
+    "layer": {
+      "title": "שכבה",
+      "reorderSuccess": "השכבות סודרו מחדש בהצלחה",
+      "deleteSuccess": "השכבה נמחקה בהצלחה",
+      "description": "תיאור השכבה",
+      "updateSuccess": "השכבה עודכנה בהצלחה",
+      "editTitle": "ערוך שכבה",
+      "substanceHelper": "חומר השכבה",
+      "nameHelper": "שם השכבה",
+      "makerHelper": "יצרן השכבה",
+      "productHelper": "מוצר השכבה",
+      "thicknessHelper": "עובי השכבה",
+      "name": "שם שכבה",
+      "substance": "חומר",
+      "addTitle": "הוסף שכבה חדשה",
+      "addSuccess": "השכבה נוספה בהצלחה",
+      "invalidData": "נתונים לא תקינים",
+      "maker": "יצרן",
+      "product": "מוצר",
+      "thickness": "עובי",
+      "thermalConductivity": "מוליכות תרמית",
+      "thermalResistance": "התנגדות תרמית",
+      "density": "צפיפות",
+      "specificHeat": "חום סגולי",
+      "layerType": {
+        "insulation": "בידוד",
+        "concrete": "בטון",
+        "wood": "עץ",
+        "glass": "זכוכית",
+        "metal": "מתכת"
+      }
     },
     "descriptions": {
       "title": "תיאור",

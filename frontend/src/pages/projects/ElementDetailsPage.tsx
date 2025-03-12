@@ -528,7 +528,6 @@ const ElementDetailsPage: React.FC = () => {
               <TextField
                 {...params}
                 label={t("elements.layer.substance")}
-                helperText={t("elements.layer.substanceHelper")}
                 required
                 fullWidth
               />
@@ -548,7 +547,6 @@ const ElementDetailsPage: React.FC = () => {
               <TextField
                 {...params}
                 label={t("elements.layer.maker")}
-                helperText={t("elements.layer.makerHelper")}
                 required
                 fullWidth
               />
@@ -568,7 +566,6 @@ const ElementDetailsPage: React.FC = () => {
               <TextField
                 {...params}
                 label={t("elements.layer.product")}
-                helperText={t("elements.layer.productHelper")}
                 required
                 fullWidth
               />
@@ -589,7 +586,6 @@ const ElementDetailsPage: React.FC = () => {
                 },
               }))
             }
-            helperText={t("elements.layer.thicknessHelper")}
             InputProps={{
               endAdornment: (
                 <Typography variant="body2" sx={{ ml: 1 }}>
@@ -609,6 +605,12 @@ const ElementDetailsPage: React.FC = () => {
         </Button>
         <Button
           onClick={handleSaveLayer}
+          disabled={
+            !layerDialog.data.substance ||
+            !layerDialog.data.maker ||
+            !layerDialog.data.product ||
+            !layerDialog.data.thickness
+          }
           variant="contained"
           color="primary"
           startIcon={layerDialog.mode === "add" ? <AddIcon /> : <EditIcon />}
@@ -882,137 +884,131 @@ const ElementDetailsPage: React.FC = () => {
         <Typography variant="h5" component="h2" gutterBottom>
           {t("elements.layers.title")}
         </Typography>
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Box sx={{ mb: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={handleAddLayer}
-            >
-              {t("elements.layers.add")}
-            </Button>
-          </Box>
+        <Box sx={{ mb: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleAddLayer}
+          >
+            {t("elements.layers.add")}
+          </Button>
+        </Box>
 
-          {element.layers && element.layers.length > 0 ? (
-            <Accordion defaultExpanded>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6">
-                  {t("elements.layers.list")} ({element.layers.length})
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Tree
-                  tree={treeData}
-                  renderItem={({ item, provided }) => {
-                    const layer = item.data as Layer;
-                    const index = parseInt(item.id as string, 10);
+        {element.layers && element.layers.length > 0 ? (
+          <Accordion defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="h6">{t("elements.layers.list")}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Tree
+                tree={treeData}
+                renderItem={({ item, provided }) => {
+                  const layer = item.data as Layer;
+                  const index = parseInt(item.id as string, 10);
 
-                    if (item.id === "root") return null;
+                  if (item.id === "root") return null;
 
-                    return (
-                      <div ref={provided.innerRef} {...provided.draggableProps}>
-                        <Grid item xs={12} key={index}>
-                          <Card variant="outlined">
-                            <CardContent>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <Typography variant="h6">
-                                  {t("elements.layers.layer")} {index + 1}
-                                </Typography>
-                                <Box>
-                                  <IconButton
-                                    color="primary"
-                                    onClick={() =>
-                                      handleEditLayer(index, layer)
-                                    }
-                                  >
-                                    <EditIcon />
-                                  </IconButton>
-                                  <IconButton
-                                    color="error"
-                                    onClick={() => handleDeleteLayer(index)}
-                                  >
-                                    <DeleteIcon />
-                                  </IconButton>
-                                  <IconButton {...provided.dragHandleProps}>
-                                    <DragHandleIcon />
-                                  </IconButton>
-                                </Box>
+                  return (
+                    <div ref={provided.innerRef} {...provided.draggableProps}>
+                      <Grid item xs={12} key={index}>
+                        <Card variant="outlined">
+                          <CardContent>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Typography variant="h6">
+                                {t("elements.layers.layer")} {index + 1}
+                              </Typography>
+                              <Box>
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => handleEditLayer(index, layer)}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                                <IconButton
+                                  color="error"
+                                  onClick={() => handleDeleteLayer(index)}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                                <IconButton {...provided.dragHandleProps}>
+                                  <DragHandleIcon />
+                                </IconButton>
                               </Box>
-                              <Grid container spacing={2} sx={{ mt: 1 }}>
-                                <Grid item xs={12} sm={6}>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    {t("elements.layer.substance")}
-                                  </Typography>
-                                  <Typography variant="body1">
-                                    {layer.substance}
-                                  </Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    {t("elements.layer.maker")}
-                                  </Typography>
-                                  <Typography variant="body1">
-                                    {layer.maker}
-                                  </Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    {t("elements.layer.product")}
-                                  </Typography>
-                                  <Typography variant="body1">
-                                    {layer.product}
-                                  </Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    {t("elements.layer.thickness")}
-                                  </Typography>
-                                  <Typography variant="body1">
-                                    {layer.thickness} cm
-                                  </Typography>
-                                </Grid>
+                            </Box>
+                            <Grid container spacing={2} sx={{ mt: 1 }}>
+                              <Grid item xs={12} sm={6}>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  {t("elements.layer.substance")}
+                                </Typography>
+                                <Typography variant="body1">
+                                  {layer.substance}
+                                </Typography>
                               </Grid>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      </div>
-                    );
-                  }}
-                  onDragEnd={handleDragEnd}
-                  isDragEnabled
-                  isNestingEnabled={false}
-                />
-              </AccordionDetails>
-            </Accordion>
-          ) : (
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ textAlign: "center", py: 3 }}
-            >
-              {t("elements.layers.empty")}
-            </Typography>
-          )}
-        </Paper>
+                              <Grid item xs={12} sm={6}>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  {t("elements.layer.maker")}
+                                </Typography>
+                                <Typography variant="body1">
+                                  {layer.maker}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6}>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  {t("elements.layer.product")}
+                                </Typography>
+                                <Typography variant="body1">
+                                  {layer.product}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6}>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  {t("elements.layer.thickness")}
+                                </Typography>
+                                <Typography variant="body1">
+                                  {layer.thickness} cm
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    </div>
+                  );
+                }}
+                onDragEnd={handleDragEnd}
+                isDragEnabled
+                isNestingEnabled={false}
+              />
+            </AccordionDetails>
+          </Accordion>
+        ) : (
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ textAlign: "center", py: 3 }}
+          >
+            {t("elements.layers.empty")}
+          </Typography>
+        )}
       </Box>
 
       {/* Compliance Check Section */}
