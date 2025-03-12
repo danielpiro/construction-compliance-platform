@@ -243,6 +243,35 @@ export const updateElement = async (
   }
 };
 
+// @desc    Insert layers for testing
+// @route   POST /api/amir
+// @access  Public
+export const insertTestLayers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const element = await Element.create({
+      name: "Test Element",
+      space: req.body.spaceId,
+      type: "Wall",
+      layers: req.body.layers,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: element,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
 // @desc    Delete element
 // @route   DELETE /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId
 // @access  Private

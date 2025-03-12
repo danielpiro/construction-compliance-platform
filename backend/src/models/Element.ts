@@ -1,6 +1,13 @@
 // src/models/Element.ts
 import mongoose, { Document, Schema } from "mongoose";
 
+interface ILayer {
+  substance: string;
+  maker: string;
+  product: string;
+  thickness: number;
+}
+
 export interface IElement extends Document {
   name: string;
   space: mongoose.Schema.Types.ObjectId;
@@ -13,6 +20,7 @@ export interface IElement extends Document {
     | "Upper Roof"
     | "Under Roof";
   parameters: Record<string, any>; // Store element-specific parameters as JSON
+  layers: ILayer[];
 }
 
 const ElementSchema: Schema = new Schema(
@@ -83,6 +91,26 @@ const ElementSchema: Schema = new Schema(
       type: Schema.Types.Mixed,
       default: {},
     },
+    layers: [
+      {
+        substance: {
+          type: String,
+          required: [true, "Please add layer substance"],
+        },
+        maker: {
+          type: String,
+          required: [true, "Please add layer maker"],
+        },
+        product: {
+          type: String,
+          required: [true, "Please add layer product"],
+        },
+        thickness: {
+          type: Number,
+          required: [true, "Please add layer thickness in cm"],
+        },
+      },
+    ],
   },
   {
     timestamps: true,

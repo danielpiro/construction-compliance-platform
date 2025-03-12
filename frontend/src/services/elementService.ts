@@ -4,6 +4,13 @@ import api from "./api";
 import { AxiosError } from "axios";
 
 // Define types
+export interface Layer {
+  substance: string;
+  maker: string;
+  product: string;
+  thickness: number;
+}
+
 export interface Element {
   _id: string;
   name: string;
@@ -13,6 +20,7 @@ export interface Element {
   projectId: string;
   typeId: string;
   parameters?: Record<string, any>;
+  layers: Layer[];
 }
 
 export interface ElementFormData {
@@ -20,6 +28,7 @@ export interface ElementFormData {
   type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
   subType?: string;
   parameters?: Record<string, any>;
+  layers?: Layer[];
 }
 
 export interface ComplianceCheckResult {

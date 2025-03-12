@@ -90,8 +90,14 @@ const CreateElementPage: React.FC = () => {
 
       setError(null);
 
+      // Ensure layers array exists even if empty
+      const elementDataWithLayers = {
+        ...elementData,
+        layers: elementData.layers || [],
+      };
+
       // Create the element using the element service
-      await createElement(projectId, typeId, spaceId, elementData);
+      await createElement(projectId, typeId, spaceId, elementDataWithLayers);
 
       toast.success(t("elements.createSuccess"));
 

@@ -5,12 +5,16 @@ import {
   updateElement,
   deleteElement,
   runComplianceCheck,
+  insertTestLayers,
 } from "../controllers/element.controller";
 import { protect } from "../middleware/auth.middleware";
 
 const router = Router();
 
-// Protect all routes
+// Public route for testing
+router.post("/amir", insertTestLayers);
+
+// Protect all other routes
 router.use(protect);
 
 // Element routes
