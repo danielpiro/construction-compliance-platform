@@ -10,6 +10,8 @@ export interface Layer {
   maker: string;
   product: string;
   thickness: number;
+  thermalConductivity: number;
+  mass: number;
 }
 
 export interface Element {

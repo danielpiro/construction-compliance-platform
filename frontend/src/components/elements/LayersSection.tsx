@@ -321,40 +321,6 @@ const layersData = [
   },
 ];
 
-// Predefined options for autocomplete
-const substances = [
-  "Concrete",
-  "Brick",
-  "Wood",
-  "Steel",
-  "Glass",
-  "Insulation",
-  "Drywall",
-  "Stone",
-  "Aluminum",
-  "Plastic",
-];
-const makers = [
-  "ACME Construction",
-  "BuildMaster",
-  "Elite Materials",
-  "Global Supplies",
-  "Quality Build",
-  "Supreme Products",
-  "Top Materials",
-  "United Builders",
-];
-const products = [
-  "Standard Grade",
-  "Premium Grade",
-  "Professional Series",
-  "Industrial Grade",
-  "Commercial Grade",
-  "Residential Grade",
-  "Heavy Duty",
-  "Light Weight",
-];
-
 interface LayerDialogState {
   open: boolean;
   mode: "add" | "edit";
@@ -368,6 +334,40 @@ const initialLayerState: Layer = {
   maker: "",
   product: "",
   thickness: 0,
+  thermalConductivity: 0,
+  mass: 0,
+};
+
+// Get filtered options based on current selection
+const getFilteredMakers = (substance: string) => {
+  return [
+    ...new Set(
+      layersData
+        .filter((layer) => layer.substance === substance)
+        .map((layer) => layer.maker)
+    ),
+  ];
+};
+
+const getFilteredProducts = (substance: string, maker: string) => {
+  return [
+    ...new Set(
+      layersData
+        .filter(
+          (layer) => layer.substance === substance && layer.maker === maker
+        )
+        .map((layer) => layer.product)
+    ),
+  ];
+};
+
+const getLayerData = (substance: string, maker: string, product: string) => {
+  return layersData.find(
+    (layer) =>
+      layer.substance === substance &&
+      layer.maker === maker &&
+      layer.product === product
+  );
 };
 
 const ITEMS_PER_PAGE = 5;
@@ -389,6 +389,21 @@ const LayersSection: React.FC<LayersSectionProps> = ({
   element,
   onElementUpdate,
 }) => {
+  const { t } = useTranslation();
+
+  // Add states for cascading selection
+  const [layerDialog, setLayerDialog] = useState<LayerDialogState>({
+    open: false,
+    mode: "add",
+    data: { ...initialLayerState },
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [availableMakers, setAvailableMakers] = useState<string[]>([]);
+  const [availableProducts, setAvailableProducts] = useState<string[]>([]);
+  const [selectedLayerData, setSelectedLayerData] = useState<
+    (typeof layersData)[0] | undefined
+  >(undefined);
+
   // Ensure all layers have IDs
   useEffect(() => {
     const layersWithIds = element.layers.map((layer) => ({
@@ -404,20 +419,15 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     }
   }, [element, onElementUpdate]);
 
-  const { t } = useTranslation();
-  const [layerDialog, setLayerDialog] = useState<LayerDialogState>({
-    open: false,
-    mode: "add",
-    data: { ...initialLayerState },
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-
   const handleAddLayer = () => {
     setLayerDialog({
       open: true,
       mode: "add",
       data: { ...initialLayerState },
     });
+    setAvailableMakers([]);
+    setAvailableProducts([]);
+    setSelectedLayerData(undefined);
   };
 
   const handleEditLayer = (
@@ -426,6 +436,14 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     layer: Layer
   ) => {
     e.stopPropagation();
+    const substance = layer.substance;
+    const maker = layer.maker;
+    const product = layer.product;
+
+    setAvailableMakers(getFilteredMakers(substance));
+    setAvailableProducts(getFilteredProducts(substance, maker));
+    setSelectedLayerData(getLayerData(substance, maker, product));
+
     setLayerDialog({
       open: true,
       mode: "edit",
@@ -467,20 +485,21 @@ const LayersSection: React.FC<LayersSectionProps> = ({
   };
 
   const handleSaveLayer = async () => {
-    if (!layerDialog.data.substance?.trim()) {
-      toast.error(t("elements.layer.errors.substanceRequired"));
+    if (!selectedLayerData) {
+      toast.error(t("elements.layer.errors.invalidSelection"));
       return;
     }
-    if (!layerDialog.data.maker?.trim()) {
-      toast.error(t("elements.layer.errors.makerRequired"));
-      return;
-    }
-    if (!layerDialog.data.product?.trim()) {
-      toast.error(t("elements.layer.errors.productRequired"));
-      return;
-    }
+
     if (!layerDialog.data.thickness || layerDialog.data.thickness <= 0) {
       toast.error(t("elements.layer.errors.thicknessRequired"));
+      return;
+    }
+
+    if (
+      layerDialog.data.thickness < selectedLayerData.minThickness ||
+      layerDialog.data.thickness > selectedLayerData.maxThickness
+    ) {
+      toast.error(t("elements.layer.errors.thicknessRange"));
       return;
     }
 
@@ -488,14 +507,20 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       const currentLayers = element.layers || [];
       const updatedLayers = [...currentLayers];
 
+      const newLayer = {
+        ...layerDialog.data,
+        thermalConductivity: selectedLayerData.thermalConductivity,
+        mass: selectedLayerData.mass,
+      };
+
       if (layerDialog.mode === "edit" && layerDialog.editIndex !== undefined) {
         updatedLayers[layerDialog.editIndex] = {
-          ...layerDialog.data,
+          ...newLayer,
           id: currentLayers[layerDialog.editIndex].id,
         };
       } else {
         updatedLayers.push({
-          ...layerDialog.data,
+          ...newLayer,
           id: crypto.randomUUID(),
         });
       }
@@ -536,26 +561,21 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     const { source, destination } = result;
     const allLayers = [...element.layers];
 
-    // Calculate indices considering pagination
     const sourceIndex = (currentPage - 1) * ITEMS_PER_PAGE + source.index;
     const destinationIndex =
       (currentPage - 1) * ITEMS_PER_PAGE + destination.index;
 
-    // Don't proceed if the position hasn't changed
     if (sourceIndex === destinationIndex) return;
 
     try {
-      // Optimistically update the UI
       const [movedLayer] = allLayers.splice(sourceIndex, 1);
       allLayers.splice(destinationIndex, 0, movedLayer);
 
-      // Update local state immediately for smooth UX
       onElementUpdate({
         ...element,
         layers: allLayers,
       });
 
-      // Send update to backend
       const response = await elementService.updateElement(
         projectId,
         typeId,
@@ -568,15 +588,13 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       );
 
       if (!response.success) {
-        // Revert local state if API call fails
         onElementUpdate({
           ...element,
-          layers: element.layers, // Revert to original state
+          layers: element.layers,
         });
         throw new Error(response.message || t("elements.errors.updateFailed"));
       }
 
-      // Update the page if the item was moved to a different page
       const newPageForItem = Math.floor(destinationIndex / ITEMS_PER_PAGE) + 1;
       if (newPageForItem !== currentPage) {
         setCurrentPage(newPageForItem);
@@ -616,15 +634,23 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       <DialogContent dividers>
         <Stack spacing={3} sx={{ mt: 2 }}>
           <Autocomplete
-            freeSolo
-            options={substances}
+            options={[...new Set(layersData.map((layer) => layer.substance))]}
             value={layerDialog.data.substance}
-            onChange={(_, newValue) =>
+            onChange={(_, newValue) => {
+              const substance = newValue || "";
+              const makers = substance ? getFilteredMakers(substance) : [];
+              setAvailableMakers(makers);
+              setAvailableProducts([]);
+              setSelectedLayerData(undefined);
               setLayerDialog((prev) => ({
                 ...prev,
-                data: { ...prev.data, substance: newValue || "" },
-              }))
-            }
+                data: {
+                  ...initialLayerState,
+                  id: prev.data.id,
+                  substance,
+                },
+              }));
+            }}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -635,15 +661,26 @@ const LayersSection: React.FC<LayersSectionProps> = ({
             )}
           />
           <Autocomplete
-            freeSolo
-            options={makers}
+            options={availableMakers}
             value={layerDialog.data.maker}
-            onChange={(_, newValue) =>
+            disabled={!layerDialog.data.substance}
+            onChange={(_, newValue) => {
+              const maker = newValue || "";
+              const products = maker
+                ? getFilteredProducts(layerDialog.data.substance, maker)
+                : [];
+              setAvailableProducts(products);
+              setSelectedLayerData(undefined);
               setLayerDialog((prev) => ({
                 ...prev,
-                data: { ...prev.data, maker: newValue || "" },
-              }))
-            }
+                data: {
+                  ...initialLayerState,
+                  id: prev.data.id,
+                  substance: prev.data.substance,
+                  maker,
+                },
+              }));
+            }}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -654,15 +691,31 @@ const LayersSection: React.FC<LayersSectionProps> = ({
             )}
           />
           <Autocomplete
-            freeSolo
-            options={products}
+            options={availableProducts}
             value={layerDialog.data.product}
-            onChange={(_, newValue) =>
+            disabled={!layerDialog.data.maker}
+            onChange={(_, newValue) => {
+              const product = newValue || "";
+              const layerData = product
+                ? getLayerData(
+                    layerDialog.data.substance,
+                    layerDialog.data.maker,
+                    product
+                  )
+                : undefined;
+              setSelectedLayerData(layerData);
               setLayerDialog((prev) => ({
                 ...prev,
-                data: { ...prev.data, product: newValue || "" },
-              }))
-            }
+                data: {
+                  ...initialLayerState,
+                  id: prev.data.id,
+                  substance: prev.data.substance,
+                  maker: prev.data.maker,
+                  product,
+                  thickness: layerData?.minThickness || 0,
+                },
+              }));
+            }}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -677,6 +730,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
             type="number"
             required
             fullWidth
+            disabled={!selectedLayerData}
             value={layerDialog.data.thickness}
             onChange={(e) =>
               setLayerDialog((prev) => ({
@@ -693,8 +747,17 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                   cm
                 </Typography>
               ),
-              inputProps: { min: 0, step: 0.1 },
+              inputProps: {
+                min: selectedLayerData?.minThickness || 0,
+                max: selectedLayerData?.maxThickness || 100,
+                step: 0.1,
+              },
             }}
+            helperText={
+              selectedLayerData
+                ? `Range: ${selectedLayerData.minThickness}-${selectedLayerData.maxThickness} cm`
+                : undefined
+            }
           />
         </Stack>
       </DialogContent>
@@ -707,10 +770,12 @@ const LayersSection: React.FC<LayersSectionProps> = ({
         <Button
           onClick={handleSaveLayer}
           disabled={
-            !layerDialog.data.substance ||
-            !layerDialog.data.maker ||
-            !layerDialog.data.product ||
-            !layerDialog.data.thickness
+            !selectedLayerData ||
+            !layerDialog.data.thickness ||
+            layerDialog.data.thickness <
+              (selectedLayerData?.minThickness || 0) ||
+            layerDialog.data.thickness >
+              (selectedLayerData?.maxThickness || 100)
           }
           variant="contained"
           color="primary"
@@ -882,6 +947,30 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                       </Typography>
                                       <Typography variant="body1">
                                         {layer.thickness} cm
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                      <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                      >
+                                        {t(
+                                          "elements.layer.thermalConductivity"
+                                        )}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {layer.thermalConductivity}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                      <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                      >
+                                        {t("elements.layer.mass")}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {layer.mass}
                                       </Typography>
                                     </Grid>
                                   </Grid>
