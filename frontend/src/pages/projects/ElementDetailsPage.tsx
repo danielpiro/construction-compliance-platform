@@ -31,9 +31,9 @@ import elementService, {
   runComplianceCheck,
   ComplianceCheckResult,
 } from "../../services/elementService";
-import LayersSection from "../../components/elements/LayersSection";
 
 import { SpaceResponse as ServiceSpaceResponse } from "../../services/spaceService";
+import LayersSection from "../../components/elements/LayersSection";
 
 // Extend SpaceResponse to include full Element type
 interface Space extends Omit<ServiceSpaceResponse, "elements"> {

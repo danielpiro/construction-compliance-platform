@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
   Button,
   IconButton,
-  Card,
-  CardContent,
   Grid,
   Dialog,
   DialogTitle,
@@ -17,18 +15,20 @@ import {
   AccordionSummary,
   AccordionDetails,
   Autocomplete,
+  Pagination,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import Tree, {
-  moveItemOnTree,
-  TreeSourcePosition,
-  TreeDestinationPosition,
-} from "@atlaskit/tree";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "react-beautiful-dnd";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import DragHandleIcon from "@mui/icons-material/DragHandle";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import elementService, { Layer, Element } from "../../services/elementService";
 
@@ -45,7 +45,6 @@ const substances = [
   "Aluminum",
   "Plastic",
 ];
-
 const makers = [
   "ACME Construction",
   "BuildMaster",
@@ -56,7 +55,6 @@ const makers = [
   "Top Materials",
   "United Builders",
 ];
-
 const products = [
   "Standard Grade",
   "Premium Grade",
@@ -75,28 +73,14 @@ interface LayerDialogState {
   data: Layer;
 }
 
-type TreeItem = {
-  id: string;
-  children: string[];
-  hasChildren: boolean;
-  isExpanded: boolean;
-  isChildrenLoading: false;
-  data: Layer;
-};
-
-interface TreeDataType {
-  rootId: string;
-  items: {
-    [key: string]: TreeItem;
-  };
-}
-
 const initialLayerState: Layer = {
   substance: "",
   maker: "",
   product: "",
   thickness: 0,
 };
+
+const ITEMS_PER_PAGE = 5;
 
 interface LayersSectionProps {
   projectId: string;
@@ -121,54 +105,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     mode: "add",
     data: { ...initialLayerState },
   });
-
-  const [treeData, setTreeData] = useState<TreeDataType>({
-    rootId: "root",
-    items: {
-      root: {
-        id: "root",
-        children: [],
-        hasChildren: false,
-        isExpanded: true,
-        isChildrenLoading: false as const,
-        data: { ...initialLayerState },
-      },
-    },
-  });
-
-  useEffect(() => {
-    if (element?.layers) {
-      const items = {
-        root: {
-          id: "root",
-          children: element.layers.map((_, i) => i.toString()),
-          hasChildren: element.layers.length > 0,
-          isExpanded: true,
-          isChildrenLoading: false as const,
-          data: { ...initialLayerState },
-        },
-        ...element.layers.reduce(
-          (acc, layer, index) => ({
-            ...acc,
-            [index]: {
-              id: index.toString(),
-              children: [],
-              hasChildren: false,
-              isExpanded: false,
-              isChildrenLoading: false,
-              data: layer,
-            },
-          }),
-          {}
-        ),
-      };
-
-      setTreeData({
-        rootId: "root",
-        items,
-      });
-    }
-  }, [element?.layers]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleAddLayer = () => {
     setLayerDialog({
@@ -178,7 +115,12 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     });
   };
 
-  const handleEditLayer = (index: number, layer: Layer) => {
+  const handleEditLayer = (
+    e: React.MouseEvent,
+    index: number,
+    layer: Layer
+  ) => {
+    e.stopPropagation();
     setLayerDialog({
       open: true,
       mode: "edit",
@@ -187,7 +129,8 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     });
   };
 
-  const handleDeleteLayer = async (index: number) => {
+  const handleDeleteLayer = async (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
     try {
       const updatedLayers = element.layers.filter((_, i) => i !== index);
       const response = await elementService.updateElement(
@@ -205,90 +148,20 @@ const LayersSection: React.FC<LayersSectionProps> = ({
         throw new Error(response.message || t("elements.errors.updateFailed"));
       }
 
-      const updatedElement = response.data;
-      onElementUpdate(updatedElement);
-
-      // Update tree data after deletion
-      const items = {
-        root: {
-          id: "root",
-          children: updatedElement.layers.map((_, i) => i.toString()),
-          hasChildren: updatedElement.layers.length > 0,
-          isExpanded: true,
-          isChildrenLoading: false as const,
-          data: { ...initialLayerState },
-        },
-        ...updatedElement.layers.reduce(
-          (acc, layer, index) => ({
-            ...acc,
-            [index]: {
-              id: index.toString(),
-              children: [],
-              hasChildren: false,
-              isExpanded: false,
-              isChildrenLoading: false,
-              data: layer,
-            },
-          }),
-          {}
-        ),
-      };
-
-      setTreeData({
-        rootId: "root",
-        items,
-      });
-
+      onElementUpdate(response.data);
       toast.success(t("elements.layer.deleteSuccess"));
+
+      const maxPages = Math.ceil(updatedLayers.length / ITEMS_PER_PAGE);
+      if (currentPage > maxPages && maxPages > 0) {
+        setCurrentPage(maxPages);
+      }
     } catch (error) {
       console.error("Error deleting layer:", error);
       toast.error(t("elements.layer.deleteFailed"));
     }
   };
 
-  const handleDragEnd = async (
-    source: TreeSourcePosition,
-    destination?: TreeDestinationPosition
-  ) => {
-    if (!destination) return;
-
-    const newTree = moveItemOnTree(
-      treeData,
-      source,
-      destination
-    ) as TreeDataType;
-    setTreeData(newTree);
-
-    const newLayers = newTree.items.root.children.map(
-      (id) => newTree.items[id].data
-    );
-
-    try {
-      const response = await elementService.updateElement(
-        projectId,
-        typeId,
-        spaceId,
-        elementId,
-        {
-          ...element,
-          layers: newLayers,
-        }
-      );
-
-      if (!response.success) {
-        throw new Error(response.message || t("elements.errors.updateFailed"));
-      }
-
-      onElementUpdate(response.data);
-      toast.success(t("elements.layer.reorderSuccess"));
-    } catch (error) {
-      console.error("Error reordering layers:", error);
-      toast.error(t("elements.layer.reorderFailed"));
-    }
-  };
-
   const handleSaveLayer = async () => {
-    // Validate all required fields
     if (!layerDialog.data.substance?.trim()) {
       toast.error(t("elements.layer.errors.substanceRequired"));
       return;
@@ -309,6 +182,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     try {
       const currentLayers = element.layers || [];
       const updatedLayers = [...currentLayers];
+
       if (layerDialog.mode === "edit" && layerDialog.editIndex !== undefined) {
         updatedLayers[layerDialog.editIndex] = layerDialog.data;
       } else {
@@ -330,40 +204,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
         throw new Error(response.message || t("elements.errors.updateFailed"));
       }
 
-      const updatedElement = response.data;
-      onElementUpdate(updatedElement);
-
-      // Update tree data with new layers
-      const items = {
-        root: {
-          id: "root",
-          children: updatedElement.layers.map((_, i) => i.toString()),
-          hasChildren: updatedElement.layers.length > 0,
-          isExpanded: true,
-          isChildrenLoading: false as const,
-          data: { ...initialLayerState },
-        },
-        ...updatedElement.layers.reduce(
-          (acc, layer, index) => ({
-            ...acc,
-            [index]: {
-              id: index.toString(),
-              children: [],
-              hasChildren: false,
-              isExpanded: false,
-              isChildrenLoading: false,
-              data: layer,
-            },
-          }),
-          {}
-        ),
-      };
-
-      setTreeData({
-        rootId: "root",
-        items,
-      });
-
+      onElementUpdate(response.data);
       setLayerDialog((prev) => ({ ...prev, open: false }));
       toast.success(
         t(
@@ -377,6 +218,58 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       toast.error(t("elements.layer.saveFailed"));
     }
   };
+
+  const onDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+
+    // Calculate absolute indices with pagination
+    const sourceIndex =
+      (currentPage - 1) * ITEMS_PER_PAGE + result.source.index;
+    const destinationIndex =
+      (currentPage - 1) * ITEMS_PER_PAGE + result.destination.index;
+
+    // Don't proceed if the position hasn't changed
+    if (sourceIndex === destinationIndex) return;
+
+    try {
+      const updatedLayers = [...element.layers];
+      // Move the layer to the new position
+      const [movedLayer] = updatedLayers.splice(sourceIndex, 1);
+      updatedLayers.splice(destinationIndex, 0, movedLayer);
+
+      // Ensure we stay on the current page after reordering
+      const newPageForItem = Math.floor(destinationIndex / ITEMS_PER_PAGE) + 1;
+      if (newPageForItem !== currentPage) {
+        setCurrentPage(newPageForItem);
+      }
+
+      const response = await elementService.updateElement(
+        projectId,
+        typeId,
+        spaceId,
+        elementId,
+        {
+          ...element,
+          layers: updatedLayers,
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || t("elements.errors.updateFailed"));
+      }
+
+      onElementUpdate(response.data);
+      toast.success(t("elements.layer.reorderSuccess"));
+    } catch (error) {
+      console.error("Error reordering layers:", error);
+      toast.error(t("elements.layer.reorderFailed"));
+    }
+  };
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const displayedLayers = element.layers.slice(startIndex, endIndex);
+  const pageCount = Math.ceil(element.layers.length / ITEMS_PER_PAGE);
 
   const renderLayerDialog = () => (
     <Dialog
@@ -523,110 +416,176 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       </Box>
 
       {element.layers && element.layers.length > 0 ? (
-        <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">{t("elements.layers.list")}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Tree
-              tree={treeData}
-              renderItem={({ item, provided }) => {
-                const layer = item.data as Layer;
-                const index = parseInt(item.id as string, 10);
-
-                if (item.id === "root") return null;
-
-                return (
-                  <div ref={provided.innerRef} {...provided.draggableProps}>
-                    <Grid item xs={12} key={index}>
-                      <Card variant="outlined">
-                        <CardContent>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
+        <>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="layers-list">
+              {(droppableProvided) => (
+                <div
+                  ref={droppableProvided.innerRef}
+                  {...droppableProvided.droppableProps}
+                  style={{ minHeight: "10px" }}
+                >
+                  {displayedLayers.map((layer, index) => {
+                    const absoluteIndex = startIndex + index;
+                    return (
+                      <Draggable
+                        key={`${absoluteIndex}-${layer.substance}`}
+                        draggableId={`${absoluteIndex}-${layer.substance}-${layer.thickness}`}
+                        index={index}
+                      >
+                        {(draggableProvided, snapshot) => (
+                          <div
+                            ref={draggableProvided.innerRef}
+                            {...draggableProvided.draggableProps}
                           >
-                            <Typography variant="h6">
-                              {t("elements.layers.layer")} {index + 1}
-                            </Typography>
-                            <Box>
-                              <IconButton
-                                color="primary"
-                                onClick={() => handleEditLayer(index, layer)}
+                            <Box
+                              sx={{
+                                mb: 2,
+                                position: "relative",
+                                "&:hover .dragHandle": {
+                                  opacity: 1,
+                                },
+                              }}
+                            >
+                              <Box
+                                {...draggableProvided.dragHandleProps}
+                                className="dragHandle"
+                                sx={{
+                                  position: "absolute",
+                                  left: -28,
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  cursor: "grab",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  opacity: 0.5,
+                                  transition: "opacity 0.2s",
+                                  "&:hover": {
+                                    color: "primary.main",
+                                  },
+                                }}
                               >
-                                <EditIcon />
-                              </IconButton>
-                              <IconButton
-                                color="error"
-                                onClick={() => handleDeleteLayer(index)}
+                                <DragIndicatorIcon />
+                              </Box>
+                              <Accordion
+                                sx={{
+                                  bgcolor: snapshot.isDragging
+                                    ? "action.selected"
+                                    : "background.paper",
+                                  transition: "transform 0.2s, box-shadow 0.2s",
+                                  transform: snapshot.isDragging
+                                    ? "scale(1.02)"
+                                    : "none",
+                                  "&:hover": { boxShadow: 3 },
+                                }}
                               >
-                                <DeleteIcon />
-                              </IconButton>
-                              <IconButton {...provided.dragHandleProps}>
-                                <DragHandleIcon />
-                              </IconButton>
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                  }}
+                                >
+                                  <Typography variant="h6" sx={{ flex: 1 }}>
+                                    {t("elements.layers.layer")}{" "}
+                                    {absoluteIndex + 1}
+                                  </Typography>
+                                  <Box
+                                    onClick={(e) => e.stopPropagation()}
+                                    sx={{ display: "flex", gap: 1 }}
+                                  >
+                                    <IconButton
+                                      size="small"
+                                      color="primary"
+                                      onClick={(e) =>
+                                        handleEditLayer(e, absoluteIndex, layer)
+                                      }
+                                    >
+                                      <EditIcon />
+                                    </IconButton>
+                                    <IconButton
+                                      size="small"
+                                      color="error"
+                                      onClick={(e) =>
+                                        handleDeleteLayer(e, absoluteIndex)
+                                      }
+                                    >
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  </Box>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={6}>
+                                      <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                      >
+                                        {t("elements.layer.substance")}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {layer.substance}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                      <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                      >
+                                        {t("elements.layer.maker")}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {layer.maker}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                      <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                      >
+                                        {t("elements.layer.product")}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {layer.product}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                      <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                      >
+                                        {t("elements.layer.thickness")}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {layer.thickness} cm
+                                      </Typography>
+                                    </Grid>
+                                  </Grid>
+                                </AccordionDetails>
+                              </Accordion>
                             </Box>
-                          </Box>
-                          <Grid container spacing={2} sx={{ mt: 1 }}>
-                            <Grid item xs={12} sm={6}>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                {t("elements.layer.substance")}
-                              </Typography>
-                              <Typography variant="body1">
-                                {layer.substance}
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                {t("elements.layer.maker")}
-                              </Typography>
-                              <Typography variant="body1">
-                                {layer.maker}
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                {t("elements.layer.product")}
-                              </Typography>
-                              <Typography variant="body1">
-                                {layer.product}
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                {t("elements.layer.thickness")}
-                              </Typography>
-                              <Typography variant="body1">
-                                {layer.thickness} cm
-                              </Typography>
-                            </Grid>
-                          </Grid>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  </div>
-                );
-              }}
-              onDragEnd={handleDragEnd}
-              isDragEnabled
-              isNestingEnabled={false}
-            />
-          </AccordionDetails>
-        </Accordion>
+                          </div>
+                        )}
+                      </Draggable>
+                    );
+                  })}
+                  {droppableProvided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+          {pageCount > 1 && (
+            <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+              <Pagination
+                count={pageCount}
+                page={currentPage}
+                onChange={(_, page) => setCurrentPage(page)}
+                color="primary"
+              />
+            </Box>
+          )}
+        </>
       ) : (
         <Typography
           variant="body1"

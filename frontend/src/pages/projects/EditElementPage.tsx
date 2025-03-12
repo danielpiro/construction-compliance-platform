@@ -82,7 +82,15 @@ const EditElementPage: React.FC = () => {
           ) {
             const element = spaceResponse.data.elements[elementIndex];
             setElementName(element.name);
-            setInitialData(element);
+
+            // Add layers property if it doesn't exist before setting as initial data
+            const elementWithLayers = {
+              ...element,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              layers: (element as any).layers || [],
+            };
+
+            setInitialData(elementWithLayers);
           } else {
             throw new Error(t("elements.notFound"));
           }
