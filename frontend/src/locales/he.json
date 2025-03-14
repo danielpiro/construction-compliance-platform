@@ -1,42 +1,4 @@
 {
-  "Concrete": "בטון",
-  "Regular Concrete": "בטון רגיל",
-  "Thermal Insulation": "טיח תרמי",
-  "T'I": "ת\"י",
-  "Tambur": "טמבור",
-  "Betkal": "בטקל",
-  "Light Concrete": "בטון קל",
-  "Light Concrete 1200": "בטון קל 1200",
-  "Tit": "טיט",
-  "Itung": "איטונג",
-  "Pomis gold 22": "פומיס זהב 22",
-  "Pomis gold 25": "פומיס זהב 25",
-  "Isolation Board": "לוח בידוד",
-  "Board Polish 200": "לוח פוליש 200",
-  "Board Polish Extra": "לוח פוליש אקסטרה",
-  "Board Polish Premium": "לוח פוליש פרמיום",
-  "Internal Insulation": "טיח פנים",
-  "Melagol": "מלגול",
-  "Pomglass": "פומגלס",
-  "Solarglass": "סולרגלס",
-  "Kal Product Isolation": "קל מוצרי בידוד",
-  "Firetop": "פיירטופ",
-  "Misterfix": "מיסטרפיקס",
-  "Rock": "אבן",
-  "Granite": "גרניט",
-  "Marble": "שיש",
-  "Gear Rock": "אבן גיר",
-  "Fiximo 640": "פיקסימו 640",
-  "Polybid": "פוליביד",
-  "Block Ravid": "בלוק רביד",
-  "Block Itung": "בלוק איטונג",
-  "Block": "בלוק",
-  "Pomis dor 5 - 25": "פומיס דור 5 - 25",
-  "Pomis dor 5 - 30": "פומיס דור 5 - 30",
-  "Pomis dor 5 - 22": "פומיס דור 5 - 22",
-  "Thermodan": "תרמודן",
-  "Melet Chemanty": "מלט צמנטי",
-  "Thermofix": "תרמופיקס",
   "common": {
     "loading": "טוען...",
     "loadingMessage": "טוען... אנא המתן",
@@ -53,7 +15,15 @@
     "update": "עדכן",
     "required": "שדה חובה",
     "processing": "מעבד...",
-    "showDebug": "הצג פרטי שגיאה"
+    "showDebug": "הצג פרטי שגיאה",
+    "next": "הבא",
+    "previous": "הקודם",
+    "remove": "הסר",
+    "retry": "נסה שוב",
+    "search": "חיפוש",
+    "submit": "שלח",
+    "yes": "כן",
+    "no": "לא"
   },
   "auth": {
     "login": "התחברות",
@@ -79,58 +49,65 @@
       "passwordMismatch": "הסיסמאות אינן תואמות",
       "loginFailed": "ההתחברות נכשלה. אנא בדוק את הפרטים שלך ונסה שוב.",
       "registerFailed": "ההרשמה נכשלה. אנא נסה שוב מאוחר יותר."
-    }
+    },
+    "rememberMe": "זכור אותי",
+    "logoutSuccess": "התנתקת בהצלחה!",
+    "sessionExpired": "פג תוקף החיבור, אנא התחבר מחדש"
   },
   "nav": {
-    "home": "דף הבית",
+    "home": "בית",
     "dashboard": "לוח בקרה",
     "projects": "פרויקטים",
     "profile": "פרופיל",
     "settings": "הגדרות",
     "features": "תכונות",
-    "contact": "צור קשר"
+    "contact": "צור קשר",
+    "about": "אודות",
+    "login": "התחבר",
+    "register": "הרשם",
+    "logout": "התנתק"
   },
   "home": {
-    "title": "פלטפורמת אימות התאמה לבנייה",
-    "subtitle": "אמת התאמה של בניינים לתקנות מדינה באמצעות אלגוריתמים מתקדמים",
-    "getStarted": "התחל כאן",
-    "dashboard": "לך ללוח הבקרה",
+    "title": "ניהול וידוא תקינה בבנייה",
+    "subtitle": "פתרון מקיף לניהול ואימות תקינה של בידוד תרמי בבניינים",
+    "getStarted": "התחל עכשיו",
+    "dashboard": "לוח הבקרה שלי",
     "createProject": "צור פרויקט חדש",
-    "heroText": "פתרון מתקדם לבדיקת תאימות תכניות בנייה",
+    "heroText": "וודא עמידה בתקני בנייה בקלות ובמהירות",
     "benefits": {
-      "title": "יתרונות השימוש בפלטפורמה",
+      "title": "למה כדאי להשתמש במערכת",
       "items": {
-        "timeSaving": "חיסכון בזמן ומשאבים",
-        "confidence": "יותר בטחון בתוכניות הבנייה",
+        "timeSaving": "חיסכון בזמן וייעול תהליכי עבודה",
+        "confidence": "ביטחון בעמידה בתקנים",
         "errorReduction": "הפחתת טעויות אנוש",
-        "compliance": "התאמה לתקנים העדכניים ביותר",
-        "progress": "מעקב פשוט אחר התקדמות",
+        "compliance": "וידוא תקינה אוטומטי",
+        "progress": "מעקב אחר התקדמות הפרויקט",
         "userFriendly": "ממשק ידידותי למשתמש"
       }
     },
     "features": {
-      "title": "תכונות מרכזיות",
+      "title": "יתרונות המערכת",
       "validation": {
-        "title": "אימות אלגוריתמי",
-        "description": "אמת באופן אוטומטי את ההתאמה לתקנות בנייה ותקנים באמצעות האלגוריתמים המתוחכמים שלנו."
+        "title": "אימות תקינה אוטומטי",
+        "description": "בדיקות אוטומטיות של עמידה בדרישות תקנים עדכניים"
       },
       "workflow": {
         "title": "תהליך עבודה מובנה",
-        "description": "נהל פרויקטים, סוגים, חללים ואלמנטים במקום אחד עם המבנה ההיררכי האינטואיטיבי שלנו."
+        "description": "ניהול שיטתי של תהליכי בדיקת התאימות בפרויקטים"
       },
       "collaboration": {
         "title": "שיתוף פעולה מאובטח",
         "description": "שתף פרויקטים עם חברי צוות ולקוחות עם רמות גישה והרשאות מבוקרות."
       },
       "performance": {
-        "title": "ביצועים גבוהים",
-        "description": "הפלטפורמה שלנו מתוכננת להתמודד עם פרויקטים גדולים ומורכבים, תוך שמירה על מהירות ודיוק."
+        "title": "ניתוח ביצועים",
+        "description": "כלים לניתוח וייעול הביצועים האנרגטיים של הבניין"
       }
     },
     "cta": {
-      "title": "מוכן להבטיח שהפרויקטים שלך עומדים בכל דרישות ההתאמה?",
-      "description": "הצטרף לאלפי אנשי מקצוע שסומכים על הפלטפורמה שלנו לאימות התאמה רגולטורית.",
-      "button": "הירשם עכשיו"
+      "title": "מוכנים להתחיל?",
+      "description": "הצטרפו למאות מהנדסים ואדריכלים שכבר משתמשים במערכת",
+      "button": "הירשמו עכשיו"
     }
   },
   "projects": {
@@ -168,7 +145,7 @@
       "update": "עדכן פרויקט"
     },
     "delete": {
-      "title": "מחק פרויקט",
+      "title": "מחיקת פרויקט",
       "confirm": "האם אתה בטוח שברצונך למחוק את \"{name}\"? פעולה זו אינה ניתנת לביטול.",
       "button": "מחק"
     },
@@ -179,6 +156,16 @@
       "noTypesYet": "אין עדיין סוגי פרויקט",
       "createNew": "צור סוג חדש",
       "addNewType": "הוסף סוג פרויקט חדש"
+    },
+    "project": "פרויקט",
+    "backToList": "חזרה לרשימת הפרויקטים",
+    "notFound": "הפרויקט לא נמצא",
+    "errors": {
+      "loadFailed": "שגיאה בטעינת הפרויקט",
+      "noPermission": "אין לך הרשאה לצפות בפרויקט זה",
+      "deleteNoPermission": "אין לך הרשאה למחוק פרויקט זה",
+      "deleteFailed": "שגיאה במחיקת הפרויקט",
+      "fetchFailed": "שגיאה בטעינת נתוני הפרויקט"
     }
   },
   "types": {
@@ -195,6 +182,9 @@
     "editSpace": "ערוך חלל",
     "createSpace": "צור חלל",
     "createSuccess": "החלל נוצר בהצלחה",
+    "updateSuccess": "החלל עודכן בהצלחה",
+    "updateError": "שגיאה בעדכון החלל",
+    "edit": "ערוך חלל",
     "paths": {
       "edit": "ערוך חלל",
       "projects": "פרויקטים",
@@ -214,7 +204,7 @@
       "deleteFailed": "מחיקת החלל נכשלה. אנא נסה שוב."
     },
     "types": {
-      "bedroom": "חדר שינה",
+      "bedroom": "חדר שינה / אירוח",
       "protectspace": "מרחב מוגן",
       "wetroom": "חדר רטוב",
       "balcony": "מרפסת",
@@ -225,7 +215,8 @@
       "corridor": "מסדרון",
       "office": "משרד",
       "storage": "מחסן",
-      "other": "אחר"
+      "other": "אחר",
+      "hallway": "מסדרון"
     }
   },
   "elements": {
@@ -251,7 +242,8 @@
       "subType": "תת סוג",
       "submit": "הוסף אלמנט",
       "layers": "שכבות",
-      "addLayer": "הוסף שכבה"
+      "addLayer": "הוסף שכבה",
+      "isolationCoverage": "כיסוי בידוד"
     },
     "types": {
       "wall": "קיר",
@@ -282,11 +274,19 @@
       "Upper Open Space": "חלל פתוח עליון",
       "Upper Close Room": "חדר סגור עליון",
       "Upper Roof": "גג עליון",
-      "Under Roof": "תחת גג"
+      "Under Roof": "תחת גג",
+      "external": "חיצוני",
+      "internal": "פנימי",
+      "groundfloor": "רצפה על הקרקע",
+      "midfloor": "רצפה בין קומות",
+      "roof": "גג",
+      "opening": "פתח",
+      "column": "עמוד",
+      "beam": "קורה"
     },
     "layers": {
       "mass": "מסה",
-      "title": "שכבות",
+      "title": "שכבות האלמנט",
       "name": "שם שכבה",
       "list": "שכבות",
       "layer": "שכבה",
@@ -417,10 +417,10 @@
     },
     "descriptions": {
       "title": "תיאור",
-      "wall": "אלמנט קיר המשמש כגבול החלל",
+      "wall": "קיר המפריד בין חללים או בין חלל לסביבה החיצונית",
       "floor": "אלמנט רצפה המגדיר את בסיס החלל",
-      "ceiling": "אלמנט תקרה המכסה את החלל מלמעלה",
-      "thermalBridge": "אזור בעל מוליכות תרמית גבוהה",
+      "ceiling": "תקרה המפרידה בין חללים בקומות שונות או בין חלל לחלל אחר",
+      "thermalBridge": "גשר תרמי המהווה נקודת חולשה במעטפת המבנה",
       "context": {
         "title": "הקשר"
       }
@@ -431,15 +431,15 @@
     "deleteSuccess": "האלמנט נמחק בהצלחה",
     "confirmDelete": "האם אתה בטוח שברצונך למחוק אלמנט זה?",
     "compliance": {
-      "title": "בדיקת תאימות",
-      "description": "בדוק את תאימות האלמנט לתקנות הבנייה",
-      "runCheck": "הפעל בדיקת תאימות",
-      "results": "תוצאות בדיקה",
-      "compliant": "האלמנט עומד בתקנים",
-      "nonCompliant": "האלמנט אינו עומד בתקנים",
-      "checksPassed": "בדיקות שעברו בהצלחה",
-      "checksFailed": "בדיקות שנכשלו",
-      "recommendations": "המלצות"
+      "title": "בדיקת תקינה",
+      "description": "בדיקת עמידה בדרישות התקן לאלמנט זה",
+      "runCheck": "הרץ בדיקת תקינה",
+      "results": "תוצאות בדיקת תקינה",
+      "compliant": "עומד בדרישות התקן",
+      "nonCompliant": "אינו עומד בדרישות התקן",
+      "checksPassed": "בדיקות שעברו בהצלחה:",
+      "checksFailed": "בדיקות שנכשלו:",
+      "recommendations": "המלצות לשיפור:"
     },
     "errors": {
       "fetchFailed": "טעינת האלמנט נכשלה",
@@ -447,7 +447,14 @@
       "complianceCheckFailed": "בדיקת התאימות נכשלה"
     },
     "notFound": "האלמנט לא נמצא",
-    "complianceCheckSuccess": "בדיקת התאימות הושלמה בהצלחה"
+    "complianceCheckSuccess": "בדיקת התקינה הושלמה בהצלחה",
+    "edit": "ערוך אלמנט",
+    "updateSuccess": "האלמנט עודכן בהצלחה",
+    "updateError": "שגיאה בעדכון האלמנט",
+    "isolationCoverage": {
+      "dark color": "צבע כהה",
+      "bright color": "צבע בהיר"
+    }
   },
   "buildingTypes": {
     "edit": "ערוך סוג מבנה",
@@ -514,8 +521,8 @@
     }
   },
   "profile": {
-    "title": "הפרופיל שלי",
-    "subtitle": "צפייה ועריכת פרטי המשתמש שלך",
+    "title": "פרופיל אישי",
+    "subtitle": "ערוך את פרטי המשתמש והעדפות אישיות",
     "userAvatar": "תמונת משתמש",
     "updateSuccess": "הפרופיל עודכן בהצלחה!",
     "updateError": "אירעה שגיאה בעדכון הפרופיל",
@@ -676,6 +683,60 @@
       "message": "הדף שאתה מחפש אינו קיים או הועבר.",
       "button": "חזור לדף הבית"
     },
-    "generic": "אירעה שגיאה. אנא נסה שוב מאוחר יותר."
-  }
+    "generic": "אירעה שגיאה. אנא נסה שוב מאוחר יותר.",
+    "sessionExpired": "ההתחברות שלך פגה. אנא התחבר מחדש",
+    "missingParameters": "נתונים חסרים, אנא נסה שוב"
+  },
+  "materials": {
+    "title": "חומרים",
+    "select": "בחר חומר",
+    "categories": {
+      "concrete": "בטון",
+      "insulation": "בידוד",
+      "stone": "אבן",
+      "wood": "עץ",
+      "metal": "מתכת",
+      "glass": "זכוכית",
+      "plastic": "פלסטיק",
+      "other": "אחר"
+    }
+  },
+  "Concrete": "בטון",
+  "Regular Concrete": "בטון רגיל",
+  "Thermal Insulation": "טיח תרמי",
+  "T'I": "ת\"י",
+  "Tambur": "טמבור",
+  "Betkal": "בטקל",
+  "Light Concrete": "בטון קל",
+  "Light Concrete 1200": "בטון קל 1200",
+  "Tit": "טיט",
+  "Itung": "איטונג",
+  "Pomis gold 22": "פומיס זהב 22",
+  "Pomis gold 25": "פומיס זהב 25",
+  "Isolation Board": "לוח בידוד",
+  "Board Polish 200": "לוח פוליש 200",
+  "Board Polish Extra": "לוח פוליש אקסטרה",
+  "Board Polish Premium": "לוח פוליש פרמיום",
+  "Internal Insulation": "טיח פנים",
+  "Melagol": "מלגול",
+  "Pomglass": "פומגלס",
+  "Solarglass": "סולרגלס",
+  "Kal Product Isolation": "קל מוצרי בידוד",
+  "Firetop": "פיירטופ",
+  "Misterfix": "מיסטרפיקס",
+  "Rock": "אבן",
+  "Granite": "גרניט",
+  "Marble": "שיש",
+  "Gear Rock": "אבן גיר",
+  "Fiximo 640": "פיקסימו 640",
+  "Polybid": "פוליביד",
+  "Block Ravid": "בלוק רביד",
+  "Block Itung": "בלוק איטונג",
+  "Block": "בלוק",
+  "Pomis dor 5 - 25": "פומיס דור 5 - 25",
+  "Pomis dor 5 - 30": "פומיס דור 5 - 30",
+  "Pomis dor 5 - 22": "פומיס דור 5 - 22",
+  "Thermodan": "תרמודן",
+  "Melet Chemanty": "מלט צמנטי",
+  "Thermofix": "תרמופיקס"
 }
