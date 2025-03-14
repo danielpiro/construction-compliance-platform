@@ -230,12 +230,6 @@ const SpaceDetailsPage: React.FC = () => {
               {t("common.back")}
             </Button>
             <Button
-              variant="contained"
-              onClick={() => setEditSpaceModalOpen(true)}
-            >
-              {t("common.edit")}
-            </Button>
-            <Button
               startIcon={<AddIcon />}
               variant="contained"
               color="primary"

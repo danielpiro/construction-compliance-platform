@@ -314,9 +314,6 @@ const ElementDetailsPage: React.FC = () => {
             >
               {t("common.back")}
             </Button>
-            <Button variant="contained" onClick={() => setEditModalOpen(true)}>
-              {t("common.edit")}
-            </Button>
           </Box>
         </Box>
       </Box>

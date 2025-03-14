@@ -6,6 +6,8 @@ interface ILayer {
   maker: string;
   product: string;
   thickness: number;
+  thermalConductivity: number;
+  mass: number;
 }
 
 export interface IElement extends Document {
@@ -108,6 +110,14 @@ const ElementSchema: Schema = new Schema(
         thickness: {
           type: Number,
           required: [true, "Please add layer thickness in cm"],
+        },
+        thermalConductivity: {
+          type: Number,
+          required: [true, "Please add layer thermal conductivity"],
+        },
+        mass: {
+          type: Number,
+          required: [true, "Please add layer mass"],
         },
       },
     ],

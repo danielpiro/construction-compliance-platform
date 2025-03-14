@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
 import BaseCreateModal from "../common/BaseCreateModal";
 import BuildingTypeForm from "../../pages/projects/BuildingTypeForm";
 
@@ -20,7 +19,6 @@ const CreateBuildingTypeModal: React.FC<CreateBuildingTypeModalProps> = ({
   const { t } = useTranslation();
 
   const handleSuccess = () => {
-    toast.success(t("buildingTypes.createSuccess"));
     onSuccess?.();
     onClose();
   };
