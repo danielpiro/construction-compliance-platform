@@ -15,9 +15,14 @@ import {
   CardContent,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Layer } from "../../services/elementService";
+import { Layer, IsolationCoverage } from "../../services/elementService";
 
 type ElementType = "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
+
+const isolationCoverageOptions: IsolationCoverage[] = [
+  "dark color",
+  "bright color",
+];
 
 interface SubTypes {
   Wall: ["Outside Wall", "Isolation Wall"];
@@ -30,6 +35,7 @@ export interface ElementFormData {
   name: string;
   type: ElementType;
   subType?: string;
+  isolationCoverage?: IsolationCoverage;
   layers: Layer[];
 }
 
@@ -62,6 +68,7 @@ export const ElementForm: React.FC<ElementFormProps> = ({
       name: "",
       type: "Wall",
       subType: "Outside Wall",
+      isolationCoverage: "dark color",
       layers: [],
     }
   );
@@ -157,6 +164,28 @@ export const ElementForm: React.FC<ElementFormProps> = ({
                 {subTypes[formData.type].map((subType) => (
                   <MenuItem key={subType} value={subType}>
                     {t(`elements.subtypes.${subType}`)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          {formData.type === "Wall" && formData.subType === "Outside Wall" && (
+            <FormControl required fullWidth>
+              <InputLabel>{t("elements.form.isolationCoverage")}</InputLabel>
+              <Select
+                value={formData.isolationCoverage}
+                label={t("elements.form.isolationCoverage")}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    isolationCoverage: e.target.value as IsolationCoverage,
+                  })
+                }
+              >
+                {isolationCoverageOptions.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {t(`elements.isolationCoverage.${option}`)}
                   </MenuItem>
                 ))}
               </Select>

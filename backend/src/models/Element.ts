@@ -10,6 +10,8 @@ interface ILayer {
   mass: number;
 }
 
+type IsolationCoverage = "dark color" | "bright color";
+
 export interface IElement extends Document {
   name: string;
   space: mongoose.Schema.Types.ObjectId;
@@ -22,6 +24,7 @@ export interface IElement extends Document {
     | "Upper Roof"
     | "Under Roof";
   parameters: Record<string, any>; // Store element-specific parameters as JSON
+  isolationCoverage?: IsolationCoverage;
   layers: ILayer[];
 }
 
@@ -92,6 +95,13 @@ const ElementSchema: Schema = new Schema(
     parameters: {
       type: Schema.Types.Mixed,
       default: {},
+    },
+    isolationCoverage: {
+      type: String,
+      enum: ["dark color", "bright color"],
+      required: function (this: IElement) {
+        return this.type === "Wall" && this.subType === "Outside Wall";
+      },
     },
     layers: [
       {

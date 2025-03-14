@@ -14,6 +14,8 @@ export interface Layer {
   mass: number;
 }
 
+export type IsolationCoverage = "dark color" | "bright color";
+
 export interface Element {
   _id: string;
   name: string;
@@ -23,6 +25,7 @@ export interface Element {
   projectId: string;
   typeId: string;
   parameters?: Record<string, any>;
+  isolationCoverage?: IsolationCoverage;
   layers: Layer[];
 }
 
@@ -31,6 +34,7 @@ export interface ElementFormData {
   type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
   subType?: string;
   parameters?: Record<string, any>;
+  isolationCoverage?: IsolationCoverage;
   layers?: Layer[];
 }
 
