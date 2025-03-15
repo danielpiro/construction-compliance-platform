@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
 
 import { ElementData, SpaceData } from "../../services/spaceService";
 
@@ -46,10 +45,6 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
       ? [{ ...initialData, elements: initialData.elements || [] }]
       : [{ ...emptySpace }]
   );
-
-  const handleAddSpace = () => {
-    setSpaces((prev) => [...prev, { ...emptySpace }]);
-  };
 
   const handleRemoveSpace = (spaceIndex: number) => {
     setSpaces((prev) => prev.filter((_, index) => index !== spaceIndex));
@@ -82,20 +77,6 @@ export const SpaceForm: React.FC<SpaceFormProps> = ({
     <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
       <Container maxWidth="md">
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Box sx={{ mb: 3 }}>
-            {!initialData && (
-              <Button
-                startIcon={<AddIcon />}
-                onClick={handleAddSpace}
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-              >
-                {t("spaces.addAnotherSpace")}
-              </Button>
-            )}
-          </Box>
-
           {spaces.map((space, spaceIndex) => (
             <Card key={spaceIndex} sx={{ mb: 3 }}>
               <CardContent>

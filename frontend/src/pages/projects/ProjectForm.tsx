@@ -394,9 +394,30 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             {formData.imageUrl && (
               <Box mt={2}>
                 <img
-                  src={formData.imageUrl}
+                  src={
+                    formData.image
+                      ? formData.imageUrl
+                      : formData.imageUrl?.startsWith("http")
+                      ? formData.imageUrl
+                      : `${import.meta.env.VITE_API_URL}${formData.imageUrl}`
+                  }
                   alt="תצוגה מקדימה של הפרויקט"
                   style={{ maxWidth: "100%", maxHeight: "200px" }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null;
+                    const placeholder = document.createElement("div");
+                    placeholder.style.width = "100%";
+                    placeholder.style.height = "200px";
+                    placeholder.style.backgroundColor = "#f0f0f0";
+                    placeholder.style.display = "flex";
+                    placeholder.style.alignItems = "center";
+                    placeholder.style.justifyContent = "center";
+                    placeholder.textContent = formData.name[0].toUpperCase();
+                    placeholder.style.fontSize = "2rem";
+                    placeholder.style.color = "#666";
+                    target.parentElement?.replaceChild(placeholder, target);
+                  }}
                 />
               </Box>
             )}

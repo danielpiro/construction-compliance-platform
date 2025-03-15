@@ -321,23 +321,23 @@ const ElementDetailsPage: React.FC = () => {
       {/* Project Context */}
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
-          {t("elements.context.title")}
+          {t("elements.context.projectDetails")}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Typography variant="body1" gutterBottom>
-              <strong>{t("projects.type")}:</strong> {projectType}
+              <strong>{t("projectType")}:</strong> {projectType}
             </Typography>
             <Typography variant="body1" gutterBottom>
-              <strong>{t("buildingTypes.title")}:</strong> {buildingTypeName}
+              <strong>{t("buildingTypeTitle")}:</strong> {buildingTypeName}
             </Typography>
           </Grid>
           <Grid item xs={12} md={6}>
             <Typography variant="body1" gutterBottom>
-              <strong>{t("spaces.name")}:</strong> {spaceName}
+              <strong>{t("spaceName")}:</strong> {spaceName}
             </Typography>
             <Typography variant="body1" gutterBottom>
-              <strong>{t("spaces.type")}:</strong> {spaceType}
+              <strong>{t("spaceType")}:</strong> {spaceType}
             </Typography>
           </Grid>
         </Grid>

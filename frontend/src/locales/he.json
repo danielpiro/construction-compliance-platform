@@ -112,6 +112,7 @@
   },
   "projects": {
     "title": "הפרויקטים שלי",
+    "type": "סוג פרויקט",
     "createNew": "צור פרויקט חדש",
     "createSuccess": "הפרויקט נוצר בהצלחה",
     "newProject": "פרויקט חדש",
@@ -232,7 +233,8 @@
       "types": "סוגים",
       "spaces": "חללים",
       "elements": "אלמנטים",
-      "title": "הקשר אלמנט"
+      "title": "הקשר אלמנט",
+      "projectDetails": "פרטי פרויקט"
     },
     "form": {
       "title": "הוסף אלמנט",
@@ -384,11 +386,11 @@
       "updateSuccess": "השכבה עודכנה בהצלחה",
       "editTitle": "ערוך שכבה",
       "substanceHelper": "חומר השכבה",
-      "nameHelper": "שם השכבה",
+      "name": "שם שכבה",
+      "nameHelper": "שם שיוצג בכותרת השכבה",
       "makerHelper": "יצרן השכבה",
       "productHelper": "מוצר השכבה",
       "thicknessHelper": "עובי השכבה",
-      "name": "שם שכבה",
       "substance": "חומר",
       "addTitle": "הוסף שכבה חדשה",
       "addSuccess": "השכבה נוספה בהצלחה",
@@ -738,5 +740,9 @@
   "Pomis dor 5 - 22": "פומיס דור 5 - 22",
   "Thermodan": "תרמודן",
   "Melet Chemanty": "מלט צמנטי",
-  "Thermofix": "תרמופיקס"
+  "Thermofix": "תרמופיקס",
+  "projectType": "סוג פרויקט",
+  "buildingTypeTitle": "ייעוד הבניין",
+  "spaceName": "שם חלל",
+  "spaceType": "סוג חלל"
 }

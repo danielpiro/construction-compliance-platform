@@ -330,6 +330,7 @@ interface LayerDialogState {
 
 const initialLayerState: Layer = {
   id: crypto.randomUUID(),
+  name: "",
   substance: "",
   maker: "",
   product: "",
@@ -423,7 +424,11 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     setLayerDialog({
       open: true,
       mode: "add",
-      data: { ...initialLayerState },
+      data: {
+        ...initialLayerState,
+        id: crypto.randomUUID(),
+        name: "", // Explicitly initialize name
+      },
     });
     setAvailableMakers([]);
     setAvailableProducts([]);
@@ -448,7 +453,10 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       open: true,
       mode: "edit",
       editIndex: index,
-      data: { ...layer },
+      data: {
+        ...layer,
+        name: layer.name || "", // Ensure name is defined
+      },
     });
   };
 
@@ -633,6 +641,21 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={3} sx={{ mt: 2 }}>
+          <TextField
+            fullWidth
+            label={t("elements.layer.name")}
+            value={layerDialog.data.name}
+            onChange={(e) =>
+              setLayerDialog((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  name: e.target.value,
+                },
+              }))
+            }
+            helperText={t("elements.layer.nameHelper")}
+          />
           <Autocomplete
             options={[...new Set(layersData.map((layer) => layer.substance))]}
             getOptionLabel={(option) => t(`${option}`)}
@@ -643,14 +666,22 @@ const LayersSection: React.FC<LayersSectionProps> = ({
               setAvailableMakers(makers);
               setAvailableProducts([]);
               setSelectedLayerData(undefined);
-              setLayerDialog((prev) => ({
-                ...prev,
-                data: {
-                  ...initialLayerState,
-                  id: prev.data.id,
-                  substance,
-                },
-              }));
+              setLayerDialog((prev) => {
+                const currentName = prev.data.name; // Preserve the current name
+                return {
+                  ...prev,
+                  data: {
+                    ...prev.data,
+                    substance,
+                    maker: "",
+                    product: "",
+                    thickness: 0,
+                    thermalConductivity: 0,
+                    mass: 0,
+                    name: currentName, // Keep the name
+                  },
+                };
+              });
             }}
             renderInput={(params) => (
               <TextField
@@ -673,15 +704,21 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                 : [];
               setAvailableProducts(products);
               setSelectedLayerData(undefined);
-              setLayerDialog((prev) => ({
-                ...prev,
-                data: {
-                  ...initialLayerState,
-                  id: prev.data.id,
-                  substance: prev.data.substance,
-                  maker,
-                },
-              }));
+              setLayerDialog((prev) => {
+                const currentName = prev.data.name; // Preserve the current name
+                return {
+                  ...prev,
+                  data: {
+                    ...prev.data,
+                    maker,
+                    product: "",
+                    thickness: 0,
+                    thermalConductivity: 0,
+                    mass: 0,
+                    name: currentName, // Keep the name
+                  },
+                };
+              });
             }}
             renderInput={(params) => (
               <TextField
@@ -707,17 +744,20 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                   )
                 : undefined;
               setSelectedLayerData(layerData);
-              setLayerDialog((prev) => ({
-                ...prev,
-                data: {
-                  ...initialLayerState,
-                  id: prev.data.id,
-                  substance: prev.data.substance,
-                  maker: prev.data.maker,
-                  product,
-                  thickness: layerData?.minThickness || 0,
-                },
-              }));
+              setLayerDialog((prev) => {
+                const currentName = prev.data.name; // Preserve the current name
+                return {
+                  ...prev,
+                  data: {
+                    ...prev.data,
+                    product,
+                    thickness: layerData?.minThickness || 0,
+                    thermalConductivity: layerData?.thermalConductivity || 0,
+                    mass: layerData?.mass || 0,
+                    name: currentName, // Keep the name
+                  },
+                };
+              });
             }}
             renderInput={(params) => (
               <TextField
@@ -876,8 +916,10 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                   }}
                                 >
                                   <Typography variant="h6" sx={{ flex: 1 }}>
-                                    {t("elements.layers.layer")}{" "}
-                                    {absoluteIndex + 1}
+                                    {layer.name ||
+                                      t("elements.layers.layer") +
+                                        " " +
+                                        (absoluteIndex + 1)}
                                   </Typography>
                                   <Box
                                     onClick={(e) => e.stopPropagation()}
@@ -959,7 +1001,10 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                         )}
                                       </Typography>
                                       <Typography variant="body1">
-                                        {layer.thermalConductivity}
+                                        {layer.thermalConductivity}{" "}
+                                        {t(
+                                          "elements.layers.units.thermalConductivity"
+                                        )}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -970,7 +1015,8 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                         {t("elements.layers.mass")}
                                       </Typography>
                                       <Typography variant="body1">
-                                        {layer.mass}
+                                        {layer.mass}{" "}
+                                        {t("elements.layers.units.mass")}
                                       </Typography>
                                     </Grid>
                                   </Grid>

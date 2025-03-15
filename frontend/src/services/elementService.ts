@@ -6,6 +6,7 @@ import { AxiosError } from "axios";
 // Define types
 export interface Layer {
   id: string;
+  name: string;
   substance: string;
   maker: string;
   product: string;
