@@ -366,9 +366,10 @@
       },
       "units": {
         "thickness": "ס\"מ",
-        "thermalConductivity": "W/mk",
+        "thermalConductivity": "W/m·K",
         "density": "ק\"ג/מ\"ק",
-        "specificHeat": "J/kg·K"
+        "specificHeat": "J/kg·K",
+        "mass": "ק\"ג"
       },
       "helpers": {
         "thickness": "טווח: {{min}}-{{max}} ס\"מ",

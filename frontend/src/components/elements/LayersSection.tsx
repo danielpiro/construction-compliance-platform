@@ -421,13 +421,14 @@ const LayersSection: React.FC<LayersSectionProps> = ({
   }, [element, onElementUpdate]);
 
   const handleAddLayer = () => {
+    const newLayerName = `Layer ${element.layers.length + 1}`;
     setLayerDialog({
       open: true,
       mode: "add",
       data: {
         ...initialLayerState,
         id: crypto.randomUUID(),
-        name: "", // Explicitly initialize name
+        name: newLayerName,
       },
     });
     setAvailableMakers([]);
@@ -798,7 +799,10 @@ const LayersSection: React.FC<LayersSectionProps> = ({
             }}
             helperText={
               selectedLayerData
-                ? `Range: ${selectedLayerData.minThickness}-${selectedLayerData.maxThickness} cm`
+                ? t("elements.layers.helpers.thickness", {
+                    min: selectedLayerData.minThickness,
+                    max: selectedLayerData.maxThickness,
+                  })
                 : undefined
             }
           />
