@@ -20,7 +20,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Box sx={{ direction: "rtl" }}>
             <CssBaseline />
             <BrowserRouter>
-              <ToastContainer position="top-right" rtl autoClose={5000} />
+              <ToastContainer position="top-right" rtl autoClose={3000} />
               <App />
             </BrowserRouter>
           </Box>
