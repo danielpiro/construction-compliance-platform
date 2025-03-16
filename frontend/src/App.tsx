@@ -18,7 +18,6 @@ import PricingPage from "./pages/PricingPage";
 
 // Protected Pages
 import ProjectsPage from "./pages/projects/ProjectsPage";
-import EditProjectPage from "./pages/projects/EditProjectPage";
 import ProjectDetailPage from "./pages/projects/ProjectDetailPage";
 import ProjectTypePage from "./pages/projects/ProjectTypePage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -111,15 +110,6 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/projects/:projectId/edit"
-          element={
-            <ProtectedRoute>
-              <EditProjectPage />
-            </ProtectedRoute>
-          }
-        />
-        {/* Project Type Routes - Order matters for proper matching */}
         <Route
           path="/projects/:projectId/types/:typeId"
           element={
