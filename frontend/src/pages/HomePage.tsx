@@ -20,7 +20,7 @@ import {
   Architecture as ArchitectureIcon,
   Description as DescriptionIcon,
 } from "@mui/icons-material";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { useTranslation } from "react-i18next";
 
 // Feature list for the landing page
