@@ -6,7 +6,6 @@ import { AxiosError } from "axios";
 // Define types
 export interface Layer {
   id: string;
-  name: string;
   substance: string;
   maker: string;
   product: string;
@@ -120,8 +119,19 @@ export const updateElement = async (
   typeId: string,
   spaceId: string,
   elementId: string,
-  elementData: ElementFormData
+  elementData: any
 ): Promise<{ success: boolean; data: Element; message?: string }> => {
+  // Ensure all layers have valid IDs before sending to server
+  if (elementData.layers && Array.isArray(elementData.layers)) {
+    elementData.layers = elementData.layers.map((layer: any) => {
+      // Only ensure a valid ID (remove name)
+      return {
+        ...layer,
+        id: layer.id || crypto.randomUUID(),
+      };
+    });
+  }
+
   try {
     const response = await api.put(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}`,

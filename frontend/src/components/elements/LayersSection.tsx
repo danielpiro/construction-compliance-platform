@@ -16,20 +16,16 @@ import {
   AccordionDetails,
   Autocomplete,
   Pagination,
+  Tooltip,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "react-beautiful-dnd";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import elementService, { Layer, Element } from "../../services/elementService";
 import { layersData } from "./LayerData";
 
@@ -42,7 +38,6 @@ interface LayerDialogState {
 
 const initialLayerState: Layer = {
   id: crypto.randomUUID(),
-  name: "",
   substance: "",
   maker: "",
   product: "",
@@ -117,25 +112,32 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     (typeof layersData)[0] | undefined
   >(undefined);
 
-  // Ensure all layers have valid IDs and are properly initialized
+  // Ensure all layers have valid IDs
   useEffect(() => {
     if (!element.layers) return;
 
-    const layersWithIds = element.layers.map((layer) => {
-      if (!layer.id || typeof layer.id !== "string") {
-        return {
-          ...layer,
-          id: crypto.randomUUID(),
-        };
-      }
-      return layer;
+    // Make sure we're working with an array
+    const currentLayers = Array.isArray(element.layers) ? element.layers : [];
+
+    // Deep copy the layers to avoid direct mutation
+    const layersWithIds = currentLayers.map((layer) => {
+      // Create a fresh object instead of mutating
+      return {
+        ...layer,
+        // Force ID to be valid
+        id: layer.id || crypto.randomUUID(),
+      };
     });
 
     const needsUpdate = layersWithIds.some(
-      (layer, index) => layer.id !== element.layers[index].id
+      (layer, index) =>
+        !layer.id ||
+        !currentLayers[index].id ||
+        layer.id !== currentLayers[index].id
     );
 
     if (needsUpdate) {
+      console.log("Updating layers with proper IDs");
       onElementUpdate({
         ...element,
         layers: layersWithIds,
@@ -144,14 +146,12 @@ const LayersSection: React.FC<LayersSectionProps> = ({
   }, [element, onElementUpdate]);
 
   const handleAddLayer = () => {
-    const newLayerName = `Layer ${element.layers.length + 1}`;
     setLayerDialog({
       open: true,
       mode: "add",
       data: {
         ...initialLayerState,
         id: crypto.randomUUID(),
-        name: newLayerName,
       },
     });
     setAvailableMakers([]);
@@ -179,7 +179,6 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       editIndex: index,
       data: {
         ...layer,
-        name: layer.name || "", // Ensure name is defined
       },
     });
   };
@@ -257,6 +256,11 @@ const LayersSection: React.FC<LayersSectionProps> = ({
         });
       }
 
+      console.log(
+        "Sending layers to server:",
+        updatedLayers.map((l) => ({ id: l.id }))
+      );
+
       const response = await elementService.updateElement(
         projectId,
         typeId,
@@ -271,6 +275,11 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       if (!response.success) {
         throw new Error(response.message || t("elements.errors.updateFailed"));
       }
+
+      console.log(
+        "Response from server:",
+        response.data.layers?.map((l) => ({ id: l.id }))
+      );
 
       onElementUpdate(response.data);
       setLayerDialog((prev) => ({ ...prev, open: false }));
@@ -287,27 +296,26 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     }
   };
 
-  const onDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
-
-    const { source, destination } = result;
-    const allLayers = [...element.layers];
-
-    const sourceIndex = (currentPage - 1) * ITEMS_PER_PAGE + source.index;
-    const destinationIndex =
-      (currentPage - 1) * ITEMS_PER_PAGE + destination.index;
-
-    if (sourceIndex === destinationIndex) return;
+  // Add handlers for moving layers up or down
+  const moveLayerUp = async (index: number) => {
+    if (index === 0) return; // Can't move first item up
 
     try {
-      const [movedLayer] = allLayers.splice(sourceIndex, 1);
-      allLayers.splice(destinationIndex, 0, movedLayer);
+      const allLayers = [...element.layers];
+      const absoluteIndex = startIndex + index;
 
+      // Swap items
+      const temp = allLayers[absoluteIndex];
+      allLayers[absoluteIndex] = allLayers[absoluteIndex - 1];
+      allLayers[absoluteIndex - 1] = temp;
+
+      // Update local state immediately for better UX
       onElementUpdate({
         ...element,
         layers: allLayers,
       });
 
+      // Update on server
       const response = await elementService.updateElement(
         projectId,
         typeId,
@@ -320,6 +328,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       );
 
       if (!response.success) {
+        // If server update fails, revert to previous state
         onElementUpdate({
           ...element,
           layers: element.layers,
@@ -327,22 +336,63 @@ const LayersSection: React.FC<LayersSectionProps> = ({
         throw new Error(response.message || t("elements.errors.updateFailed"));
       }
 
-      const newPageForItem = Math.floor(destinationIndex / ITEMS_PER_PAGE) + 1;
-      if (newPageForItem !== currentPage) {
-        setCurrentPage(newPageForItem);
+      toast.success(t("elements.layer.reorderSuccess"));
+    } catch (error) {
+      console.error("Error moving layer up:", error);
+      toast.error(t("elements.layer.reorderFailed"));
+    }
+  };
+
+  const moveLayerDown = async (index: number) => {
+    const absoluteIndex = startIndex + index;
+    if (absoluteIndex >= element.layers.length - 1) return; // Can't move last item down
+
+    try {
+      const allLayers = [...element.layers];
+
+      // Swap items
+      const temp = allLayers[absoluteIndex];
+      allLayers[absoluteIndex] = allLayers[absoluteIndex + 1];
+      allLayers[absoluteIndex + 1] = temp;
+
+      // Update local state immediately for better UX
+      onElementUpdate({
+        ...element,
+        layers: allLayers,
+      });
+
+      // Update on server
+      const response = await elementService.updateElement(
+        projectId,
+        typeId,
+        spaceId,
+        elementId,
+        {
+          ...element,
+          layers: allLayers,
+        }
+      );
+
+      if (!response.success) {
+        // If server update fails, revert to previous state
+        onElementUpdate({
+          ...element,
+          layers: element.layers,
+        });
+        throw new Error(response.message || t("elements.errors.updateFailed"));
       }
 
       toast.success(t("elements.layer.reorderSuccess"));
     } catch (error) {
-      console.error("Error reordering layers:", error);
+      console.error("Error moving layer down:", error);
       toast.error(t("elements.layer.reorderFailed"));
     }
   };
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const displayedLayers = element.layers.slice(startIndex, endIndex);
-  const pageCount = Math.ceil(element.layers.length / ITEMS_PER_PAGE);
+  const displayedLayers = element.layers?.slice(startIndex, endIndex) || [];
+  const pageCount = Math.ceil((element.layers?.length || 0) / ITEMS_PER_PAGE);
 
   const renderLayerDialog = () => (
     <Dialog
@@ -365,21 +415,6 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={3} sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label={t("elements.layer.name")}
-            value={layerDialog.data.name}
-            onChange={(e) =>
-              setLayerDialog((prev) => ({
-                ...prev,
-                data: {
-                  ...prev.data,
-                  name: e.target.value,
-                },
-              }))
-            }
-            helperText={t("elements.layer.nameHelper")}
-          />
           <Autocomplete
             options={[...new Set(layersData.map((layer) => layer.substance))]}
             getOptionLabel={(option) => t(`${option}`)}
@@ -390,22 +425,18 @@ const LayersSection: React.FC<LayersSectionProps> = ({
               setAvailableMakers(makers);
               setAvailableProducts([]);
               setSelectedLayerData(undefined);
-              setLayerDialog((prev) => {
-                const currentName = prev.data.name; // Preserve the current name
-                return {
-                  ...prev,
-                  data: {
-                    ...prev.data,
-                    substance,
-                    maker: "",
-                    product: "",
-                    thickness: 0,
-                    thermalConductivity: 0,
-                    mass: 0,
-                    name: currentName, // Keep the name
-                  },
-                };
-              });
+              setLayerDialog((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  substance,
+                  maker: "",
+                  product: "",
+                  thickness: 0,
+                  thermalConductivity: 0,
+                  mass: 0,
+                },
+              }));
             }}
             renderInput={(params) => (
               <TextField
@@ -428,21 +459,17 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                 : [];
               setAvailableProducts(products);
               setSelectedLayerData(undefined);
-              setLayerDialog((prev) => {
-                const currentName = prev.data.name; // Preserve the current name
-                return {
-                  ...prev,
-                  data: {
-                    ...prev.data,
-                    maker,
-                    product: "",
-                    thickness: 0,
-                    thermalConductivity: 0,
-                    mass: 0,
-                    name: currentName, // Keep the name
-                  },
-                };
-              });
+              setLayerDialog((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  maker,
+                  product: "",
+                  thickness: 0,
+                  thermalConductivity: 0,
+                  mass: 0,
+                },
+              }));
             }}
             renderInput={(params) => (
               <TextField
@@ -468,20 +495,16 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                   )
                 : undefined;
               setSelectedLayerData(layerData);
-              setLayerDialog((prev) => {
-                const currentName = prev.data.name; // Preserve the current name
-                return {
-                  ...prev,
-                  data: {
-                    ...prev.data,
-                    product,
-                    thickness: layerData?.minThickness || 0,
-                    thermalConductivity: layerData?.thermalConductivity || 0,
-                    mass: layerData?.mass || 0,
-                    name: currentName, // Keep the name
-                  },
-                };
-              });
+              setLayerDialog((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  product,
+                  thickness: layerData?.minThickness || 0,
+                  thermalConductivity: layerData?.thermalConductivity || 0,
+                  mass: layerData?.mass || 0,
+                },
+              }));
             }}
             renderInput={(params) => (
               <TextField
@@ -571,236 +594,176 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       </Box>
 
       {element.layers && element.layers.length > 0 ? (
-        <>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable
-              droppableId="layers-list"
-              isDropDisabled={false}
-              isCombineEnabled={false}
-              type="layers"
-            >
-              {(droppableProvided) => (
-                <Box
-                  ref={droppableProvided.innerRef}
-                  {...droppableProvided.droppableProps}
-                  sx={{ minHeight: "10px" }}
+        <Box>
+          {/* Simple implementation without drag & drop for now */}
+          {displayedLayers.map((layer, index) => {
+            const absoluteIndex = startIndex + index;
+            return (
+              <Box key={layer.id || `layer-${absoluteIndex}`} sx={{ mb: 2 }}>
+                <Accordion
+                  sx={{
+                    bgcolor: "background.paper",
+                    transition: "box-shadow 0.2s",
+                    "&:hover": { boxShadow: 3 },
+                  }}
                 >
-                  {displayedLayers.map((layer, index) => {
-                    const absoluteIndex = startIndex + index;
-                    return (
-                      <Draggable
-                        key={layer.id || `layer-${index}`}
-                        draggableId={layer.id || `layer-${index}`}
-                        index={index}
-                      >
-                        {(draggableProvided, snapshot) => (
-                          <div
-                            ref={draggableProvided.innerRef}
-                            {...draggableProvided.draggableProps}
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    {/* Add reordering buttons */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        mr: 1,
+                      }}
+                    >
+                      <Tooltip title={t("common.moveUp")}>
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveLayerUp(index);
+                            }}
+                            disabled={index === 0 && startIndex === 0}
+                            sx={{ p: 0.5 }}
                           >
-                            <Box
-                              sx={{
-                                mb: 2,
-                                position: "relative",
-                                "&:hover .dragHandle": {
-                                  opacity: 1,
-                                },
-                              }}
-                            >
-                              <Box
-                                {...draggableProvided.dragHandleProps}
-                                className="dragHandle"
-                                sx={{
-                                  position: "absolute",
-                                  left: -28,
-                                  top: "50%",
-                                  transform: "translateY(-50%)",
-                                  cursor: "grab",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  opacity: 0.5,
-                                  transition: "opacity 0.2s",
-                                  "&:hover": {
-                                    color: "primary.main",
-                                  },
-                                }}
-                              >
-                                <DragIndicatorIcon />
-                              </Box>
-                              <Accordion
-                                sx={{
-                                  bgcolor: snapshot.isDragging
-                                    ? "action.selected"
-                                    : "background.paper",
-                                  transition: "transform 0.2s, box-shadow 0.2s",
-                                  transform: snapshot.isDragging
-                                    ? "scale(1.02)"
-                                    : "none",
-                                  "&:hover": { boxShadow: 3 },
-                                }}
-                              >
-                                <AccordionSummary
-                                  expandIcon={<ExpandMoreIcon />}
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                  }}
-                                >
-                                  <Typography
-                                    variant="h6"
-                                    component="div"
-                                    sx={{ flex: 1 }}
-                                  >
-                                    {layer.name ||
-                                      t("elements.layers.layer") +
-                                        " " +
-                                        (absoluteIndex + 1)}
-                                  </Typography>
-                                  <Box
-                                    onClick={(e) => e.stopPropagation()}
-                                    sx={{ display: "flex", gap: 1 }}
-                                  >
-                                    <div>
-                                      <IconButton
-                                        size="small"
-                                        color="primary"
-                                        onClick={(e) =>
-                                          handleEditLayer(
-                                            e,
-                                            absoluteIndex,
-                                            layer
-                                          )
-                                        }
-                                      >
-                                        <EditIcon />
-                                      </IconButton>
-                                    </div>
-                                    <div>
-                                      <IconButton
-                                        size="small"
-                                        color="error"
-                                        onClick={(e) =>
-                                          handleDeleteLayer(e, absoluteIndex)
-                                        }
-                                      >
-                                        <DeleteIcon />
-                                      </IconButton>
-                                    </div>
-                                  </Box>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                  <Grid container spacing={2}>
-                                    <Grid item xs={12} sm={6}>
-                                      <Typography
-                                        variant="body2"
-                                        component="div"
-                                        color="text.secondary"
-                                      >
-                                        {t("elements.layer.substance")}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        component="div"
-                                      >
-                                        {t(layer.substance)}
-                                      </Typography>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                      <Typography
-                                        variant="body2"
-                                        component="div"
-                                        color="text.secondary"
-                                      >
-                                        {t("elements.layer.maker")}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        component="div"
-                                      >
-                                        {t(layer.maker)}
-                                      </Typography>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                      <Typography
-                                        variant="body2"
-                                        component="div"
-                                        color="text.secondary"
-                                      >
-                                        {t("elements.layer.product")}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        component="div"
-                                      >
-                                        {t(layer.product)}
-                                      </Typography>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                      <Typography
-                                        variant="body2"
-                                        component="div"
-                                        color="text.secondary"
-                                      >
-                                        {t("elements.layer.thickness")}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        component="div"
-                                      >
-                                        {layer.thickness} ס"מ
-                                      </Typography>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                      <Typography
-                                        variant="body2"
-                                        component="div"
-                                        color="text.secondary"
-                                      >
-                                        {t(
-                                          "elements.layer.thermalConductivity"
-                                        )}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        component="div"
-                                      >
-                                        {layer.thermalConductivity}{" "}
-                                        {t(
-                                          "elements.layers.units.thermalConductivity"
-                                        )}
-                                      </Typography>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                      <Typography
-                                        variant="body2"
-                                        component="div"
-                                        color="text.secondary"
-                                      >
-                                        {t("elements.layers.mass")}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        component="div"
-                                      >
-                                        {layer.mass}{" "}
-                                        {t("elements.layers.units.mass")}
-                                      </Typography>
-                                    </Grid>
-                                  </Grid>
-                                </AccordionDetails>
-                              </Accordion>
-                            </Box>
-                          </div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
-                  {droppableProvided.placeholder}
-                </Box>
-              )}
-            </Droppable>
-          </DragDropContext>
+                            <ArrowUpwardIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title={t("common.moveDown")}>
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveLayerDown(index);
+                            }}
+                            disabled={
+                              absoluteIndex >= element.layers.length - 1
+                            }
+                            sx={{ p: 0.5 }}
+                          >
+                            <ArrowDownwardIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </Box>
+
+                    <Typography variant="h6" component="div" sx={{ flex: 1 }}>
+                      {t("elements.layers.layer") + " " + (absoluteIndex + 1)}
+                    </Typography>
+                    <Box
+                      onClick={(e) => e.stopPropagation()}
+                      sx={{ display: "flex", gap: 1 }}
+                    >
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={(e) =>
+                          handleEditLayer(e, absoluteIndex, layer)
+                        }
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={(e) => handleDeleteLayer(e, absoluteIndex)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    {/* ...existing AccordionDetails content... */}
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography
+                          variant="body2"
+                          component="div"
+                          color="text.secondary"
+                        >
+                          {t("elements.layer.substance")}
+                        </Typography>
+                        <Typography variant="body1" component="div">
+                          {t(layer.substance)}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography
+                          variant="body2"
+                          component="div"
+                          color="text.secondary"
+                        >
+                          {t("elements.layer.maker")}
+                        </Typography>
+                        <Typography variant="body1" component="div">
+                          {t(layer.maker)}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography
+                          variant="body2"
+                          component="div"
+                          color="text.secondary"
+                        >
+                          {t("elements.layer.product")}
+                        </Typography>
+                        <Typography variant="body1" component="div">
+                          {t(layer.product)}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography
+                          variant="body2"
+                          component="div"
+                          color="text.secondary"
+                        >
+                          {t("elements.layer.thickness")}
+                        </Typography>
+                        <Typography variant="body1" component="div">
+                          {layer.thickness} ס"מ
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography
+                          variant="body2"
+                          component="div"
+                          color="text.secondary"
+                        >
+                          {t("elements.layer.thermalConductivity")}
+                        </Typography>
+                        <Typography variant="body1" component="div">
+                          {layer.thermalConductivity}{" "}
+                          {t("elements.layers.units.thermalConductivity")}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography
+                          variant="body2"
+                          component="div"
+                          color="text.secondary"
+                        >
+                          {t("elements.layers.mass")}
+                        </Typography>
+                        <Typography variant="body1" component="div">
+                          {layer.mass} {t("elements.layers.units.mass")}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+              </Box>
+            );
+          })}
           {pageCount > 1 && (
             <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
               <Pagination
@@ -811,7 +774,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
               />
             </Box>
           )}
-        </>
+        </Box>
       ) : (
         <Typography
           variant="body1"
