@@ -493,6 +493,8 @@
     }
   },
   "footer": {
+    "madeInIsrael": "נוצר בישראל",
+    "copyright": "כל הזכויות שמורות",
     "about": "אודות",
     "terms": "תנאים",
     "company": "חברה",

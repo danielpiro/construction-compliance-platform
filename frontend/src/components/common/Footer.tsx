@@ -161,9 +161,6 @@ const Footer: React.FC = () => {
           >
             {t("footer.copyright", { year: currentYear })}
           </Typography>
-          <Typography variant="body2" color="text.secondary" align="center">
-            {t("footer.madeInIsrael")}
-          </Typography>
         </Box>
       </Container>
     </Box>
