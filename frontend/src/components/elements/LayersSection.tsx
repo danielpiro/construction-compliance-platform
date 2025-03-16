@@ -31,295 +31,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import elementService, { Layer, Element } from "../../services/elementService";
-
-const layersData = [
-  {
-    id: "1",
-    substance: "Thermal Insulation",
-    maker: "T'I",
-    product: "200",
-    minThickness: 1,
-    maxThickness: 8,
-    thickness: 1,
-    thermalConductivity: 0.07,
-    mass: 200,
-  },
-  {
-    id: "2",
-    substance: "Thermal Insulation",
-    maker: "T'I",
-    product: "300",
-    minThickness: 1,
-    maxThickness: 8,
-    thickness: 1,
-    thermalConductivity: 0.094,
-    mass: 300,
-  },
-  {
-    id: "3",
-    substance: "Thermal Insulation",
-    maker: "T'I",
-    product: "400",
-    minThickness: 1,
-    maxThickness: 8,
-    thickness: 1,
-    thermalConductivity: 0.115,
-    mass: 400,
-  },
-  {
-    id: "4",
-    substance: "Thermal Insulation",
-    maker: "Tambur",
-    product: "200",
-    minThickness: 1,
-    maxThickness: 8,
-    thickness: 1,
-    thermalConductivity: 0.0653,
-    mass: 200,
-  },
-  {
-    id: "5",
-    substance: "Thermal Insulation",
-    maker: "Tambur",
-    product: "86",
-    minThickness: 1,
-    maxThickness: 8,
-    thickness: 1,
-    thermalConductivity: 0.124,
-    mass: 400,
-  },
-  {
-    id: "6",
-    substance: "Thermal Insulation",
-    maker: "Thermofix",
-    product: "750",
-    minThickness: 1,
-    maxThickness: 5,
-    thickness: 1,
-    thermalConductivity: 0.086,
-    mass: 300,
-  },
-  {
-    id: "7",
-    substance: "Thermal Insulation",
-    maker: "Thermofix",
-    product: "760",
-    minThickness: 1,
-    maxThickness: 8,
-    thickness: 1,
-    thermalConductivity: 0.105,
-    mass: 400,
-  },
-  {
-    id: "8",
-    substance: "Concrete",
-    maker: "Regular Concrete",
-    product: "Regular Concrete",
-    minThickness: 5,
-    maxThickness: 100,
-    thickness: 5,
-    thermalConductivity: 2.1,
-    mass: 2400,
-  },
-  {
-    id: "9",
-    substance: "Betkal",
-    maker: "Light Concrete",
-    product: "Light Concrete 1200",
-    minThickness: 5,
-    maxThickness: 40,
-    thickness: 5,
-    thermalConductivity: 0.62,
-    mass: 1200,
-  },
-  {
-    id: "10",
-    substance: "Tit",
-    maker: "Tit",
-    product: "Melet Chemanty",
-    minThickness: 1,
-    maxThickness: 8,
-    thickness: 1,
-    thermalConductivity: 1,
-    mass: 1800,
-  },
-  {
-    id: "11",
-    substance: "Block",
-    maker: "Thermodan",
-    product: "Pomis dor 5 - 22",
-    minThickness: 220,
-    maxThickness: 220,
-    thickness: 220,
-    thermalConductivity: 0.22,
-    mass: 1047,
-  },
-  {
-    id: "12",
-    substance: "Block",
-    maker: "Thermodan",
-    product: "Pomis dor 5 - 30",
-    minThickness: 30,
-    maxThickness: 30,
-    thickness: 30,
-    thermalConductivity: 0.3,
-    mass: 772,
-  },
-  {
-    id: "13",
-    substance: "Block",
-    maker: "Thermodan",
-    product: "Pomis dor 5 - 25",
-    minThickness: 250,
-    maxThickness: 250,
-    thickness: 250,
-    thermalConductivity: 0.227,
-    mass: 920,
-  },
-  {
-    id: "14",
-    substance: "Block",
-    maker: "Itung",
-    product: "Block Itung",
-    minThickness: 20,
-    maxThickness: 30,
-    thickness: 20,
-    thermalConductivity: 0.1035,
-    mass: 400,
-  },
-  {
-    id: "15",
-    substance: "Block",
-    maker: "Block Ravid",
-    product: "Pomis gold 22",
-    minThickness: 22,
-    maxThickness: 22,
-    thickness: 22,
-    thermalConductivity: 0.191,
-    mass: 801,
-  },
-  {
-    id: "16",
-    substance: "Block",
-    maker: "Block Ravid",
-    product: "Pomis gold 25",
-    minThickness: 250,
-    maxThickness: 250,
-    thickness: 250,
-    thermalConductivity: 0.166,
-    mass: 867,
-  },
-  {
-    id: "17",
-    substance: "Isolation Board",
-    maker: "Polybid",
-    product: "Board Polish 200",
-    minThickness: 2,
-    maxThickness: 6,
-    thickness: 2,
-    thermalConductivity: 0.0676,
-    mass: 200,
-  },
-  {
-    id: "18",
-    substance: "Isolation Board",
-    maker: "Polybid",
-    product: "Board Polish Extra",
-    minThickness: 2,
-    maxThickness: 6,
-    thickness: 2,
-    thermalConductivity: 0.0513,
-    mass: 140,
-  },
-  {
-    id: "19",
-    substance: "Isolation Board",
-    maker: "Polybid",
-    product: "Board Polish Premium",
-    minThickness: 2,
-    maxThickness: 6,
-    thickness: 2,
-    thermalConductivity: 0.0456,
-    mass: 100,
-  },
-  {
-    id: "20",
-    substance: "Isolation Board",
-    maker: "Melagol",
-    product: "Pomglass",
-    minThickness: 3,
-    maxThickness: 10,
-    thickness: 3,
-    thermalConductivity: 0.043,
-    mass: 130,
-  },
-  {
-    id: "21",
-    substance: "Isolation Board",
-    maker: "Melagol",
-    product: "Solarglass",
-    minThickness: 3,
-    maxThickness: 10,
-    thickness: 3,
-    thermalConductivity: 0.043,
-    mass: 120,
-  },
-  {
-    id: "22",
-    substance: "Isolation Board",
-    maker: "Kal Product Isolation",
-    product: "Firetop",
-    minThickness: 3,
-    maxThickness: 7,
-    thickness: 3,
-    thermalConductivity: 0.0606,
-    mass: 180,
-  },
-  {
-    id: "23",
-    substance: "Internal Insulation",
-    maker: "Misterfix",
-    product: "Fiximo 640",
-    minThickness: 1,
-    maxThickness: 5,
-    thickness: 1,
-    thermalConductivity: 0.87,
-    mass: 300,
-  },
-  {
-    id: "24",
-    substance: "Rock",
-    maker: "Granite",
-    product: "Granite",
-    minThickness: 1,
-    maxThickness: 5,
-    thickness: 1,
-    thermalConductivity: 2.8,
-    mass: 2700,
-  },
-  {
-    id: "25",
-    substance: "Rock",
-    maker: "Marble",
-    product: "Marble",
-    minThickness: 1,
-    maxThickness: 5,
-    thickness: 1,
-    thermalConductivity: 3.5,
-    mass: 2800,
-  },
-  {
-    id: "26",
-    substance: "Rock",
-    maker: "Gear Rock",
-    product: "Gear Rock",
-    minThickness: 1,
-    maxThickness: 5,
-    thickness: 1,
-    thermalConductivity: 2.3,
-    mass: 2600,
-  },
-];
+import { layersData } from "./LayerData";
 
 interface LayerDialogState {
   open: boolean;
@@ -405,14 +117,25 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     (typeof layersData)[0] | undefined
   >(undefined);
 
-  // Ensure all layers have IDs
+  // Ensure all layers have valid IDs and are properly initialized
   useEffect(() => {
-    const layersWithIds = element.layers.map((layer) => ({
-      ...layer,
-      id: layer.id || crypto.randomUUID(),
-    }));
+    if (!element.layers) return;
 
-    if (JSON.stringify(layersWithIds) !== JSON.stringify(element.layers)) {
+    const layersWithIds = element.layers.map((layer) => {
+      if (!layer.id || typeof layer.id !== "string") {
+        return {
+          ...layer,
+          id: crypto.randomUUID(),
+        };
+      }
+      return layer;
+    });
+
+    const needsUpdate = layersWithIds.some(
+      (layer, index) => layer.id !== element.layers[index].id
+    );
+
+    if (needsUpdate) {
       onElementUpdate({
         ...element,
         layers: layersWithIds,
@@ -850,19 +573,24 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       {element.layers && element.layers.length > 0 ? (
         <>
           <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="layers-list">
+            <Droppable
+              droppableId="layers-list"
+              isDropDisabled={false}
+              isCombineEnabled={false}
+              type="layers"
+            >
               {(droppableProvided) => (
-                <div
+                <Box
                   ref={droppableProvided.innerRef}
                   {...droppableProvided.droppableProps}
-                  style={{ minHeight: "10px" }}
+                  sx={{ minHeight: "10px" }}
                 >
                   {displayedLayers.map((layer, index) => {
                     const absoluteIndex = startIndex + index;
                     return (
                       <Draggable
-                        key={layer.id}
-                        draggableId={layer.id}
+                        key={layer.id || `layer-${index}`}
+                        draggableId={layer.id || `layer-${index}`}
                         index={index}
                       >
                         {(draggableProvided, snapshot) => (
@@ -919,7 +647,11 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                     gap: 1,
                                   }}
                                 >
-                                  <Typography variant="h6" sx={{ flex: 1 }}>
+                                  <Typography
+                                    variant="h6"
+                                    component="div"
+                                    sx={{ flex: 1 }}
+                                  >
                                     {layer.name ||
                                       t("elements.layers.layer") +
                                         " " +
@@ -929,24 +661,32 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                     onClick={(e) => e.stopPropagation()}
                                     sx={{ display: "flex", gap: 1 }}
                                   >
-                                    <IconButton
-                                      size="small"
-                                      color="primary"
-                                      onClick={(e) =>
-                                        handleEditLayer(e, absoluteIndex, layer)
-                                      }
-                                    >
-                                      <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                      size="small"
-                                      color="error"
-                                      onClick={(e) =>
-                                        handleDeleteLayer(e, absoluteIndex)
-                                      }
-                                    >
-                                      <DeleteIcon />
-                                    </IconButton>
+                                    <div>
+                                      <IconButton
+                                        size="small"
+                                        color="primary"
+                                        onClick={(e) =>
+                                          handleEditLayer(
+                                            e,
+                                            absoluteIndex,
+                                            layer
+                                          )
+                                        }
+                                      >
+                                        <EditIcon />
+                                      </IconButton>
+                                    </div>
+                                    <div>
+                                      <IconButton
+                                        size="small"
+                                        color="error"
+                                        onClick={(e) =>
+                                          handleDeleteLayer(e, absoluteIndex)
+                                        }
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </div>
                                   </Box>
                                 </AccordionSummary>
                                 <AccordionDetails>
@@ -954,57 +694,77 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                     <Grid item xs={12} sm={6}>
                                       <Typography
                                         variant="body2"
+                                        component="div"
                                         color="text.secondary"
                                       >
                                         {t("elements.layer.substance")}
                                       </Typography>
-                                      <Typography variant="body1">
+                                      <Typography
+                                        variant="body1"
+                                        component="div"
+                                      >
                                         {t(layer.substance)}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                       <Typography
                                         variant="body2"
+                                        component="div"
                                         color="text.secondary"
                                       >
                                         {t("elements.layer.maker")}
                                       </Typography>
-                                      <Typography variant="body1">
+                                      <Typography
+                                        variant="body1"
+                                        component="div"
+                                      >
                                         {t(layer.maker)}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                       <Typography
                                         variant="body2"
+                                        component="div"
                                         color="text.secondary"
                                       >
                                         {t("elements.layer.product")}
                                       </Typography>
-                                      <Typography variant="body1">
+                                      <Typography
+                                        variant="body1"
+                                        component="div"
+                                      >
                                         {t(layer.product)}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                       <Typography
                                         variant="body2"
+                                        component="div"
                                         color="text.secondary"
                                       >
                                         {t("elements.layer.thickness")}
                                       </Typography>
-                                      <Typography variant="body1">
+                                      <Typography
+                                        variant="body1"
+                                        component="div"
+                                      >
                                         {layer.thickness} ס"מ
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                       <Typography
                                         variant="body2"
+                                        component="div"
                                         color="text.secondary"
                                       >
                                         {t(
                                           "elements.layer.thermalConductivity"
                                         )}
                                       </Typography>
-                                      <Typography variant="body1">
+                                      <Typography
+                                        variant="body1"
+                                        component="div"
+                                      >
                                         {layer.thermalConductivity}{" "}
                                         {t(
                                           "elements.layers.units.thermalConductivity"
@@ -1014,11 +774,15 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                                     <Grid item xs={12} sm={6}>
                                       <Typography
                                         variant="body2"
+                                        component="div"
                                         color="text.secondary"
                                       >
                                         {t("elements.layers.mass")}
                                       </Typography>
-                                      <Typography variant="body1">
+                                      <Typography
+                                        variant="body1"
+                                        component="div"
+                                      >
                                         {layer.mass}{" "}
                                         {t("elements.layers.units.mass")}
                                       </Typography>
@@ -1033,7 +797,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                     );
                   })}
                   {droppableProvided.placeholder}
-                </div>
+                </Box>
               )}
             </Droppable>
           </DragDropContext>
@@ -1052,6 +816,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
         <Typography
           variant="body1"
           color="text.secondary"
+          component="div"
           sx={{ textAlign: "center", py: 3 }}
         >
           {t("elements.layers.empty")}
