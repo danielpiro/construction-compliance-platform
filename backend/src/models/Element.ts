@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 
 interface ILayer {
   substance: string;
+  name: string;
   maker: string;
   product: string;
   thickness: number;
@@ -105,6 +106,10 @@ const ElementSchema: Schema = new Schema(
     },
     layers: [
       {
+        name: {
+          type: String,
+          required: [true, "Please add layer name"],
+        },
         substance: {
           type: String,
           required: [true, "Please add layer substance"],

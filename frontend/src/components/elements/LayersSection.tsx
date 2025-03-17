@@ -22,7 +22,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import elementService, { Layer, Element } from "../../services/elementService";
 import LayerModal from "./LayerModal";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 interface LayersSectionProps {
   projectId: string;
@@ -45,6 +45,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
 
   const initialLayerState: Layer = {
     id: crypto.randomUUID(),
+    name: "",
     substance: "",
     maker: "",
     product: "",
@@ -319,7 +320,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
                     </Box>
 
                     <Typography variant="h6" component="div" sx={{ flex: 1 }}>
-                      {t("elements.layers.layer") + " " + (absoluteIndex + 1)}
+                      {layer.name || t("elements.layers.unnamed")}
                     </Typography>
                     <Box
                       onClick={(e) => e.stopPropagation()}

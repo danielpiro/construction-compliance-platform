@@ -155,6 +155,15 @@ const LayerModal: React.FC<LayerModalProps> = ({
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={3} sx={{ mt: 2 }}>
+          <TextField
+            label={t("elements.layer.name")}
+            required
+            fullWidth
+            value={layerData.name}
+            onChange={(e) =>
+              setLayerData({ ...layerData, name: e.target.value })
+            }
+          />
           <Autocomplete
             options={[...new Set(layersData.map((layer) => layer.substance))]}
             getOptionLabel={(option) => t(`${option}`)}
