@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import authService from "../services/authService";
-import { saveToken, removeToken, hasToken } from "../utils/tokenStorage";
+import { saveToken, removeToken } from "../utils/tokenStorage";
 
 // User interface
 interface UserSettings {
@@ -63,90 +63,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Cache keys
-  const USER_CACHE_KEY = "userData";
-  const CACHE_EXPIRY_KEY = "userCacheExpiry";
-  const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
-
-  // Cache management functions
-  const setCachedUser = (userData: User) => {
-    localStorage.setItem(USER_CACHE_KEY, JSON.stringify(userData));
-    localStorage.setItem(
-      CACHE_EXPIRY_KEY,
-      (Date.now() + CACHE_DURATION).toString()
-    );
-  };
-
-  const getCachedUser = (): User | null => {
-    const cached = localStorage.getItem(USER_CACHE_KEY);
-    const expiry = localStorage.getItem(CACHE_EXPIRY_KEY);
-
-    if (cached && expiry && Date.now() < parseInt(expiry)) {
-      try {
-        return JSON.parse(cached);
-      } catch {
-        // Ignore parse error
-        return null;
-      }
-    }
-    return null;
-  };
-
-  const clearUserCache = () => {
-    localStorage.removeItem(USER_CACHE_KEY);
-    localStorage.removeItem(CACHE_EXPIRY_KEY);
-  };
-
-  // Check if user is already authenticated on mount
+  // Initialize auth state
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (hasToken()) {
-          // 1. Quick local check with cached data
-          const cachedUser = getCachedUser();
-          if (cachedUser) {
-            setUser(cachedUser);
-            setIsLoggedIn(true);
-            setLoading(false);
-          }
-
-          // 2. Background sync for fresh data
-          try {
-            const response = await authService.getCurrentUser();
-            if (response.success && response.data) {
-              setUser(response.data);
-              setCachedUser(response.data);
-              setIsLoggedIn(true);
-            } else {
-              if (!cachedUser) {
-                // Only clear if we didn't have cached data
-                removeToken();
-                setIsLoggedIn(false);
-                setUser(null);
-              }
-            }
-          } catch (error) {
-            console.error("Background sync failed:", error);
-            if (!cachedUser) {
-              // Only clear if we didn't have cached data
-              removeToken();
-              setIsLoggedIn(false);
-              setUser(null);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Authentication check failed:", error);
-        removeToken();
-        clearUserCache();
-        setIsLoggedIn(false);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
+    setLoading(false);
   }, []);
 
   // Login function
@@ -158,7 +77,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.login(email, password);
 
       if (response.success && response.token) {
-        // Save token and set auth state
         saveToken(response.token);
 
         // Get user data after successful login
@@ -170,11 +88,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
 
-      // If we reach here, login failed
       setError(response.message || "Login failed. Please try again.");
       return false;
     } catch (err) {
-      // Handle login error
       console.error("Login error:", err);
       setError("An unexpected error occurred. Please try again.");
       return false;
@@ -224,7 +140,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     authService.logout();
     removeToken();
-    clearUserCache();
     setIsLoggedIn(false);
     setUser(null);
   };
@@ -239,7 +154,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (user) {
       const updatedUser = { ...user, ...newUserData };
       setUser(updatedUser);
-      setCachedUser(updatedUser);
     }
   };
 
