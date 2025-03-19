@@ -14,8 +14,6 @@ import buildingTypeRoutes from "./routes/buildingType.routes";
 import spaceRoutes from "./routes/space.routes";
 import elementRoutes from "./routes/element.routes";
 import adminRoutes from "./routes/admin.routes";
-import subscriptionRoutes from "./routes/subscription.routes";
-import cityRoutes from "./routes/city.routes";
 import userRoutes from "./routes/user.routes";
 
 // Load environment variables
@@ -113,8 +111,6 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes); // This will handle all nested routes
 app.use("/api/admin", adminRoutes);
-app.use("/api/subscriptions", subscriptionRoutes);
-app.use("/api/cities", cityRoutes);
 app.use("/api/user", userRoutes);
 
 // Basic route
