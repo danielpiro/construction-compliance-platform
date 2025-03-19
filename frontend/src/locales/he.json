@@ -247,7 +247,10 @@
       "submit": "הוסף אלמנט",
       "layers": "שכבות",
       "addLayer": "הוסף שכבה",
-      "isolationCoverage": "כיסוי בידוד"
+      "isolationCoverage": "כיסוי בידוד",
+      "outsideCover": "כיסוי חיצוני",
+      "buildMethod": "שיטת בנייה",
+      "buildMethodIsolation": "סוג בידוד"
     },
     "types": {
       "wall": "קיר",
@@ -456,6 +459,24 @@
     "edit": "ערוך אלמנט",
     "updateSuccess": "האלמנט עודכן בהצלחה",
     "updateError": "שגיאה בעדכון האלמנט",
+    "outsideCover": {
+      "tiah": "טיח",
+      "dry hang": "תלייה יבשה",
+      "wet hang": "תלייה רטובה"
+    },
+    "buildMethod": {
+      "blocks": "בלוקים",
+      "concrete": "בטון",
+      "amir wall": "קיר אמיר",
+      "baranovich": "ברנוביץ'",
+      "light build": "בנייה קלה"
+    },
+    "buildMethodIsolation": {
+      "no extra cover": "ללא כיסוי נוסף",
+      "extra cover": "כיסוי נוסף",
+      "inside isolation": "בידוד פנימי",
+      "outside isolation": "בידוד חיצוני"
+    },
     "isolationCoverage": {
       "dark color": "צבע כהה",
       "bright color": "צבע בהיר"

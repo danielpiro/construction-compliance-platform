@@ -17,8 +17,19 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Layer, Element } from "../../services/elementService";
 import { layersData } from "./LayerData";
 
-// Get filtered options based on current selection
-const getFilteredMakers = (substance: string) => {
+// Get filtered options based on current selection and element conditions
+const getFilteredMakers = (substance: string, element: Element) => {
+  // Filter for concrete with outside isolation - only show specific layers
+  if (
+    element.buildMethod === "concrete" &&
+    element.buildMethodIsolation === "outside isolation"
+  ) {
+    const allowedIds = ["27", "28", "29", "30", "31"];
+    const filteredLayers = layersData.filter(
+      (layer) => allowedIds.includes(layer.id) && layer.substance === substance
+    );
+    return [...new Set(filteredLayers.map((layer) => layer.maker))];
+  }
   return [
     ...new Set(
       layersData
@@ -28,7 +39,25 @@ const getFilteredMakers = (substance: string) => {
   ];
 };
 
-const getFilteredProducts = (substance: string, maker: string) => {
+const getFilteredProducts = (
+  substance: string,
+  maker: string,
+  element: Element
+) => {
+  // Filter for concrete with outside isolation - only show specific layers
+  if (
+    element.buildMethod === "concrete" &&
+    element.buildMethodIsolation === "outside isolation"
+  ) {
+    const allowedIds = ["27", "28", "29", "30", "31"];
+    const filteredLayers = layersData.filter(
+      (layer) =>
+        allowedIds.includes(layer.id) &&
+        layer.substance === substance &&
+        layer.maker === maker
+    );
+    return [...new Set(filteredLayers.map((layer) => layer.product))];
+  }
   return [
     ...new Set(
       layersData
@@ -71,11 +100,11 @@ const LayerModal: React.FC<LayerModalProps> = ({
   const { t } = useTranslation();
   const [layerData, setLayerData] = useState(layer);
   const [availableMakers, setAvailableMakers] = useState<string[]>(
-    layer.substance ? getFilteredMakers(layer.substance) : []
+    layer.substance ? getFilteredMakers(layer.substance, element) : []
   );
   const [availableProducts, setAvailableProducts] = useState<string[]>(
     layer.substance && layer.maker
-      ? getFilteredProducts(layer.substance, layer.maker)
+      ? getFilteredProducts(layer.substance, layer.maker, element)
       : []
   );
   const [selectedLayerData, setSelectedLayerData] = useState<
@@ -170,7 +199,9 @@ const LayerModal: React.FC<LayerModalProps> = ({
             value={layerData.substance}
             onChange={(_, newValue) => {
               const substance = newValue || "";
-              const makers = substance ? getFilteredMakers(substance) : [];
+              const makers = substance
+                ? getFilteredMakers(substance, element)
+                : [];
               setAvailableMakers(makers);
               setAvailableProducts([]);
               setSelectedLayerData(undefined);
@@ -201,7 +232,7 @@ const LayerModal: React.FC<LayerModalProps> = ({
             onChange={(_, newValue) => {
               const maker = newValue || "";
               const products = maker
-                ? getFilteredProducts(layerData.substance, maker)
+                ? getFilteredProducts(layerData.substance, maker, element)
                 : [];
               setAvailableProducts(products);
               setSelectedLayerData(undefined);

@@ -18,11 +18,41 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Layer, IsolationCoverage } from "../../services/elementService";
 
 type ElementType = "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
+type OutsideCover = "tiah" | "dry hang" | "wet hang";
+type BuildMethod =
+  | "blocks"
+  | "concrete"
+  | "amir wall"
+  | "baranovich"
+  | "light build";
+type BuildMethodIsolation =
+  | "no extra cover"
+  | "extra cover"
+  | "inside isolation"
+  | "outside isolation";
 
 const isolationCoverageOptions: IsolationCoverage[] = [
   "dark color",
   "bright color",
 ];
+
+const outsideCoverOptions: OutsideCover[] = ["tiah", "dry hang", "wet hang"];
+
+const buildMethodOptions: BuildMethod[] = [
+  "blocks",
+  "concrete",
+  "amir wall",
+  "baranovich",
+  "light build",
+];
+
+const buildMethodIsolationMap: Record<BuildMethod, BuildMethodIsolation[]> = {
+  blocks: ["no extra cover", "extra cover"],
+  concrete: ["inside isolation", "outside isolation"],
+  "amir wall": ["outside isolation"],
+  baranovich: ["inside isolation"],
+  "light build": [],
+};
 
 interface SubTypes {
   Wall: ["Outside Wall", "Isolation Wall"];
@@ -35,6 +65,9 @@ export interface ElementFormData {
   name: string;
   type: ElementType;
   subType?: string;
+  outsideCover?: OutsideCover;
+  buildMethod?: BuildMethod;
+  buildMethodIsolation?: BuildMethodIsolation;
   isolationCoverage?: IsolationCoverage;
   layers: Layer[];
 }
@@ -68,6 +101,9 @@ export const ElementForm: React.FC<ElementFormProps> = ({
       name: "",
       type: "Wall",
       subType: "Outside Wall",
+      outsideCover: undefined,
+      buildMethod: undefined,
+      buildMethodIsolation: undefined,
       isolationCoverage: "dark color",
       layers: [],
     }
@@ -171,25 +207,109 @@ export const ElementForm: React.FC<ElementFormProps> = ({
           )}
 
           {formData.type === "Wall" && formData.subType === "Outside Wall" && (
-            <FormControl required fullWidth>
-              <InputLabel>{t("elements.form.isolationCoverage")}</InputLabel>
-              <Select
-                value={formData.isolationCoverage}
-                label={t("elements.form.isolationCoverage")}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    isolationCoverage: e.target.value as IsolationCoverage,
-                  })
-                }
-              >
-                {isolationCoverageOptions.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {t(`elements.isolationCoverage.${option}`)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <>
+              <FormControl required fullWidth>
+                <InputLabel>{t("elements.form.outsideCover")}</InputLabel>
+                <Select
+                  value={formData.outsideCover || ""}
+                  label={t("elements.form.outsideCover")}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      outsideCover: e.target.value as OutsideCover,
+                      buildMethod: undefined,
+                      buildMethodIsolation: undefined,
+                    })
+                  }
+                >
+                  {outsideCoverOptions.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {t(`elements.outsideCover.${option}`)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {formData.outsideCover && (
+                <FormControl required fullWidth>
+                  <InputLabel>{t("elements.form.buildMethod")}</InputLabel>
+                  <Select
+                    value={formData.buildMethod || ""}
+                    label={t("elements.form.buildMethod")}
+                    onChange={(e) => {
+                      const method = e.target.value as BuildMethod;
+                      const isolationOptions = buildMethodIsolationMap[method];
+                      setFormData({
+                        ...formData,
+                        buildMethod: method,
+                        buildMethodIsolation:
+                          isolationOptions?.length === 1
+                            ? isolationOptions[0]
+                            : undefined,
+                      });
+                    }}
+                  >
+                    {buildMethodOptions.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {t(`elements.buildMethod.${option}`)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+
+              {formData.buildMethod &&
+                buildMethodIsolationMap[formData.buildMethod].length > 1 && (
+                  <FormControl required fullWidth>
+                    <InputLabel>
+                      {t("elements.form.buildMethodIsolation")}
+                    </InputLabel>
+                    <Select
+                      value={formData.buildMethodIsolation || ""}
+                      label={t("elements.form.buildMethodIsolation")}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          buildMethodIsolation: e.target
+                            .value as BuildMethodIsolation,
+                        })
+                      }
+                    >
+                      {buildMethodIsolationMap[formData.buildMethod].map(
+                        (option) => (
+                          <MenuItem key={option} value={option}>
+                            {t(`elements.buildMethodIsolation.${option}`)}
+                          </MenuItem>
+                        )
+                      )}
+                    </Select>
+                  </FormControl>
+                )}
+
+              {formData.buildMethod && formData.buildMethodIsolation && (
+                <FormControl required fullWidth>
+                  <InputLabel>
+                    {t("elements.form.isolationCoverage")}
+                  </InputLabel>
+                  <Select
+                    value={formData.isolationCoverage}
+                    label={t("elements.form.isolationCoverage")}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        isolationCoverage: e.target.value as IsolationCoverage,
+                      })
+                    }
+                  >
+                    {isolationCoverageOptions.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {t(`elements.isolationCoverage.${option}`)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            </>
           )}
 
           {formData.layers.map((layer, index) => (

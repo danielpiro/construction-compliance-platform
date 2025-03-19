@@ -16,6 +16,18 @@ export interface Layer {
 }
 
 export type IsolationCoverage = "dark color" | "bright color";
+export type OutsideCover = "tiah" | "dry hang" | "wet hang";
+export type BuildMethod =
+  | "blocks"
+  | "concrete"
+  | "amir wall"
+  | "baranovich"
+  | "light build";
+export type BuildMethodIsolation =
+  | "no extra cover"
+  | "extra cover"
+  | "inside isolation"
+  | "outside isolation";
 
 export interface Element {
   _id: string;
@@ -26,6 +38,9 @@ export interface Element {
   projectId: string;
   typeId: string;
   parameters?: Record<string, any>;
+  outsideCover?: OutsideCover;
+  buildMethod?: BuildMethod;
+  buildMethodIsolation?: BuildMethodIsolation;
   isolationCoverage?: IsolationCoverage;
   layers: Layer[];
 }
@@ -35,6 +50,9 @@ export interface ElementFormData {
   type: "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
   subType?: string;
   parameters?: Record<string, any>;
+  outsideCover?: OutsideCover;
+  buildMethod?: BuildMethod;
+  buildMethodIsolation?: BuildMethodIsolation;
   isolationCoverage?: IsolationCoverage;
   layers?: Layer[];
 }
