@@ -14,20 +14,57 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import { Layer, Element } from "../../services/elementService";
+import { Layer } from "../../services/elementService";
+import type { ElementFormData } from "./ElementForm";
 import { layersData } from "./LayerData";
 
-// Get filtered options based on current selection and element conditions
-const getFilteredMakers = (substance: string, element: Element) => {
-  // Filter for concrete with outside isolation - only show specific layers
+const ALLOWED_CONCRETE_OUTSIDE_ISOLATION_IDS = [
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "32",
+  "17",
+  "3",
+];
+
+const getFilteredSubstances = (element: ElementFormData): string[] => {
   if (
     element.buildMethod === "concrete" &&
     element.buildMethodIsolation === "outside isolation"
   ) {
-    const allowedIds = ["27", "28", "29", "30", "31", "32", "17", "3"];
+    console.log("Filtering for concrete + outside isolation");
+    const allowedIds = ALLOWED_CONCRETE_OUTSIDE_ISOLATION_IDS;
+    const substances = [
+      ...new Set(
+        layersData
+          .filter((layer) => allowedIds.includes(layer.id))
+          .map((layer) => layer.substance)
+      ),
+    ];
+    console.log("Filtered substances:", substances);
+    return substances;
+  }
+  return [...new Set(layersData.map((layer) => layer.substance))];
+};
+
+const getFilteredMakers = (
+  substance: string,
+  element: ElementFormData
+): string[] => {
+  if (
+    element.buildMethod === "concrete" &&
+    element.buildMethodIsolation === "outside isolation"
+  ) {
     const filteredLayers = layersData.filter(
-      (layer) => allowedIds.includes(layer.id) && layer.substance === substance
+      (layer) =>
+        ALLOWED_CONCRETE_OUTSIDE_ISOLATION_IDS.includes(layer.id) &&
+        layer.substance === substance
     );
+    console.log("Filtered makers:", [
+      ...new Set(filteredLayers.map((layer) => layer.maker)),
+    ]);
     return [...new Set(filteredLayers.map((layer) => layer.maker))];
   }
   return [
@@ -42,20 +79,21 @@ const getFilteredMakers = (substance: string, element: Element) => {
 const getFilteredProducts = (
   substance: string,
   maker: string,
-  element: Element
-) => {
-  // Filter for concrete with outside isolation - only show specific layers
+  element: ElementFormData
+): string[] => {
   if (
     element.buildMethod === "concrete" &&
     element.buildMethodIsolation === "outside isolation"
   ) {
-    const allowedIds = ["27", "28", "29", "30", "31", "32", "17", "3"];
     const filteredLayers = layersData.filter(
       (layer) =>
-        allowedIds.includes(layer.id) &&
+        ALLOWED_CONCRETE_OUTSIDE_ISOLATION_IDS.includes(layer.id) &&
         layer.substance === substance &&
         layer.maker === maker
     );
+    console.log("Filtered products:", [
+      ...new Set(filteredLayers.map((layer) => layer.product)),
+    ]);
     return [...new Set(filteredLayers.map((layer) => layer.product))];
   }
   return [
@@ -69,40 +107,43 @@ const getFilteredProducts = (
   ];
 };
 
+type LayerData = (typeof layersData)[0];
+
 const getLayerData = (
   substance: string,
   maker: string,
   product: string,
-  element: Element
-) => {
+  element: ElementFormData
+): LayerData | undefined => {
   let filteredLayers = layersData;
 
   if (
     element.buildMethod === "concrete" &&
     element.buildMethodIsolation === "outside isolation"
   ) {
-    const allowedIds = ["27", "28", "29", "30", "31", "32", "17", "3"];
     filteredLayers = layersData.filter((layer) =>
-      allowedIds.includes(layer.id)
+      ALLOWED_CONCRETE_OUTSIDE_ISOLATION_IDS.includes(layer.id)
     );
   }
 
-  return filteredLayers.find(
+  const foundLayer = filteredLayers.find(
     (layer) =>
       layer.substance === substance &&
       layer.maker === maker &&
       layer.product === product
   );
+  console.log("Found layer:", foundLayer);
+  return foundLayer;
 };
 
 interface LayerModalProps {
   open: boolean;
   mode: "add" | "edit";
   layer: Layer;
-  element: Element;
+  element: ElementFormData;
   editIndex?: number;
   onClose: () => void;
-  onSave: (updatedElement: Element) => void;
+  onSave: (updatedElement: ElementFormData) => void;
 }
 
 const LayerModal: React.FC<LayerModalProps> = ({
@@ -131,6 +172,16 @@ const LayerModal: React.FC<LayerModalProps> = ({
       ? getLayerData(layer.substance, layer.maker, layer.product, element)
       : undefined
   );
+
+  const isConcreteOutsideIsolation =
+    element.buildMethod === "concrete" &&
+    element.buildMethodIsolation === "outside isolation";
+
+  console.log("Current element:", element);
+  console.log("Is concrete + outside isolation:", isConcreteOutsideIsolation);
+  console.log("Current layerData:", layerData);
+  console.log("Available makers:", availableMakers);
+  console.log("Available products:", availableProducts);
 
   const handleSave = async () => {
     if (!selectedLayerData) {
@@ -211,24 +262,10 @@ const LayerModal: React.FC<LayerModalProps> = ({
             }
           />
           <Autocomplete
-            options={
-              element.buildMethod === "concrete" &&
-              element.buildMethodIsolation === "outside isolation"
-                ? [
-                    ...new Set(
-                      layersData
-                        .filter((layer) =>
-                          ["27", "28", "29", "30", "31", "32"].includes(
-                            layer.id
-                          )
-                        )
-                        .map((layer) => layer.substance)
-                    ),
-                  ]
-                : [...new Set(layersData.map((layer) => layer.substance))]
-            }
-            getOptionLabel={(option) => t(`${option}`)}
-            value={layerData.substance}
+            options={getFilteredSubstances(element)}
+            isOptionEqualToValue={(option, value) => option === value}
+            getOptionLabel={(option) => (option ? t(`${option}`) : "")}
+            value={layerData.substance || null}
             onChange={(_, newValue) => {
               const substance = newValue || "";
               const makers = substance
@@ -258,8 +295,9 @@ const LayerModal: React.FC<LayerModalProps> = ({
           />
           <Autocomplete
             options={availableMakers}
-            value={layerData.maker}
-            getOptionLabel={(option) => t(`${option}`)}
+            isOptionEqualToValue={(option, value) => option === value}
+            value={layerData.maker || null}
+            getOptionLabel={(option) => (option ? t(`${option}`) : "")}
             disabled={!layerData.substance}
             onChange={(_, newValue) => {
               const maker = newValue || "";
@@ -288,8 +326,9 @@ const LayerModal: React.FC<LayerModalProps> = ({
           />
           <Autocomplete
             options={availableProducts}
-            getOptionLabel={(option) => t(`${option}`)}
-            value={layerData.product}
+            isOptionEqualToValue={(option, value) => option === value}
+            getOptionLabel={(option) => (option ? t(`${option}`) : "")}
+            value={layerData.product || null}
             disabled={!layerData.maker}
             onChange={(_, newValue) => {
               const product = newValue || "";
