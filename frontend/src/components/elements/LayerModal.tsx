@@ -34,7 +34,6 @@ const getFilteredSubstances = (element: ElementFormData): string[] => {
     element.buildMethod === "concrete" &&
     element.buildMethodIsolation === "outside isolation"
   ) {
-    console.log("Filtering for concrete + outside isolation");
     const allowedIds = ALLOWED_CONCRETE_OUTSIDE_ISOLATION_IDS;
     const substances = [
       ...new Set(
@@ -43,7 +42,6 @@ const getFilteredSubstances = (element: ElementFormData): string[] => {
           .map((layer) => layer.substance)
       ),
     ];
-    console.log("Filtered substances:", substances);
     return substances;
   }
   return [...new Set(layersData.map((layer) => layer.substance))];
@@ -62,9 +60,6 @@ const getFilteredMakers = (
         ALLOWED_CONCRETE_OUTSIDE_ISOLATION_IDS.includes(layer.id) &&
         layer.substance === substance
     );
-    console.log("Filtered makers:", [
-      ...new Set(filteredLayers.map((layer) => layer.maker)),
-    ]);
     return [...new Set(filteredLayers.map((layer) => layer.maker))];
   }
   return [
@@ -91,9 +86,6 @@ const getFilteredProducts = (
         layer.substance === substance &&
         layer.maker === maker
     );
-    console.log("Filtered products:", [
-      ...new Set(filteredLayers.map((layer) => layer.product)),
-    ]);
     return [...new Set(filteredLayers.map((layer) => layer.product))];
   }
   return [
@@ -132,7 +124,6 @@ const getLayerData = (
       layer.maker === maker &&
       layer.product === product
   );
-  console.log("Found layer:", foundLayer);
   return foundLayer;
 };
 
@@ -172,16 +163,6 @@ const LayerModal: React.FC<LayerModalProps> = ({
       ? getLayerData(layer.substance, layer.maker, layer.product, element)
       : undefined
   );
-
-  const isConcreteOutsideIsolation =
-    element.buildMethod === "concrete" &&
-    element.buildMethodIsolation === "outside isolation";
-
-  console.log("Current element:", element);
-  console.log("Is concrete + outside isolation:", isConcreteOutsideIsolation);
-  console.log("Current layerData:", layerData);
-  console.log("Available makers:", availableMakers);
-  console.log("Available products:", availableProducts);
 
   const handleSave = async () => {
     if (!selectedLayerData) {

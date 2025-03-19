@@ -140,8 +140,6 @@ export const updateElement = async (
   elementId: string,
   elementData: ElementFormData
 ): Promise<{ success: boolean; data: Element; message?: string }> => {
-  console.log("Updating element with data:", elementData);
-
   // Create a clean update object with only the fields we want to update
   const updateData: ElementFormData = {
     name: elementData.name,
@@ -163,15 +161,11 @@ export const updateElement = async (
       })) || [],
   };
 
-  console.log("Cleaned update data:", updateData);
-
   try {
     const response = await api.put(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}`,
       updateData
     );
-
-    console.log("Update response:", response.data);
 
     return response.data as {
       success: boolean;

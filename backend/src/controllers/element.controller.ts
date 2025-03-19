@@ -99,8 +99,6 @@ export const getElement = async (
     const userId = (req as any).user.id;
     const elementId = req.params.elementId;
 
-    console.log("Getting element with ID:", elementId);
-
     // Find element
     const element = await Element.findById(elementId);
 
@@ -110,8 +108,6 @@ export const getElement = async (
         message: "Element not found",
       });
     }
-
-    console.log("Found element:", element.toObject());
 
     // Check access
     const accessCheck = await checkSpaceAccess(
@@ -201,11 +197,6 @@ export const createElement = async (
       }
     }
 
-    console.log("Creating element with data:", {
-      ...req.body,
-      space: spaceId,
-    });
-
     // Prepare element data
     const elementData = {
       ...req.body,
@@ -223,12 +214,8 @@ export const createElement = async (
       elementData.isolationCoverage = elementData.isolationCoverage || null;
     }
 
-    console.log("Creating element with data:", elementData);
-
     // Create element with explicit data
     const element = await Element.create(elementData);
-
-    console.log("Created element:", element.toObject());
 
     res.status(201).json({
       success: true,
@@ -344,8 +331,6 @@ export const updateElement = async (
       updateData.buildMethodIsolation = updateData.buildMethodIsolation || null;
       updateData.isolationCoverage = updateData.isolationCoverage || null;
     }
-
-    console.log("Updating element with data:", updateData);
 
     // Update element with explicit data
     element = await Element.findByIdAndUpdate(elementId, updateData, {

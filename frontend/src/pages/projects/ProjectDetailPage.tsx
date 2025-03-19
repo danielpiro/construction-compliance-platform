@@ -23,7 +23,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import api from "../../services/api";
 import { toast } from "react-toastify";
-import { getToken, removeToken } from "../../utils/tokenStorage";
+import { removeToken } from "../../utils/tokenStorage";
 import { areaToHebrew } from "../../utils/areaMapping";
 import buildingTypeService from "../../services/buildingTypeService";
 import CreateBuildingTypeModal from "../../components/projects/CreateBuildingTypeModal";
@@ -114,22 +114,8 @@ const ProjectDetailPage: React.FC = () => {
     setError(null);
 
     try {
-      // Debugging: Check token and project ID
-      const token = getToken();
-      const debugData = {
-        hasToken: !!token,
-        tokenFirstChars: token ? `${token.substring(0, 10)}...` : "N/A",
-        projectId,
-        apiUrl: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-      };
-
-      console.log("Starting project fetch with token status:", !!token);
-      console.log("Project ID:", projectId);
-      console.log("API URL:", debugData.apiUrl);
-
       // Make direct API call with proper error handling
       const response = await api.get(`/projects/${projectId}`);
-      console.log("API Response received:", response?.data);
 
       // Process response
       if (response?.data?.success && response?.data?.data) {

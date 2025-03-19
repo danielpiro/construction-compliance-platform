@@ -156,7 +156,6 @@ export const createProject = async (
 
   try {
     const userId = normalizeId((req as any).user.id);
-    console.log(`Creating project - User ID: ${userId}`);
 
     // Check for project limit (50 per user)
     const projectCount = await Project.countDocuments({ owner: userId });

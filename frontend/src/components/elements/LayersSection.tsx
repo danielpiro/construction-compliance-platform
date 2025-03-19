@@ -85,7 +85,6 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     );
 
     if (needsUpdate) {
-      console.log("Updating layers with proper IDs");
       onElementUpdate({
         ...element,
         layers: layersWithIds,

@@ -20,7 +20,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import { toast } from "react-toastify";
 import EditProjectModal from "../../components/projects/EditProjectModal";
 import projectService from "../../services/projectService";
-import { getToken } from "../../utils/tokenStorage";
 import { areaToHebrew } from "../../utils/areaMapping";
 import { t } from "i18next";
 
@@ -99,16 +98,6 @@ const ProjectsPage: React.FC = () => {
     setError(null);
 
     try {
-      const token = getToken();
-      const debugData = {
-        hasToken: !!token,
-        tokenFirstChars: token ? `${token.substring(0, 10)}...` : "N/A",
-        apiUrl: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-      };
-
-      console.log("Starting API call with token status:", !!token);
-      console.log("API URL:", debugData.apiUrl);
-
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error("Request timed out after 10 seconds")),

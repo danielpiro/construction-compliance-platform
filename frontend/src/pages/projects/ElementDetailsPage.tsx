@@ -182,7 +182,6 @@ const ElementDetailsPage: React.FC = () => {
         ]);
 
         if (projectResponse.success) {
-          console.log("Project response:", projectResponse.data);
           setProjectName(projectResponse.data.name);
           setProjectType(projectResponse.data.area);
         }
