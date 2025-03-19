@@ -23,7 +23,6 @@ const app: Application = express();
 
 // Set up static folders and paths
 const uploadsPath = path.join(__dirname, "../uploads");
-console.log("Setting up static upload directory at:", uploadsPath);
 
 // Configure security middleware
 app.use(
@@ -68,11 +67,6 @@ app.use(
   "/api/uploads",
   (req, res, next) => {
     const filePath = path.join(uploadsPath, req.path);
-    console.log("Attempting to serve file:", {
-      requestPath: req.path,
-      fullFilePath: filePath,
-      exists: fs.existsSync(filePath),
-    });
     next();
   },
   express.static(uploadsPath)
@@ -85,7 +79,9 @@ export const connectDB = async (): Promise<void> => {
       process.env.MONGO_URI ||
         "mongodb://localhost:27017/construction-compliance"
     );
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(
+      `MongoDB Connected: ${conn.connection.host} (${conn.connection.name})`
+    );
   } catch (error: any) {
     console.error(`Error: ${error.message}`);
     process.exit(1);
@@ -98,8 +94,6 @@ fs.readdir(
   (err: NodeJS.ErrnoException | null, files: string[]) => {
     if (err) {
       console.error("Error reading uploads directory:", err);
-    } else {
-      console.log("Files in uploads directory:", files);
     }
   }
 );

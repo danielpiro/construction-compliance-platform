@@ -182,8 +182,9 @@ const ElementDetailsPage: React.FC = () => {
         ]);
 
         if (projectResponse.success) {
+          console.log("Project response:", projectResponse.data);
           setProjectName(projectResponse.data.name);
-          setProjectType(projectResponse.data.type);
+          setProjectType(projectResponse.data.area);
         }
 
         if (buildingTypeResponse.success) {
@@ -326,18 +327,18 @@ const ElementDetailsPage: React.FC = () => {
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Typography variant="body1" gutterBottom>
-              <strong>{t("projectType")}:</strong> {projectType}
+              <strong>{t("projectArea")}:</strong> {t(projectType)}
             </Typography>
             <Typography variant="body1" gutterBottom>
-              <strong>{t("buildingTypeTitle")}:</strong> {buildingTypeName}
+              <strong>{t("buildingTypeTitle")}:</strong> {t(buildingTypeName)}
             </Typography>
           </Grid>
           <Grid item xs={12} md={6}>
             <Typography variant="body1" gutterBottom>
-              <strong>{t("spaceName")}:</strong> {spaceName}
+              <strong>{t("spaceName")}:</strong> {t(spaceName)}
             </Typography>
             <Typography variant="body1" gutterBottom>
-              <strong>{t("spaceType")}:</strong> {spaceType}
+              <strong>{t("spaceType")}:</strong> {t(spaceType)}
             </Typography>
           </Grid>
         </Grid>
