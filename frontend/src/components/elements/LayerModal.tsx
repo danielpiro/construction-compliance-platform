@@ -24,7 +24,7 @@ const getFilteredMakers = (substance: string, element: Element) => {
     element.buildMethod === "concrete" &&
     element.buildMethodIsolation === "outside isolation"
   ) {
-    const allowedIds = ["27", "28", "29", "30", "31"];
+    const allowedIds = ["27", "28", "29", "30", "31", "32", "17", "3"];
     const filteredLayers = layersData.filter(
       (layer) => allowedIds.includes(layer.id) && layer.substance === substance
     );
@@ -49,7 +49,7 @@ const getFilteredProducts = (
     element.buildMethod === "concrete" &&
     element.buildMethodIsolation === "outside isolation"
   ) {
-    const allowedIds = ["27", "28", "29", "30", "31"];
+    const allowedIds = ["27", "28", "29", "30", "31", "32", "17", "3"];
     const filteredLayers = layersData.filter(
       (layer) =>
         allowedIds.includes(layer.id) &&
@@ -69,8 +69,25 @@ const getFilteredProducts = (
   ];
 };
 
-const getLayerData = (substance: string, maker: string, product: string) => {
-  return layersData.find(
+const getLayerData = (
+  substance: string,
+  maker: string,
+  product: string,
+  element: Element
+) => {
+  let filteredLayers = layersData;
+
+  if (
+    element.buildMethod === "concrete" &&
+    element.buildMethodIsolation === "outside isolation"
+  ) {
+    const allowedIds = ["27", "28", "29", "30", "31", "32", "17", "3"];
+    filteredLayers = layersData.filter((layer) =>
+      allowedIds.includes(layer.id)
+    );
+  }
+
+  return filteredLayers.find(
     (layer) =>
       layer.substance === substance &&
       layer.maker === maker &&
@@ -111,7 +128,7 @@ const LayerModal: React.FC<LayerModalProps> = ({
     (typeof layersData)[0] | undefined
   >(
     layer.substance && layer.maker && layer.product
-      ? getLayerData(layer.substance, layer.maker, layer.product)
+      ? getLayerData(layer.substance, layer.maker, layer.product, element)
       : undefined
   );
 
@@ -194,7 +211,22 @@ const LayerModal: React.FC<LayerModalProps> = ({
             }
           />
           <Autocomplete
-            options={[...new Set(layersData.map((layer) => layer.substance))]}
+            options={
+              element.buildMethod === "concrete" &&
+              element.buildMethodIsolation === "outside isolation"
+                ? [
+                    ...new Set(
+                      layersData
+                        .filter((layer) =>
+                          ["27", "28", "29", "30", "31", "32"].includes(
+                            layer.id
+                          )
+                        )
+                        .map((layer) => layer.substance)
+                    ),
+                  ]
+                : [...new Set(layersData.map((layer) => layer.substance))]
+            }
             getOptionLabel={(option) => t(`${option}`)}
             value={layerData.substance}
             onChange={(_, newValue) => {
@@ -262,7 +294,12 @@ const LayerModal: React.FC<LayerModalProps> = ({
             onChange={(_, newValue) => {
               const product = newValue || "";
               const newLayerData = product
-                ? getLayerData(layerData.substance, layerData.maker, product)
+                ? getLayerData(
+                    layerData.substance,
+                    layerData.maker,
+                    product,
+                    element
+                  )
                 : undefined;
               setSelectedLayerData(newLayerData);
               setLayerData({

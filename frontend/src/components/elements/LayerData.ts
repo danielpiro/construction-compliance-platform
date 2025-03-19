@@ -340,4 +340,15 @@ export const layersData = [
     thermalConductivity: 0.043,
     mass: 130,
   },
+  {
+    id: "32",
+    substance: "Glass Moksaf",
+    maker: "Solarglass",
+    product: "Glass Moksaf Board",
+    minThickness: 0.03,
+    maxThickness: 0.1,
+    thickness: 0.03,
+    thermalConductivity: 0.043,
+    mass: 130,
+  },
 ];
