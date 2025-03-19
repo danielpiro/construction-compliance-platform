@@ -11,6 +11,19 @@ interface ILayer {
   mass: number;
 }
 
+type OutsideCover = "tiah" | "dry hang" | "wet hang";
+type BuildMethod =
+  | "blocks"
+  | "concrete"
+  | "amir wall"
+  | "baranovich"
+  | "light build";
+type BuildMethodIsolation =
+  | "no extra cover"
+  | "extra cover"
+  | "inside isolation"
+  | "outside isolation";
+
 type IsolationCoverage = "dark color" | "bright color";
 
 export interface IElement extends Document {
@@ -27,6 +40,9 @@ export interface IElement extends Document {
   parameters: Record<string, any>; // Store element-specific parameters as JSON
   isolationCoverage?: IsolationCoverage;
   layers: ILayer[];
+  outsideCover?: OutsideCover;
+  buildMethod?: BuildMethod;
+  buildMethodIsolation?: BuildMethodIsolation;
 }
 
 const ElementSchema: Schema = new Schema(
@@ -103,6 +119,23 @@ const ElementSchema: Schema = new Schema(
       required: function (this: IElement) {
         return this.type === "Wall" && this.subType === "Outside Wall";
       },
+    },
+    outsideCover: {
+      type: String,
+      enum: ["tiah", "dry hang", "wet hang"],
+    },
+    buildMethod: {
+      type: String,
+      enum: ["blocks", "concrete", "amir wall", "baranovich", "light build"],
+    },
+    buildMethodIsolation: {
+      type: String,
+      enum: [
+        "no extra cover",
+        "extra cover",
+        "inside isolation",
+        "outside isolation",
+      ],
     },
     layers: [
       {

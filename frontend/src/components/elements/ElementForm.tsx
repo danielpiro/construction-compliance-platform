@@ -10,11 +10,7 @@ import {
   MenuItem,
   Typography,
   Container,
-  IconButton,
-  Card,
-  CardContent,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Layer, IsolationCoverage } from "../../services/elementService";
 
 type ElementType = "Wall" | "Ceiling" | "Floor" | "Thermal Bridge";
@@ -100,11 +96,11 @@ export const ElementForm: React.FC<ElementFormProps> = ({
     initialData || {
       name: "",
       type: "Wall",
-      subType: "Outside Wall",
+      subType: undefined,
       outsideCover: undefined,
       buildMethod: undefined,
       buildMethodIsolation: undefined,
-      isolationCoverage: "dark color",
+      isolationCoverage: undefined,
       layers: [],
     }
   );
@@ -127,26 +123,6 @@ export const ElementForm: React.FC<ElementFormProps> = ({
       return;
     }
     onSubmit(formData);
-  };
-
-  const updateLayer = (
-    index: number,
-    field: keyof Layer,
-    value: string | number
-  ) => {
-    const newLayers = [...formData.layers];
-    newLayers[index] = {
-      ...newLayers[index],
-      [field]: field === "thickness" ? Number(value) : value,
-    };
-    setFormData({ ...formData, layers: newLayers });
-  };
-
-  const removeLayer = (index: number) => {
-    setFormData({
-      ...formData,
-      layers: formData.layers.filter((_, i) => i !== index),
-    });
   };
 
   return (
@@ -311,68 +287,6 @@ export const ElementForm: React.FC<ElementFormProps> = ({
               )}
             </>
           )}
-
-          {formData.layers.map((layer, index) => (
-            <Card key={index} sx={{ mt: 2 }}>
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="subtitle1">
-                    {t("elements.form.layer")} {index + 1}
-                  </Typography>
-                  <IconButton onClick={() => removeLayer(index)} color="error">
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <TextField
-                    required
-                    label={t("elements.form.substance")}
-                    value={layer.substance}
-                    onChange={(e) =>
-                      updateLayer(index, "substance", e.target.value)
-                    }
-                    fullWidth
-                  />
-                  <TextField
-                    required
-                    label={t("elements.form.maker")}
-                    value={layer.maker}
-                    onChange={(e) =>
-                      updateLayer(index, "maker", e.target.value)
-                    }
-                    fullWidth
-                  />
-                  <TextField
-                    required
-                    label={t("elements.form.product")}
-                    value={layer.product}
-                    onChange={(e) =>
-                      updateLayer(index, "product", e.target.value)
-                    }
-                    fullWidth
-                  />
-                  <TextField
-                    required
-                    type="number"
-                    label={t("elements.form.thickness")}
-                    value={layer.thickness}
-                    onChange={(e) =>
-                      updateLayer(index, "thickness", e.target.value)
-                    }
-                    inputProps={{ min: 0, step: 0.1 }}
-                    fullWidth
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
 
           <Button
             type="submit"
