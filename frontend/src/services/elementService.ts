@@ -138,24 +138,41 @@ export const updateElement = async (
   typeId: string,
   spaceId: string,
   elementId: string,
-  elementData: any
+  elementData: ElementFormData
 ): Promise<{ success: boolean; data: Element; message?: string }> => {
-  // Ensure all layers have valid IDs before sending to server
-  if (elementData.layers && Array.isArray(elementData.layers)) {
-    elementData.layers = elementData.layers.map((layer: any) => {
-      // Only ensure a valid ID (remove name)
-      return {
+  console.log("Updating element with data:", elementData);
+
+  // Create a clean update object with only the fields we want to update
+  const updateData: ElementFormData = {
+    name: elementData.name,
+    type: elementData.type,
+    subType: elementData.subType,
+    // Only include Wall/Outside Wall specific fields if they exist
+    ...(elementData.type === "Wall" &&
+      elementData.subType === "Outside Wall" && {
+        outsideCover: elementData.outsideCover,
+        buildMethod: elementData.buildMethod,
+        buildMethodIsolation: elementData.buildMethodIsolation,
+        isolationCoverage: elementData.isolationCoverage,
+      }),
+    parameters: elementData.parameters || {},
+    layers:
+      elementData.layers?.map((layer) => ({
         ...layer,
         id: layer.id || crypto.randomUUID(),
-      };
-    });
-  }
+      })) || [],
+  };
+
+  console.log("Cleaned update data:", updateData);
 
   try {
     const response = await api.put(
       `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${elementId}`,
-      elementData
+      updateData
     );
+
+    console.log("Update response:", response.data);
+
     return response.data as {
       success: boolean;
       data: Element;

@@ -380,6 +380,66 @@ const ElementDetailsPage: React.FC = () => {
             </Grid>
           )}
 
+          {element.type === "Wall" && element.subType === "Outside Wall" && (
+            <>
+              {element.outsideCover && (
+                <Grid item xs={12} md={6}>
+                  <Typography variant="body1" gutterBottom>
+                    <strong>{t("elements.form.outsideCover")}:</strong>{" "}
+                    <Chip
+                      label={t(`elements.outsideCover.${element.outsideCover}`)}
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Typography>
+                </Grid>
+              )}
+
+              {element.buildMethod && (
+                <Grid item xs={12} md={6}>
+                  <Typography variant="body1" gutterBottom>
+                    <strong>{t("elements.form.buildMethod")}:</strong>{" "}
+                    <Chip
+                      label={t(`elements.buildMethod.${element.buildMethod}`)}
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Typography>
+                </Grid>
+              )}
+
+              {element.buildMethodIsolation && (
+                <Grid item xs={12} md={6}>
+                  <Typography variant="body1" gutterBottom>
+                    <strong>{t("elements.form.buildMethodIsolation")}:</strong>{" "}
+                    <Chip
+                      label={t(
+                        `elements.buildMethodIsolation.${element.buildMethodIsolation}`
+                      )}
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Typography>
+                </Grid>
+              )}
+
+              {element.isolationCoverage && (
+                <Grid item xs={12} md={6}>
+                  <Typography variant="body1" gutterBottom>
+                    <strong>{t("elements.form.isolationCoverage")}:</strong>{" "}
+                    <Chip
+                      label={t(
+                        `elements.isolationCoverage.${element.isolationCoverage}`
+                      )}
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Typography>
+                </Grid>
+              )}
+            </>
+          )}
+
           <Grid item xs={12}>
             <Divider sx={{ my: 2 }} />
             <Typography variant="h6" gutterBottom>

@@ -5,14 +5,11 @@ import {
   updateElement,
   deleteElement,
   runComplianceCheck,
-  insertTestLayers,
+  clearSpaceElements,
 } from "../controllers/element.controller";
 import { protect } from "../middleware/auth.middleware";
 
 const router = Router();
-
-// Public route for testing
-router.post("/amir", insertTestLayers);
 
 // Protect all other routes
 router.use(protect);
@@ -21,5 +18,8 @@ router.use(protect);
 router.route("/:id").get(getElement).put(updateElement).delete(deleteElement);
 
 router.route("/:id/compliance-check").post(runComplianceCheck);
+
+// Clear all elements in a space
+router.route("/clear").delete(clearSpaceElements);
 
 export default router;

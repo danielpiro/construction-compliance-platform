@@ -123,10 +123,20 @@ const ElementSchema: Schema = new Schema(
     outsideCover: {
       type: String,
       enum: ["tiah", "dry hang", "wet hang"],
+      required: function (this: IElement) {
+        return this.type === "Wall" && this.subType === "Outside Wall";
+      },
     },
     buildMethod: {
       type: String,
       enum: ["blocks", "concrete", "amir wall", "baranovich", "light build"],
+      required: function (this: IElement) {
+        return (
+          this.type === "Wall" &&
+          this.subType === "Outside Wall" &&
+          this.outsideCover
+        );
+      },
     },
     buildMethodIsolation: {
       type: String,
@@ -136,6 +146,16 @@ const ElementSchema: Schema = new Schema(
         "inside isolation",
         "outside isolation",
       ],
+      required: function (this: IElement) {
+        return (
+          this.type === "Wall" &&
+          this.subType === "Outside Wall" &&
+          this.buildMethod &&
+          ["blocks", "concrete", "amir wall", "baranovich"].includes(
+            this.buildMethod
+          )
+        );
+      },
     },
     layers: [
       {

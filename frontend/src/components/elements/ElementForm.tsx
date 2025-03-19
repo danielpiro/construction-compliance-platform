@@ -105,23 +105,69 @@ export const ElementForm: React.FC<ElementFormProps> = ({
     }
   );
 
-  // Update subType when type changes
+  // Update subType and clear conditional fields when type changes
   useEffect(() => {
     if (formData.type === "Thermal Bridge") {
-      setFormData((prev) => ({ ...prev, subType: undefined }));
+      setFormData((prev) => ({
+        ...prev,
+        subType: undefined,
+        outsideCover: undefined,
+        buildMethod: undefined,
+        buildMethodIsolation: undefined,
+        isolationCoverage: undefined,
+      }));
     } else {
       setFormData((prev) => ({
         ...prev,
         subType: subTypes[prev.type][0],
+        // Clear wall-specific fields if not a wall
+        ...(prev.type !== "Wall" && {
+          outsideCover: undefined,
+          buildMethod: undefined,
+          buildMethodIsolation: undefined,
+          isolationCoverage: undefined,
+        }),
       }));
     }
   }, [formData.type]);
+
+  // Clear dependent fields when subType changes
+  useEffect(() => {
+    if (formData.type === "Wall" && formData.subType !== "Outside Wall") {
+      setFormData((prev) => ({
+        ...prev,
+        outsideCover: undefined,
+        buildMethod: undefined,
+        buildMethodIsolation: undefined,
+        isolationCoverage: undefined,
+      }));
+    }
+  }, [formData.type, formData.subType]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formData.name || !formData.type) {
       return;
     }
+
+    // For Wall/Outside Wall, ensure all required fields are present
+    if (formData.type === "Wall" && formData.subType === "Outside Wall") {
+      if (!formData.outsideCover || !formData.buildMethod) {
+        return;
+      }
+      // Some build methods require buildMethodIsolation
+      if (
+        buildMethodIsolationMap[formData.buildMethod].length > 0 &&
+        !formData.buildMethodIsolation
+      ) {
+        return;
+      }
+      // isolationCoverage is required for Outside Wall
+      if (!formData.isolationCoverage) {
+        return;
+      }
+    }
+
     onSubmit(formData);
   };
 
