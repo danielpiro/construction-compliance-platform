@@ -247,14 +247,14 @@
       "name": "שם אלמנט",
       "namePlaceholder": "הכנס שם אלמנט",
       "type": "סוג אלמנט",
-      "subType": "תת סוג",
+      "subType": "סוג קיר",
       "submit": "הוסף אלמנט",
       "layers": "שכבות",
       "addLayer": "הוסף שכבה",
       "isolationCoverage": "כיסוי בידוד",
-      "outsideCover": "כיסוי חיצוני",
+      "outsideCover": "סוג חיפוי",
       "buildMethod": "שיטת בנייה",
-      "buildMethodIsolation": "סוג בידוד"
+      "buildMethodIsolation": "מיקום"
     },
     "types": {
       "wall": "קיר",
