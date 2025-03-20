@@ -15,16 +15,20 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import spaceService from "../../services/spaceService";
 import projectService from "../../services/projectService";
 import buildingTypeService from "../../services/buildingTypeService";
 import { Space } from "../../services/spaceService";
+import elementService from "../../services/elementService";
 import CreateElementModal from "../../components/elements/CreateElementModal";
 import EditSpaceModal from "../../components/spaces/EditSpaceModal";
 
@@ -283,69 +287,126 @@ const SpaceDetailsPage: React.FC = () => {
           <Grid container spacing={3}>
             {space.elements.map((element, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <Paper
-                  component={element._id ? RouterLink : "div"}
-                  to={
-                    element._id
-                      ? `/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${element._id}`
-                      : undefined
-                  }
+                <Box
                   sx={{
-                    p: 3,
+                    position: "relative",
                     height: "100%",
-                    textDecoration: "none",
-                    color: "inherit",
-                    display: "flex",
-                    flexDirection: "column",
                     transition: "transform 0.2s ease-in-out",
                     "&:hover": {
                       transform: "translateY(-4px)",
-                      boxShadow: 3,
                     },
                   }}
                 >
-                  <Typography variant="h6" gutterBottom>
-                    {element.name}
-                  </Typography>
+                  {/* Delete Button - Outside of RouterLink */}
+                  <Box
+                    sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}
+                  >
+                    <Tooltip title={t("elements.delete")}>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={async (e: React.MouseEvent) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (
+                            window.confirm(t("elements.deleteConfirmation"))
+                          ) {
+                            try {
+                              const response =
+                                await elementService.deleteElement(
+                                  projectId!,
+                                  typeId!,
+                                  spaceId!,
+                                  element._id!
+                                );
+                              if (response.success) {
+                                toast.success(t("elements.deleteSuccess"));
+                                const spaceResponse =
+                                  await spaceService.getSpace(
+                                    projectId!,
+                                    typeId!,
+                                    spaceId!
+                                  );
+                                if (spaceResponse.success) {
+                                  setSpace({
+                                    ...spaceResponse.data,
+                                    elements: spaceResponse.data.elements || [],
+                                  });
+                                }
+                              } else {
+                                throw new Error(response.message);
+                              }
+                            } catch (error) {
+                              console.error("Error deleting element:", error);
+                              toast.error(t("elements.deleteFailed"));
+                            }
+                          }
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
 
-                  <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                    <Chip
-                      label={t(
-                        `elements.types.${element.type
-                          .toLowerCase()
-                          .replace(/\s+/g, "")}`
-                      )}
-                      color={
-                        getChipColor(element.type) as
-                          | "primary"
-                          | "secondary"
-                          | "success"
-                          | "warning"
-                          | "default"
-                      }
-                      size="small"
-                    />
-                    {element.subType && (
+                  {/* Card Content with RouterLink */}
+                  <Paper
+                    component={RouterLink}
+                    to={`/projects/${projectId}/types/${typeId}/spaces/${spaceId}/elements/${element._id}`}
+                    sx={{
+                      p: 3,
+                      height: "100%",
+                      textDecoration: "none",
+                      color: "inherit",
+                      display: "flex",
+                      flexDirection: "column",
+                      "&:hover": {
+                        boxShadow: 3,
+                      },
+                    }}
+                  >
+                    <Typography variant="h6" gutterBottom>
+                      {element.name}
+                    </Typography>
+
+                    <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
                       <Chip
                         label={t(
-                          `elements.subtypes.${element.subType
+                          `elements.types.${element.type
                             .toLowerCase()
                             .replace(/\s+/g, "")}`
                         )}
-                        variant="outlined"
+                        color={
+                          getChipColor(element.type) as
+                            | "primary"
+                            | "secondary"
+                            | "success"
+                            | "warning"
+                            | "default"
+                        }
                         size="small"
                       />
-                    )}
-                  </Box>
+                      {element.subType && (
+                        <Chip
+                          label={t(
+                            `elements.subtypes.${element.subType
+                              .toLowerCase()
+                              .replace(/\s+/g, "")}`
+                          )}
+                          variant="outlined"
+                          size="small"
+                        />
+                      )}
+                    </Box>
 
-                  <Typography variant="body2" color="text.secondary">
-                    {t(
-                      `elements.descriptions.${element.type
-                        .toLowerCase()
-                        .replace(/\s+/g, "")}`
-                    )}
-                  </Typography>
-                </Paper>
+                    <Typography variant="body2" color="text.secondary">
+                      {t(
+                        `elements.descriptions.${element.type
+                          .toLowerCase()
+                          .replace(/\s+/g, "")}`
+                      )}
+                    </Typography>
+                  </Paper>
+                </Box>
               </Grid>
             ))}
           </Grid>

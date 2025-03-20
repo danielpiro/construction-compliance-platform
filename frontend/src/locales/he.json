@@ -8,6 +8,7 @@
     "save": "שמור",
     "edit": "ערוך",
     "delete": "מחק",
+    "deleteConfirmation": "האם אתה בטוח שברצונך למחוק את האלמנט? פעולה זו בלתי הפיכה.",
     "back": "חזרה",
     "confirm": "אישור",
     "add": "הוסף",
@@ -224,6 +225,9 @@
   },
   "elements": {
     "title": "אלמנטים",
+    "delete": "מחק אלמנט",
+    "deleteConfirmation": "האם אתה בטוח שברצונך למחוק את האלמנט?.",
+    "deleteFailed": "מחיקת האלמנט נכשלה",
     "addElement": "הוסף אלמנט",
     "element": "אלמנט {{number}}",
     "count": "{{count}} אלמנטים",
