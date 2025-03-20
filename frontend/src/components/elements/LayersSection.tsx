@@ -52,6 +52,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     thickness: 0,
     thermalConductivity: 0,
     mass: 0,
+    group: 1,
   };
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -60,34 +61,29 @@ const LayersSection: React.FC<LayersSectionProps> = ({
   const [currentLayer, setCurrentLayer] = useState<Layer>(initialLayerState);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Ensure all layers have valid IDs
+  // Ensure all layers have valid IDs and groups
   useEffect(() => {
     if (!element.layers) return;
 
-    // Make sure we're working with an array
     const currentLayers = Array.isArray(element.layers) ? element.layers : [];
+    const updatedLayers = currentLayers.map((layer, index) => ({
+      ...layer,
+      id: layer.id || crypto.randomUUID(),
+      group: layer.group || (index % 3) + 1, // Assign groups 1-3 in round-robin fashion
+    }));
 
-    // Deep copy the layers to avoid direct mutation
-    const layersWithIds = currentLayers.map((layer) => {
-      // Create a fresh object instead of mutating
-      return {
-        ...layer,
-        // Force ID to be valid
-        id: layer.id || crypto.randomUUID(),
-      };
-    });
-
-    const needsUpdate = layersWithIds.some(
+    const needsUpdate = updatedLayers.some(
       (layer, index) =>
         !layer.id ||
         !currentLayers[index].id ||
-        layer.id !== currentLayers[index].id
+        layer.id !== currentLayers[index].id ||
+        !currentLayers[index].group
     );
 
     if (needsUpdate) {
       onElementUpdate({
         ...element,
-        layers: layersWithIds,
+        layers: updatedLayers,
       });
     }
   }, [element, onElementUpdate]);
@@ -107,7 +103,7 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     e.stopPropagation();
     setModalMode("edit");
     setEditIndex(index);
-    setCurrentLayer(layer);
+    setCurrentLayer({ ...layer, group: layer.group || 1 });
     setModalOpen(true);
   };
 
@@ -143,26 +139,23 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     }
   };
 
-  // Add handlers for moving layers up or down
-  const moveLayerUp = async (index: number) => {
-    if (index === 0) return; // Can't move first item up
-
+  const moveLayerUp = async (groupNumber: number, index: number) => {
     try {
+      if (index === 0) return;
+
+      // Swap within the same group
       const allLayers = [...element.layers];
-      const absoluteIndex = startIndex + index;
+      const groupIndices = allLayers
+        .map((layer, i) => (layer.group === groupNumber ? i : -1))
+        .filter((i) => i !== -1);
 
-      // Swap items
-      const temp = allLayers[absoluteIndex];
-      allLayers[absoluteIndex] = allLayers[absoluteIndex - 1];
-      allLayers[absoluteIndex - 1] = temp;
+      const fromIndex = groupIndices[index];
+      const toIndex = groupIndices[index - 1];
 
-      // Update local state immediately for better UX
-      onElementUpdate({
-        ...element,
-        layers: allLayers,
-      });
+      const temp = allLayers[fromIndex];
+      allLayers[fromIndex] = allLayers[toIndex];
+      allLayers[toIndex] = temp;
 
-      // Update on server
       const response = await elementService.updateElement(
         projectId,
         typeId,
@@ -175,14 +168,10 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       );
 
       if (!response.success) {
-        // If server update fails, revert to previous state
-        onElementUpdate({
-          ...element,
-          layers: element.layers,
-        });
         throw new Error(response.message || t("elements.errors.updateFailed"));
       }
 
+      onElementUpdate(response.data);
       toast.success(t("elements.layer.reorderSuccess"));
     } catch (error) {
       console.error("Error moving layer up:", error);
@@ -190,25 +179,26 @@ const LayersSection: React.FC<LayersSectionProps> = ({
     }
   };
 
-  const moveLayerDown = async (index: number) => {
-    const absoluteIndex = startIndex + index;
-    if (absoluteIndex >= element.layers.length - 1) return; // Can't move last item down
-
+  const moveLayerDown = async (groupNumber: number, index: number) => {
     try {
+      const sameGroupLayers = element.layers.filter(
+        (layer) => layer.group === groupNumber
+      );
+      if (index >= sameGroupLayers.length - 1) return;
+
+      // Swap within the same group
       const allLayers = [...element.layers];
+      const groupIndices = allLayers
+        .map((layer, i) => (layer.group === groupNumber ? i : -1))
+        .filter((i) => i !== -1);
 
-      // Swap items
-      const temp = allLayers[absoluteIndex];
-      allLayers[absoluteIndex] = allLayers[absoluteIndex + 1];
-      allLayers[absoluteIndex + 1] = temp;
+      const fromIndex = groupIndices[index];
+      const toIndex = groupIndices[index + 1];
 
-      // Update local state immediately for better UX
-      onElementUpdate({
-        ...element,
-        layers: allLayers,
-      });
+      const temp = allLayers[fromIndex];
+      allLayers[fromIndex] = allLayers[toIndex];
+      allLayers[toIndex] = temp;
 
-      // Update on server
       const response = await elementService.updateElement(
         projectId,
         typeId,
@@ -221,14 +211,10 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       );
 
       if (!response.success) {
-        // If server update fails, revert to previous state
-        onElementUpdate({
-          ...element,
-          layers: element.layers,
-        });
         throw new Error(response.message || t("elements.errors.updateFailed"));
       }
 
+      onElementUpdate(response.data);
       toast.success(t("elements.layer.reorderSuccess"));
     } catch (error) {
       console.error("Error moving layer down:", error);
@@ -240,6 +226,177 @@ const LayersSection: React.FC<LayersSectionProps> = ({
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const displayedLayers = element.layers?.slice(startIndex, endIndex) || [];
   const pageCount = Math.ceil((element.layers?.length || 0) / ITEMS_PER_PAGE);
+
+  const renderAccordion = (
+    layer: Layer,
+    groupNumber: number,
+    index: number
+  ) => {
+    return (
+      <Accordion
+        key={layer.id}
+        sx={{
+          bgcolor: "background.paper",
+          transition: "box-shadow 0.2s",
+          "&:hover": { boxShadow: 3 },
+          mb: 2,
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              mr: 1,
+            }}
+          >
+            <Tooltip title={t("common.moveUp")}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveLayerUp(groupNumber, index);
+                  }}
+                  disabled={index === 0}
+                  sx={{ p: 0.5 }}
+                >
+                  <ArrowUpwardIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title={t("common.moveDown")}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveLayerDown(groupNumber, index);
+                  }}
+                  disabled={
+                    index >=
+                    element.layers.filter((l) => l.group === groupNumber)
+                      .length -
+                      1
+                  }
+                  sx={{ p: 0.5 }}
+                >
+                  <ArrowDownwardIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+
+          <Typography variant="h6" component="div" sx={{ flex: 1 }}>
+            {layer.name || t("elements.layers.unnamed")}
+          </Typography>
+          <Box
+            onClick={(e) => e.stopPropagation()}
+            sx={{ display: "flex", gap: 1 }}
+          >
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={(e) => handleEditLayer(e, index, layer)}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="error"
+              onClick={(e) => handleDeleteLayer(e, index)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Typography
+                variant="body2"
+                component="div"
+                color="text.secondary"
+              >
+                {t("elements.layer.substance")}
+              </Typography>
+              <Typography variant="body1" component="div">
+                {t(layer.substance)}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography
+                variant="body2"
+                component="div"
+                color="text.secondary"
+              >
+                {t("elements.layer.maker")}
+              </Typography>
+              <Typography variant="body1" component="div">
+                {t(layer.maker)}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography
+                variant="body2"
+                component="div"
+                color="text.secondary"
+              >
+                {t("elements.layer.product")}
+              </Typography>
+              <Typography variant="body1" component="div">
+                {t(layer.product)}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography
+                variant="body2"
+                component="div"
+                color="text.secondary"
+              >
+                {t("elements.layer.thickness")}
+              </Typography>
+              <Typography variant="body1" component="div">
+                {layer.thickness} cm
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography
+                variant="body2"
+                component="div"
+                color="text.secondary"
+              >
+                {t("elements.layer.thermalConductivity")}
+              </Typography>
+              <Typography variant="body1" component="div">
+                {layer.thermalConductivity}{" "}
+                {t("elements.layers.units.thermalConductivity")}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography
+                variant="body2"
+                component="div"
+                color="text.secondary"
+              >
+                {t("elements.layers.mass")}
+              </Typography>
+              <Typography variant="body1" component="div">
+                {layer.mass} {t("elements.layers.units.mass")}
+              </Typography>
+            </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+    );
+  };
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -255,187 +412,47 @@ const LayersSection: React.FC<LayersSectionProps> = ({
       </Box>
 
       {element.layers && element.layers.length > 0 ? (
-        <Box>
-          {/* Simple implementation without drag & drop for now */}
-          {displayedLayers.map((layer, index) => {
-            const absoluteIndex = startIndex + index;
-            return (
-              <Box key={layer.id || `layer-${absoluteIndex}`} sx={{ mb: 2 }}>
-                <Accordion
-                  sx={{
-                    bgcolor: "background.paper",
-                    transition: "box-shadow 0.2s",
-                    "&:hover": { boxShadow: 3 },
-                  }}
-                >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
-                    {/* Add reordering buttons */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        mr: 1,
-                      }}
-                    >
-                      <Tooltip title={t("common.moveUp")}>
-                        <span>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              moveLayerUp(index);
-                            }}
-                            disabled={index === 0 && startIndex === 0}
-                            sx={{ p: 0.5 }}
-                          >
-                            <ArrowUpwardIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip title={t("common.moveDown")}>
-                        <span>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              moveLayerDown(index);
-                            }}
-                            disabled={
-                              absoluteIndex >= element.layers.length - 1
-                            }
-                            sx={{ p: 0.5 }}
-                          >
-                            <ArrowDownwardIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </Box>
-
-                    <Typography variant="h6" component="div" sx={{ flex: 1 }}>
-                      {layer.name || t("elements.layers.unnamed")}
-                    </Typography>
-                    <Box
-                      onClick={(e) => e.stopPropagation()}
-                      sx={{ display: "flex", gap: 1 }}
-                    >
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={(e) =>
-                          handleEditLayer(e, absoluteIndex, layer)
-                        }
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={(e) => handleDeleteLayer(e, absoluteIndex)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {/* ...existing AccordionDetails content... */}
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <Typography
-                          variant="body2"
-                          component="div"
-                          color="text.secondary"
-                        >
-                          {t("elements.layer.substance")}
-                        </Typography>
-                        <Typography variant="body1" component="div">
-                          {t(layer.substance)}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography
-                          variant="body2"
-                          component="div"
-                          color="text.secondary"
-                        >
-                          {t("elements.layer.maker")}
-                        </Typography>
-                        <Typography variant="body1" component="div">
-                          {t(layer.maker)}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography
-                          variant="body2"
-                          component="div"
-                          color="text.secondary"
-                        >
-                          {t("elements.layer.product")}
-                        </Typography>
-                        <Typography variant="body1" component="div">
-                          {t(layer.product)}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography
-                          variant="body2"
-                          component="div"
-                          color="text.secondary"
-                        >
-                          {t("elements.layer.thickness")}
-                        </Typography>
-                        <Typography variant="body1" component="div">
-                          {layer.thickness} ס"מ
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography
-                          variant="body2"
-                          component="div"
-                          color="text.secondary"
-                        >
-                          {t("elements.layer.thermalConductivity")}
-                        </Typography>
-                        <Typography variant="body1" component="div">
-                          {layer.thermalConductivity}{" "}
-                          {t("elements.layers.units.thermalConductivity")}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography
-                          variant="body2"
-                          component="div"
-                          color="text.secondary"
-                        >
-                          {t("elements.layers.mass")}
-                        </Typography>
-                        <Typography variant="body1" component="div">
-                          {layer.mass} {t("elements.layers.units.mass")}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </AccordionDetails>
-                </Accordion>
+        <Grid container spacing={2}>
+          {[1, 2, 3].map((groupNumber) => (
+            <Grid item xs={12} md={4} key={`group-${groupNumber}`}>
+              <Box
+                sx={{
+                  p: 2,
+                  border: "1px solid #e0e0e0",
+                  borderRadius: 1,
+                  bgcolor: "background.paper",
+                  height: "100%",
+                }}
+              >
+                <Typography variant="h6" gutterBottom align="center">
+                  {groupNumber === 1
+                    ? t("group1")
+                    : groupNumber === 2
+                    ? t("group2")
+                    : t("group3")}
+                </Typography>
+                {displayedLayers
+                  .filter((layer) => layer.group === groupNumber)
+                  .map((layer, index) =>
+                    renderAccordion(layer, groupNumber, index)
+                  )}
               </Box>
-            );
-          })}
+            </Grid>
+          ))}
+
           {pageCount > 1 && (
-            <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
-              <Pagination
-                count={pageCount}
-                page={currentPage}
-                onChange={(_, page) => setCurrentPage(page)}
-                color="primary"
-              />
-            </Box>
+            <Grid item xs={12}>
+              <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                <Pagination
+                  count={pageCount}
+                  page={currentPage}
+                  onChange={(_, page) => setCurrentPage(page)}
+                  color="primary"
+                />
+              </Box>
+            </Grid>
           )}
-        </Box>
+        </Grid>
       ) : (
         <Typography
           variant="body1"

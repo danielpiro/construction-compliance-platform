@@ -4,7 +4,6 @@ import {
   TextField,
   Button,
   Grid,
-  Typography,
   Paper,
   MenuItem,
   FormHelperText,
@@ -141,10 +140,6 @@ const BuildingTypeForm: React.FC<BuildingTypeFormProps> = ({
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
       <Box component="form" onSubmit={handleSubmit} noValidate>
-        <Typography variant="h5" gutterBottom>
-          {t(isEditing ? "buildingTypes.edit" : "buildingTypes.createNew")}
-        </Typography>
-
         <Grid container spacing={3}>
           {/* Building Type Name */}
           <Grid item xs={12}>

@@ -1,4 +1,3 @@
-// src/controllers/element.controller.ts
 import { Request, Response, NextFunction } from "express";
 import Element from "../models/Element";
 import Space from "../models/Space";
@@ -7,25 +6,21 @@ import Project from "../models/Project";
 
 // Helper function to check user access to space
 const checkSpaceAccess = async (spaceId: string, userId: string) => {
-  // Find space
   const space = await Space.findById(spaceId);
   if (!space) {
     return { access: false, message: "Space not found" };
   }
 
-  // Find building type
   const buildingType = await BuildingType.findById(space.buildingType);
   if (!buildingType) {
     return { access: false, message: "Building type not found" };
   }
 
-  // Check project access
   const project = await Project.findById(buildingType.project);
   if (!project) {
     return { access: false, message: "Project not found" };
   }
 
-  // Check if user has access to the project
   const isOwner = project.owner.toString() === userId;
   const isShared = project.sharedWith.some((s) => s.user.toString() === userId);
 
@@ -33,7 +28,6 @@ const checkSpaceAccess = async (spaceId: string, userId: string) => {
     return { access: false, message: "Not authorized to access this space" };
   }
 
-  // Check if user has write access to the project
   const hasWriteAccess =
     isOwner ||
     project.sharedWith.some(
@@ -49,9 +43,6 @@ const checkSpaceAccess = async (spaceId: string, userId: string) => {
   };
 };
 
-// @desc    Get all elements for a space
-// @route   GET /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements
-// @access  Private
 export const getElements = async (
   req: Request,
   res: Response,
@@ -61,7 +52,6 @@ export const getElements = async (
     const userId = (req as any).user.id;
     const spaceId = req.params.spaceId;
 
-    // Check access
     const accessCheck = await checkSpaceAccess(spaceId, userId);
     if (!accessCheck.access) {
       return res.status(403).json({
@@ -70,7 +60,6 @@ export const getElements = async (
       });
     }
 
-    // Get elements
     const elements = await Element.find({ space: spaceId });
 
     res.status(200).json({
@@ -87,9 +76,6 @@ export const getElements = async (
   }
 };
 
-// @desc    Get single element
-// @route   GET /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId
-// @access  Private
 export const getElement = async (
   req: Request,
   res: Response,
@@ -99,9 +85,7 @@ export const getElement = async (
     const userId = (req as any).user.id;
     const elementId = req.params.elementId;
 
-    // Find element
     const element = await Element.findById(elementId);
-
     if (!element) {
       return res.status(404).json({
         success: false,
@@ -109,7 +93,6 @@ export const getElement = async (
       });
     }
 
-    // Check access
     const accessCheck = await checkSpaceAccess(
       element.space.toString(),
       userId
@@ -134,9 +117,6 @@ export const getElement = async (
   }
 };
 
-// @desc    Create new element
-// @route   POST /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/create
-// @access  Private
 export const createElement = async (
   req: Request,
   res: Response,
@@ -146,7 +126,6 @@ export const createElement = async (
     const userId = (req as any).user.id;
     const spaceId = req.params.spaceId;
 
-    // Check access
     const accessCheck = await checkSpaceAccess(spaceId, userId);
     if (!accessCheck.access) {
       return res.status(403).json({
@@ -155,7 +134,6 @@ export const createElement = async (
       });
     }
 
-    // Check write access
     if (!accessCheck.writeAccess) {
       return res.status(403).json({
         success: false,
@@ -163,7 +141,6 @@ export const createElement = async (
       });
     }
 
-    // For Wall type with Outside Wall subtype, validate required fields
     const data = req.body;
     if (data.type === "Wall" && data.subType === "Outside Wall") {
       if (!data.outsideCover) {
@@ -197,15 +174,16 @@ export const createElement = async (
       }
     }
 
-    // Prepare element data
     const elementData = {
       ...req.body,
       space: spaceId,
       parameters: req.body.parameters || {},
-      layers: req.body.layers || [],
+      layers: (req.body.layers || []).map((layer: any, index: number) => ({
+        ...layer,
+        group: layer.group || (index % 3) + 1,
+      })),
     };
 
-    // For Wall/Outside Wall, ensure required fields
     if (elementData.type === "Wall" && elementData.subType === "Outside Wall") {
       elementData.outsideCover = elementData.outsideCover || null;
       elementData.buildMethod = elementData.buildMethod || null;
@@ -214,7 +192,6 @@ export const createElement = async (
       elementData.isolationCoverage = elementData.isolationCoverage || null;
     }
 
-    // Create element with explicit data
     const element = await Element.create(elementData);
 
     res.status(201).json({
@@ -224,7 +201,6 @@ export const createElement = async (
   } catch (error: any) {
     console.error("Error creating element:", error);
 
-    // Handle validation errors
     if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
@@ -241,9 +217,6 @@ export const createElement = async (
   }
 };
 
-// @desc    Update element
-// @route   PUT /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId
-// @access  Private
 export const updateElement = async (
   req: Request,
   res: Response,
@@ -253,9 +226,7 @@ export const updateElement = async (
     const userId = (req as any).user.id;
     const elementId = req.params.elementId;
 
-    // Find element
     let element = await Element.findById(elementId);
-
     if (!element) {
       return res.status(404).json({
         success: false,
@@ -263,7 +234,6 @@ export const updateElement = async (
       });
     }
 
-    // Check access
     const accessCheck = await checkSpaceAccess(
       element.space.toString(),
       userId
@@ -275,7 +245,6 @@ export const updateElement = async (
       });
     }
 
-    // Check write access
     if (!accessCheck.writeAccess) {
       return res.status(403).json({
         success: false,
@@ -283,7 +252,6 @@ export const updateElement = async (
       });
     }
 
-    // For Wall type with Outside Wall subtype, validate required fields
     const data = req.body;
     if (data.type === "Wall" && data.subType === "Outside Wall") {
       if (!data.outsideCover) {
@@ -317,11 +285,14 @@ export const updateElement = async (
       }
     }
 
-    // Prepare update data
+    // Prepare update data with layer group validation
     const updateData = {
       ...req.body,
       parameters: req.body.parameters || {},
-      layers: req.body.layers || [],
+      layers: (req.body.layers || []).map((layer: any, index: number) => ({
+        ...layer,
+        group: layer.group || (index % 3) + 1,
+      })),
     };
 
     // For Wall/Outside Wall, ensure required fields
@@ -332,7 +303,7 @@ export const updateElement = async (
       updateData.isolationCoverage = updateData.isolationCoverage || null;
     }
 
-    // Update element with explicit data
+    // Update element with explicit data and run validators
     element = await Element.findByIdAndUpdate(elementId, updateData, {
       new: true,
       runValidators: true,
@@ -345,7 +316,6 @@ export const updateElement = async (
   } catch (error: any) {
     console.error("Error updating element:", error);
 
-    // Handle validation errors
     if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
@@ -362,54 +332,6 @@ export const updateElement = async (
   }
 };
 
-// @desc    Clear all elements for a space
-// @route   DELETE /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/clear
-// @access  Private
-export const clearSpaceElements = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = (req as any).user.id;
-    const spaceId = req.params.spaceId;
-
-    // Check access
-    const accessCheck = await checkSpaceAccess(spaceId, userId);
-    if (!accessCheck.access) {
-      return res.status(403).json({
-        success: false,
-        message: accessCheck.message,
-      });
-    }
-
-    // Check write access
-    if (!accessCheck.writeAccess) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to clear elements for this space",
-      });
-    }
-
-    // Delete all elements for this space
-    await Element.deleteMany({ space: spaceId });
-
-    res.status(200).json({
-      success: true,
-      message: "All elements cleared successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
-};
-
-// @desc    Delete element
-// @route   DELETE /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId
-// @access  Private
 export const deleteElement = async (
   req: Request,
   res: Response,
@@ -419,9 +341,7 @@ export const deleteElement = async (
     const userId = (req as any).user.id;
     const elementId = req.params.elementId;
 
-    // Find element
     const element = await Element.findById(elementId);
-
     if (!element) {
       return res.status(404).json({
         success: false,
@@ -429,7 +349,6 @@ export const deleteElement = async (
       });
     }
 
-    // Check access
     const accessCheck = await checkSpaceAccess(
       element.space.toString(),
       userId
@@ -441,7 +360,6 @@ export const deleteElement = async (
       });
     }
 
-    // Check write access
     if (!accessCheck.writeAccess) {
       return res.status(403).json({
         success: false,
@@ -449,7 +367,6 @@ export const deleteElement = async (
       });
     }
 
-    // Delete the element
     await Element.findByIdAndDelete(elementId);
 
     res.status(200).json({
@@ -465,9 +382,45 @@ export const deleteElement = async (
   }
 };
 
-// @desc    Run compliance check for an element
-// @route   POST /api/projects/:projectId/types/:typeId/spaces/:spaceId/elements/:elementId/compliance-check
-// @access  Private
+export const clearSpaceElements = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = (req as any).user.id;
+    const spaceId = req.params.spaceId;
+
+    const accessCheck = await checkSpaceAccess(spaceId, userId);
+    if (!accessCheck.access) {
+      return res.status(403).json({
+        success: false,
+        message: accessCheck.message,
+      });
+    }
+
+    if (!accessCheck.writeAccess) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to clear elements for this space",
+      });
+    }
+
+    await Element.deleteMany({ space: spaceId });
+
+    res.status(200).json({
+      success: true,
+      message: "All elements cleared successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
 export const runComplianceCheck = async (
   req: Request,
   res: Response,
@@ -477,9 +430,7 @@ export const runComplianceCheck = async (
     const userId = (req as any).user.id;
     const elementId = req.params.elementId;
 
-    // Find element
     const element = await Element.findById(elementId);
-
     if (!element) {
       return res.status(404).json({
         success: false,
@@ -487,7 +438,6 @@ export const runComplianceCheck = async (
       });
     }
 
-    // Check access
     const accessCheck = await checkSpaceAccess(
       element.space.toString(),
       userId
@@ -499,12 +449,8 @@ export const runComplianceCheck = async (
       });
     }
 
-    // TODO: Implement actual compliance check algorithm
-    // This would involve checking the element's parameters against regulatory requirements
-    // For now, we'll return a dummy response
-
     const complianceResult = {
-      isCompliant: Math.random() > 0.3, // Random result for demo
+      isCompliant: Math.random() > 0.3,
       details: {
         checksPassed: ["Structural integrity", "Material standards"],
         checksFailed: Math.random() > 0.3 ? [] : ["Thermal insulation"],

@@ -9,6 +9,7 @@ interface ILayer {
   thickness: number;
   thermalConductivity: number;
   mass: number;
+  group: 1 | 2 | 3;
 }
 
 type OutsideCover = "tiah" | "dry hang" | "wet hang";
@@ -186,6 +187,11 @@ const ElementSchema: Schema = new Schema(
         mass: {
           type: Number,
           required: [true, "Please add layer mass"],
+        },
+        group: {
+          type: Number,
+          required: [true, "Please specify the layer group"],
+          enum: [1, 2, 3],
         },
       },
     ],

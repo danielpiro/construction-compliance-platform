@@ -13,6 +13,7 @@ export interface Layer {
   thickness: number;
   thermalConductivity: number;
   mass: number;
+  group: 1 | 2 | 3;
 }
 
 export type IsolationCoverage = "dark color" | "bright color";

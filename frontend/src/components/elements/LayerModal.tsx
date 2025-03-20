@@ -147,7 +147,10 @@ const LayerModal: React.FC<LayerModalProps> = ({
   onSave,
 }) => {
   const { t } = useTranslation();
-  const [layerData, setLayerData] = useState(layer);
+  const [layerData, setLayerData] = useState({
+    ...layer,
+    group: layer.group || 1,
+  });
   const [availableMakers, setAvailableMakers] = useState<string[]>(
     layer.substance ? getFilteredMakers(layer.substance, element) : []
   );
@@ -233,6 +236,24 @@ const LayerModal: React.FC<LayerModalProps> = ({
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={3} sx={{ mt: 2 }}>
+          <TextField
+            select
+            label={t("elements.layer.group")}
+            required
+            fullWidth
+            value={layerData.group}
+            onChange={(e) => {
+              const val = Number(e.target.value) as 1 | 2 | 3;
+              setLayerData({ ...layerData, group: val });
+            }}
+            SelectProps={{
+              native: true,
+            }}
+          >
+            <option value={1}>חיפוי חיצוני</option>
+            <option value={2}>מרכז קיר</option>
+            <option value={3}>חיפוי פנימי</option>
+          </TextField>
           <TextField
             label={t("elements.layer.name")}
             required

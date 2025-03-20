@@ -8,7 +8,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Typography,
   Container,
 } from "@mui/material";
 import { Layer, IsolationCoverage } from "../../services/elementService";
@@ -175,8 +174,6 @@ export const ElementForm: React.FC<ElementFormProps> = ({
     <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
       <Container maxWidth="sm">
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Typography variant="h6">{t("elements.form.title")}</Typography>
-
           <TextField
             required
             label={t("elements.form.name")}
